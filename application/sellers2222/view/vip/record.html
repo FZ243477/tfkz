@@ -1,0 +1,129 @@
+{include file="public/header" /}
+	<link rel="stylesheet" type="text/css" href="/static/seller/css/vipRecord.css" />
+		<!-- 右边盒子部分 -->
+		<div class="right">
+			<!-- 基本信息标题 -->
+			<div class="right-top">
+				<b>个人中心 / 资金管理 /<strong> 历史记录 </strong></b>
+			</div>
+			<div class="user_content">
+
+				<!-- 充值会员 -->
+				<div class="chongzhi_vip">
+
+					<div class="web_gonggao">
+						<div class="gonggao_row">
+							<div class="gonggao_top">
+								<a href="{:url('vip/index')}">充值会员</a>
+							</div>
+							<div class="gonggao_top">
+								<a href="{:url('vip/record')}" class="select_on">历史记录</a>
+							</div>
+						</div>
+					</div>
+
+					<!-- 选择日期 -->
+					<div class="selete_date">
+						<el-date-picker v-model="dateValue" type="daterange" range-separator="至" start-placeholder="开始日期"
+														end-placeholder="结束日期" style="margin-right: 20px;width:380px;" value-format="yyyy-MM-dd">
+						</el-date-picker>
+						<el-button type="primary" @click="search()"><i class="el-icon-search"></i> 搜索</el-button>
+					</div>
+
+					<!-- 数据列表 -->
+					<div class="shuju_table">
+						<template>
+							<el-table :data="list" border style="width: 100%;" header-cell-style="background:#f5f7fa;"
+												:cell-style="cellStyle">
+								<el-table-column prop="user_name" label="用户名" align="center">
+								</el-table-column>
+								<el-table-column prop="create_time" label="充值日期" align="center">
+								</el-table-column>
+								<el-table-column prop="price" label="金额" align="center">
+								</el-table-column>
+								<el-table-column prop="expire_time" label="到期时间" align="center">
+								</el-table-column>
+								<el-table-column prop="remarks" label="备注" align="center">
+								</el-table-column>
+							</el-table>
+						</template>
+					</div>
+
+					<!-- 分页 -->
+					<div class="fenye">
+						<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes=sizes :page-size=size
+													 layout="total, sizes, prev, pager, next, jumper" :total=total @prev-click="prevClick" @next-click="nextClick"
+													 background>
+						</el-pagination>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	<script type="text/javascript"
+	>
+		$(function () {
+
+			/* 初始化一个Vue */
+			var vm = new Vue({
+				el: ".right",
+				data: function () {
+					return {
+						dateValue: "",
+						/* 表格数据 */
+						list: [],
+						/* 默认选中第一页 */
+						currentPage: 1,
+						total:0,
+						size:5,
+						sizes:[5,10,15,20,25],
+					}
+				},
+				created: function () {
+					this.getData();
+				},
+				methods: {
+					handleSizeChange(val) {
+						this.size = val;
+						this.currentPage = 1;
+						this.getData();
+					},
+					handleCurrentChange(val) {
+						this.currentPage = val;
+						this.getData();
+					},
+					getData:function(){
+						var loadingFlag;
+						loadingFlag= layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:6000 });
+						var that = this;
+						$.post("{:url('vip/record')}",{page:this.currentPage,datetime:this.dateValue,size:this.size},function (res) {
+							if(res.code==1){
+								that.list = res.data.list;
+								that.total = res.data.total;
+								layer.close(loadingFlag);
+							}else{
+								layer.close(loadingFlag);
+								layer.msg('网络错误！',{icon:2});
+							}
+						})
+					},
+					search:function(){
+						this.currentPage = 1;
+						this.getData();
+					},
+					/* 给表格上色 */
+					cellStyle: function (e) {
+						// console.log(e);
+						if (e.columnIndex === 1 || e.columnIndex === 3) {
+							return "color:red;"
+						} else if (e.columnIndex === 2) {
+							return "color:rgb(30, 144, 255);"
+						}
+					},
+				}
+			});
+
+		});
+	</script>
+{include file="public/footer" /}

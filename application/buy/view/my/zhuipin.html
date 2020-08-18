@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css" />
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/zhuipinTask.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png" />
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/vue-2.6.10.min.js"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function() {
+
+            var vm = new Vue({
+                el: ".center_box",
+                data: function () {
+                    return {
+                        /* 默认弹框不开启 */
+                        dialogVisible: false,
+                        /* 图片路径 */
+                        localFile: [],
+                        // 数据1
+                        testData: [
+                            {volist name="product" id="vo"  }
+                            {
+                                taskBianHao: "{$list.task_number}",
+                                time: "{$list.create_time}",
+                                type: "{$list.task_type}",
+                                title: "{$vo.name}",
+                                content: `{$vo.wenzi}`,
+                                img:"{$vo.img}",
+                                video:"{$vo.video}",
+                                maiHao: "{$list.wwid}",
+                                kuaiDi: "{$list.delivery}",
+                                danHao: "{$list.delivery_num}",
+                                price: "{$list.seller_principal}"
+                            },
+                            {/volist}
+                        ],
+                        /*任务ID*/
+                        task_id:"{$list.id}",
+                    };
+                },
+                    methods: {
+                        /* 失败的弹框 */
+                        alertError: function(e) {
+                            this.$message.error({
+                                message: e,
+                                type: "error",
+                            });
+                        },
+                        /* 成功的弹框 */
+                        alertSuccess: function(e) {
+                            this.$message({
+                                message: e,
+                                type: "success"
+                            });
+                        },
+                        /* 点击上传 */
+                        takeDelivery: function () {
+                            var that = this;
+                            if(that.localFile.length===0) return vm.alertError("请上传好评截图！");
+                            console.log(that.localFile);
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('buy/my/take_zhuipin')}",
+                                async : true,
+                                data : {
+                                    "high_praise_img":that.localFile,
+                                    "task_id":that.task_id
+                                },
+                                success : function(data){
+                                    if(data.code==1){
+                                        that.alertSuccess(data.msg);
+                                        setTimeout(function(){
+                                            return location.href=data.url;
+                                        },3000)
+                                    }else{
+                                        return that.alertError(data.msg);
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                        },
+                        /* 获取图片的base64路径 */
+                        handleChange: function (e) {
+                            var that = this;
+                            var reader = new FileReader();
+                            reader.readAsDataURL(e.raw);
+                            reader.onload = function () {
+                                that.localFile.push(reader.result);
+                            };
+                        },/* 删除图片 */
+                        handleRemove: function (file) {
+                            // console.log(file);
+                            var that = this;
+                            var reader = new FileReader();
+                            reader.readAsDataURL(file.raw);
+                            reader.onload = function () {
+                                that.localFile.splice(reader.result,1);
+                            };
+                        },
+                        // 复制文字
+                        copyText:function(text) {
+                            var oInput = document.createElement('input');
+                            oInput.value = text;
+                            document.body.appendChild(oInput);
+                            oInput.select(); // 选择对象
+                            document.execCommand("Copy"); // 执行浏览器复制命令
+                            oInput.className = 'oInput';
+                            oInput.style.display='none';
+                            this.alertSuccess("复制成功");
+                        }
+                    },
+                });
+
+        });
+    </script>
+
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;<span class="msg_title_txt">追评任务</span></p>
+            </div>
+
+            <div class="user_content">
+
+                <!-- 去追评 -->
+                <div class="web_gonggao">
+                    <div class="gonggao_row">
+                        <div class="gonggao_top">
+                            <a class="select_on" href="javascript:">追评任务</a>
+                        </div>
+                        <div class="gonggao_top">
+                            <el-button type="danger" @click="dialogVisible = true">确认追评</el-button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 追评任务 -->
+                <div :key="index" class="swell" v-for="(item,index) in testData">
+                    <div class="sample">
+                        <div class="sample-top">
+                            <p style="display: flex;align-items: center;">
+                                任务编号：<b>{{item.taskBianHao}}</b>
+                            </p>
+                            <p>发布时间：<b>{{item.time}}</b></p>
+                            <p>任务类型：<strong>{{item.type}}</strong></p>
+                        </div>
+                        <div class="sample-center">
+                            <p class="sample-title">{{item.title}}</p>
+                            <div class="sample-content">
+                                <p>追评内容：<span>{{item.content}}</span></p>
+                            </div>
+                            <div class="sample-btn">
+                                <el-button @click="copyText(item.content)" v-if="item.content.length!==0" type="danger">一键复制</el-button>
+                            </div>
+                        </div>
+                        <!-- 图片和视频 -->
+                        <div class="sample-img" v-if="item.img.split(',').length!==0">
+                            <span>图片：</span>
+                            <img v-for="(item2,index2) in item.img.split(',')" :key="index2" :src="item2" alt="">
+                        </div>
+                        <div class="sample-video" v-if="item.video">
+                            <span>视频：</span>
+                            <video :src="item.video" controls="controls">
+                                <h2>您的浏览器不支持播放视频</h2>
+                            </video>
+                        </div>
+                        <div class="sample-bottom">
+                            <div class="sample-bottom-left">
+                                <p>买号： <b>{{item.maiHao}}</b></p>
+                                <p>快递： <b>{{item.kuaiDi}}</b></p>
+                                <p>快递单号： <b> {{item.danHao}}</b></p>
+                            </div>
+                            <div class="sample-bottom-right">
+                                <p>付款金额：<b>{{item.price}}</b> 元</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 弹框 -->
+                <el-dialog title="温馨提示" :visible.sync="dialogVisible" width="900px">
+                    <div>
+                    <p>请上传好评截图：</p>
+                    <p style="margin: 20px 0;">
+                    <el-upload ref="unload" action="string"
+                    list-type="picture-card"
+                    :on-remove="handleRemove"
+                    :on-change="handleChange"
+                    :limit="3"
+                    :auto-upload="false">
+                    <i class="el-icon-plus"></i>
+                    </el-upload>
+                    </p>
+                    </div>
+                    <div slot="footer" class="dialog-footer">
+                    <el-button @click="dialogVisible = false">取 消</el-button>
+                    <el-button type="primary" @click="takeDelivery">确 定</el-button>
+                    </div>
+                </el-dialog>
+
+                <!-- 提示 -->
+                <div class="alert">
+                    <div class="alert_title">
+                        <i class="el-icon-warning" style="font-size: 26px;margin-right: 10px"></i>
+                        <p>温馨提示：</p>
+                    </div>
+                    <div class="alert_txt">
+                        <p>1. 商家订单要求：注意自己的号，注意自己的号，注意自己的号!最近查的比较紧，不要影响彼此之间的账号安全！无需假聊，提交订单先不付款，到首页看同款【注意：在同款详情页里至少看1-2分钟】在回来对比下付款！</p>
+                        <p>2. 未按指定文字好评，图片好评，将扣除10银锭</p>
+                        <p>3. 评价环节，胡乱评价、复制他人评价、评价与商品不符、中差评、低星评分等恶劣评价行为,将下架买号一个月</p>
+                        <p>4. 请复制以上指定内容到淘宝进行评价</p>
+                        <p>5. 无指定好评可根据商品15字左右自由发挥</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

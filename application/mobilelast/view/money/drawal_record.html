@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>提现记录</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        // 表格数据
+                        list: [],
+                        // 默认分页
+                        currentPage: 1,
+                        total:0,
+                        currentPage2: 1
+                    };
+                },
+                // 调用混入
+                mixins: [dateMixin, tabMixin, singlePersonMixin],
+                filters: {
+                    // 修改表格样式
+                    filterType: function (val) {
+                        return val === 0 ? "转账失败" : "转账成功";
+                    }
+                },
+                methods: {
+                    // 切换页面跳转
+                    changeType:function(e){
+                        var type = e.currentTarget.dataset.type;
+                        if(type==="0"){
+                            location.href="{:url('mobile/money/drawal_record')}"
+                        }else if(type==="1"){
+                            location.href="{:url('mobile/money/silver_record')}"
+                        }
+                    },
+                    getData:function(){
+                        var that = this;
+                        $.post("{:url('mobile/money/drawal_record')}",{
+                            page:that.currentPage,
+                            datetime1:that.defaultDate,
+                            datetime2:that.defaultDate2
+                        },function (res) {
+                            if(res.code==1){
+                                that.list = res.data.list;
+                                that.total = res.data.total;
+                            }else{
+                                alertError(res.msg);
+                            }
+                        })
+                    },
+                    search:function(){
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    // 分页事件
+                    pageChange: function (val) {
+                        this.currentPage = val;
+                        this.getData();
+                    },
+                    pageChange2: function (val) {
+                        // 当前页码
+                        // console.log(val);
+                    },
+                    // 本金提现日期事件
+                    dateChange: function (val) {
+                        this.defaultDate = val.getTime();
+                        console.log(this.defaultDate);
+                    },
+                    dateChange2: function (val) {
+                        this.defaultDate2 = val.getTime();
+                        console.log(this.defaultDate2);
+                    },
+                    // 银锭提现日期事件
+                    dateChange3: function (val) {
+                        this.defaultDate3 = val.getTime();
+                        console.log(this.defaultDate3);
+                    },
+                    dateChange4: function (val) {
+                        this.defaultDate4 = val.getTime();
+                        console.log(this.defaultDate4);
+                    }
+                },
+                mounted: function () {
+                    publicFunction();
+                    this.getData();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">提现记录</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span class="active" data-type="0" @click="changeType">本金提现</span>
+            <span data-type="1" @click="changeType">银锭提现</span>
+        </div>
+
+        <!-- 本金提现内容 -->
+        <div class="benjin-record" v-show="isShow">
+            <div class="select-date">
+                <!-- 选择日期 -->
+                <div class="span-date">
+                    <mu-date-input
+                            @change="dateChange"
+                            class="span-date-item"
+                            v-model="defaultDate"
+                            label="请选择开始日期"
+                            label-float></mu-date-input>
+                    <mu-date-input
+                            @change="dateChange2"
+                            class="span-date-item"
+                            v-model="defaultDate2"
+                            label="请选择结束日期"
+                            label-float></mu-date-input>
+                </div>
+                <!-- 按钮 -->
+                <div class="date-btn">
+                    <van-button class="date-btn-item" icon="search" @click="search" type="info">搜索</van-button>
+                </div>
+                <!-- 表格 -->
+<!--                <div class="public-table">-->
+<!--                    <table>-->
+<!--                        <thead>-->
+<!--                        <tr>-->
+<!--                            <th>流水号</th>-->
+<!--                            <th>提现金额</th>-->
+<!--                            <th>实际到账金额</th>-->
+<!--                            <th>结余</th>-->
+<!--                            <th>日期</th>-->
+<!--                            <th>状态</th>-->
+<!--                            <th>备注</th>-->
+<!--                        </tr>-->
+<!--                        </thead>-->
+<!--                        <tbody>-->
+<!--                        <tr v-for="(item,index) in list" :key="index">-->
+<!--                            <td>{{item.id}}</td>-->
+<!--                            <td style="color: green;">{{item.price}}</td>-->
+<!--                            <td>{{item.toaccount}}</td>-->
+<!--                            <td>{{item.yprice}}</td>-->
+<!--                            <td style="white-space: nowrap">{{item.create_time}}</td>-->
+<!--                            <td style="white-space: nowrap">{{item.state}}</td>-->
+<!--                            <td style="white-space: nowrap">{{item.memo}}</td>-->
+<!--                        </tr>-->
+<!--                        <tr v-if="list.length===0">-->
+<!--                            <td colspan="7">暂无内容</td>-->
+<!--                        </tr>-->
+<!--                        </tbody>-->
+<!--                    </table>-->
+<!--                </div>-->
+
+                <!-- 卡片 -->
+                <div class="TaskManagement">
+                    <div class="Task-management" v-for="(item,index) in list" :key="index">
+                        <div class="TaskTop">
+                            <div class="managementHeng">
+                                <p>流水号：</p>
+                                <p>{{item.id}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>提现金额：</p>
+                                <p style="color: green;">{{item.price}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>实际到账金额：</p>
+                                <p>{{item.toaccount}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>结余：</p>
+                                <p>{{item.yprice}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>日期：</p>
+                                <p>{{item.create_time}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>状态：</p>
+                                <p>{{item.state}}</p>
+                            </div>
+                        </div>
+                        <div class="TaskBottom">
+                            <img src="/static/mobile/img/bolang.png" alt="" />
+                            <div class="TaskBottomPosition">
+                                <p>备注：<span>{{item.memo}}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Task-management" v-if="list.length===0">
+                        <div class="TaskTop" style="text-align: center">暂无内容</div>
+                        <div class="TaskBottom">
+                            <img src="/static/mobile/img/bolang.png" alt="" />
+                            <div class="TaskBottomPosition"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <div class="public-page">
+                    <span class="public-page-total">共 {{list.length}} 条</span>
+                    <van-pagination
+                            class="public-page-item"
+                            @change="pageChange"
+                            v-model="currentPage"
+                            :items-per-page="10"
+                            :total-items="total"
+                            :show-page-size="2"
+                            force-ellipses></van-pagination>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    {include file="public/footer" /}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>余额记录</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+	<link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+	<link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+	<link href="/admin_style/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body class="childrenBody">
+	<form class="layui-form">
+		<blockquote class="layui-elem-quote quoteBox">
+			<form class="layui-form">
+				<div class="layui-inline">
+					<label class="layui-form-label">日志类型：</label>
+					<div class="layui-input-inline" style="width: 150px;">
+						<select name="logType" lay-verify="">
+							<option value="">日志类型</option>
+							<option value="0" selected>全部</option><!-- 默认选中 -->
+							<option value="1" disabled>发布任务冻结</option><!-- 禁用 -->
+							<option value="2">接受任务冻结</option>
+							<option value="3">完成任务解除冻结</option>
+							<option value="4">添加</option>
+							<option value="5">减少</option>
+							<option value="6">续费会员</option>
+							<option value="7">赠送会员</option>
+							<option value="8">余额提现</option>
+							<option value="9">银锭提现</option>
+							<option value="10">放弃任务</option>
+							<option value="11">撤销任务</option>
+							<option value="12">加速任务</option>
+							<option value="13">提现审核失败返款</option>
+							<option value="14">邀请好友奖励</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">用户类型：</label>
+					<div class="layui-input-inline" style="width: 150px;">
+						<select name="userType" lay-verify="">
+							<option value="">用户类型：</option>
+							<option value="0" selected>全部</option><!-- 默认选中 -->
+							<option value="1" disabled>刷手</option><!-- 禁用 -->
+							<option value="2">商家</option>
+						</select>
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">用户名：</label>
+					<div class="layui-input-inline">
+						<input type="tel" name="name" lay-verify="name" autocomplete="off" class="layui-input name"
+							placeholder="请输入用户名">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">手机号：</label>
+					<div class="layui-input-inline">
+						<input type="tel" name="phone" lay-verify="phone" autocomplete="off" class="layui-input phone"
+							placeholder="请输入手机号">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<label class="layui-form-label">描述：</label>
+					<div class="layui-input-inline">
+						<input type="tel" name="account" lay-verify="account" autocomplete="off"
+							class="layui-input account" placeholder="描述">
+					</div>
+				</div>
+				<div class="layui-inline">
+					<a class="layui-btn search_btn" data-type="reload" lay-filter="reload" lay-submit><i class="layui-icon">&#xe615;</i>搜 索</a>
+				</div>
+			</form>
+		</blockquote>
+		<table id="userList" lay-filter="userList"></table>
+	</form>
+	<script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+	<script type="text/javascript" src="/admin_style/BalanceRecord.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="utf-8">
+	<title>邀请好友</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+	<link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+	<link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+	<link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+	<link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+	<script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+	<script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+	<script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+	<script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+	<script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+	<script>
+		$(function () {
+			var vm = new Vue({
+				el: ".tfkz-container",
+				data: function () {
+					return {};
+				},
+				// 调用混入
+				mixins: [singlePersonMixin],
+				mounted: function () {
+					publicFunction();
+				},
+				methods: {
+					//复制商家链接
+					link: function () {
+						var Url2 = document.getElementById("sellerHand");
+						Url2.select(); // 选择对象
+						document.execCommand("Copy"); // 执行浏览器复制命令
+						alertSuccess("复制成功");
+					},
+					//复制买手链接
+					links: function () {
+						var Url2 = document.getElementById("buyaHand");
+						Url2.select(); // 选择对象
+						document.execCommand("Copy"); // 执行浏览器复制命令
+						alertSuccess("复制成功");
+					}
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+<div class="tfkz-container">
+
+	<!-- 页面头部 -->
+	<div class="page-header">
+		<div class="arrow-left" onclick="javascript:history.back(-1);">
+			<van-icon class="arrow-left-item" name="arrow-left" />
+		</div>
+		<div class="page-title">邀请好友</div>
+		<div class="menu-box" onclick="slideBarClick()">
+			<van-icon class="menu-box-item" name="bars" />
+		</div>
+	</div>
+
+	<!-- 下拉菜单 -->
+	{include file="public/left" /}
+
+	<!-- 滚动容器 -->
+	<div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+		<!-- 公用tab标签 -->
+		<div class="public-tab-title">
+			<span class="active">邀请好友</span>
+		</div>
+
+		<div class="invitation">
+			<p class="invitation-text">复制您的<b class="invitation-red"> 同福客栈 </b>邀请链接，邀请好友成功注册<b class="invitation-red"> 同福客栈
+			</b>账号之后，好友做任务您可以获得邀请奖励</p>
+			<div class="invitation-link">
+				<p><b class="invitation-red">商家</b>邀请链接:</p>
+				<input type="text"
+							 readonly="readonly"
+							 value="{$url.seller}"
+							 id="sellerHand" />
+				<van-button type="info" @click="link">复制链接</van-button>
+			</div>
+			<div class="invitation-link">
+				<p><b class="invitation-red">买手</b>邀请链接:</p>
+				<input type="text"
+							 readonly="readonly"
+							 value="{$url.user}"
+							 id="buyaHand" />
+				<van-button type="info" @click="links">复制链接</van-button>
+			</div>
+			<div class="invitation-attention">
+				<div class="invitationAttention">
+					<van-icon name="warning" />
+					<b>请注意：</b></div>
+				<div class="invitation-matters">
+					<p>1、邀请链接只能发布于聊天工具中，如微信，QQ等等，禁止推广于外部网站，如微博，博客，贴吧等等 的各大网站，平台会定期核实，如有发现一律邀请链接作废！</p>
+					<p>2、邀请好友只能是朋友，亲戚，同事，熟人等等，一律不可向陌生人发送邀请链接，邀请进同福客栈注册做任务。</p>
+				</div>
+			</div>
+
+			<!-- 公用tab标签 -->
+			<div class="public-tab-title">
+				<span class="active">邀请奖励</span>
+			</div>
+
+			<p class="invitation-text">邀请商家成功，商家发布任务每单任务可获得<b class="invitation-red"> 1 </b>银锭作为奖励<br>注:
+				商家发布任务的奖金由同福客栈平台承担，不会扣除商家发布任务的金额</p>
+			<div class="invitation-table">
+				<div class="invitation-left">商家发布任务奖励</div>
+				<div class="invitation-right">
+					<p>邀请好友每发布一单任务完结后，邀请人均可获得奖励<b class="invitation-red"> 1 </b>银锭；</p>
+					<p>每邀请一个好友可获得奖励上限<b class="invitation-red"> 500 </b>银锭</p>
+				</div>
+			</div>
+			<p class="invitation-text">邀请买手完成任务后，可获得奖励 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注:<b class="invitation-red">
+				买手完成任务的奖金由同福客栈平台承担，不会扣除买手完成任务获得的佣金 </b></p>
+			<div class="invitation-table">
+				<div class="invitation-left">买家发布任务奖励</div>
+				<div class="invitation-right">
+					<p>邀请好友每完成一单任务（完结后），邀请人均可获得奖励<b class="invitation-red"> 0.5 </b>银锭；</p>
+					<p>每邀请一个好友可获得奖励上限<b class="invitation-red"> 1000 </b>银锭</p>
+				</div>
+			</div>
+			<div class="invitation-attention">
+				<div class="invitationAttention">
+					<van-icon name="warning" />
+					<b>请注意：</b></div>
+				<div class="invitation-matters">
+					<p>任何用户不得利用此活动，自己邀请自己获得返利；一旦平台排查出这种情况，违规将给予处罚。</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{include file="public/footer" /}

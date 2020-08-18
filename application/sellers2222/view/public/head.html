@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="renderer" content="webkit"/>
+  <meta name="force-rendering" content="webkit"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1"/>
+  <title>同福客栈</title>
+  <link href="/static/seller/css/iconfont.css" rel="stylesheet" type="text/css"/>
+  <link href="/static/seller/node_modules/element-ui/lib/theme-chalk/index.css" rel="stylesheet" type="text/css"/>
+  <script charset="utf-8" src="/static/seller/js/vue.js" type="text/javascript"></script>
+  <script src="/static/seller/node_modules/element-ui/lib/index.js"></script>
+  <script src="/static/seller/js/jquery.min.js"></script>
+  <script charset="utf-8" src="/static/seller/layer/layer.js" type="text/javascript"></script>
+  <script src="/static/seller/js/axios.min.js"></script>
+  <link href="/static/seller/css/public.css" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" type="text/css"  href="/static/seller/css/header.css" />
+</head>
+<body>
+<div class="top" v-cloak>
+  <header>
+    <div class="header">
+      <div class="header-left">
+        <b>{$sellerinfo.seller_name}</b>
+        <a href="{:url('login/loginOut')}">退出</a>
+      </div>
+      <div class="header-right">
+        <span>押金：<b>{$sellerinfo.balance}</b>元</span>
+        <span>银锭：<b>{$sellerinfo.reward}</b>银锭</span>
+      </div>
+    </div>
+  </header>
+  <div class="log">
+    <div class="log-padding">
+      <a class="title" href="#"><img src="/static/seller/img/log.png"/></a>
+      <ul>
+        <li><a href="{:url('index/index')}">个人中心</a></li>
+        <li><a class="list" href="{:url('help/index')}">帮助中心</a></li>
+        <li><a href="{:url('vip/index')}">会员续费</a></li>
+        <li><a href="{:url('recharge/recharge')}">账户充值</a></li>
+      </ul>
+      <span class="log-right">
+					<el-button @click="openMsg()" class='message' type="text"><b
+                  class="icon iconfont icon-lingdang"></b></el-button>
+					<a href="{:url('task/editor')}"><b class="icon iconfont icon-paper-airplane"></b>发布任务</a>
+        <div class="red_type" v-show="num > 0">{{num}}</div>
+				</span>
+    </div>
+  </div>
+  <!-- 弹出框内容 -->
+  <el-dialog :visible.sync="dialogVisible" title="个人通知">
+    <div v-if="state==1" class="center_box_header">
+
+      <!-- 左边部分 -->
+      <div class="left_box_header">
+        <div class="left_table">
+          <div :class="[index>=1?'hide_border':'',currentIndex===index?'selectOn':'']"
+               @click="handleClickTable(index,item.id)"
+               class="left_table_item"
+               v-for="(item,index) in tableList">
+            <div class="txt">
+              <span :class="item.look==1 ?'type_color':''"></span>
+              <p v-html="item.title"></p>
+            </div>
+            <div class="time">
+              <i class="el-icon-time"></i>
+              <span v-html="item.create_time"></span>
+            </div>
+          </div>
+        </div>
+        <div class="fenye">
+          <el-pagination current-change="setPage"
+                         :page-size="5"
+                         :total="total" :pager-count="5"
+                         background
+                         layout="prev, pager, next">
+          </el-pagination>
+        </div>
+      </div>
+
+      <!-- 右边盒子部分 -->
+      <div class="right_box_header">
+        <h1 v-html="title" style="margin-bottom: 20px;"></h1>
+        <div>
+          <p style="text-indent: 2em" v-html="content">
+        </div>
+        <div style="display: flex;flex-direction: column;align-self: flex-end;justify-content: flex-end; margin-top: 20px">
+          <p v-html="admin"></p>
+          <p v-html="datetime"></p>
+        </div>
+      </div>
+
+    </div>
+    <div v-else>
+      <span class="masigg">暂无通知</span>
+    </div>
+  </el-dialog>
+</div>
+<div class="body">
+  <!-- 中间内容部分 -->
+  <script>
+      function imgError(e){
+          e.src = '/static/seller/img/moren.jpg';
+      }
+  </script>
+  <script>
+      var name = new Vue({
+          el: ".top",
+          data: function () {
+              return {
+                  dialogVisible: false,
+                  tableList: [],
+                  currentIndex: 0,
+                  title: "",
+                  state: 0,
+                  content: "",
+                  datetime: "",
+                  admin: "",
+                  total: 0,
+                  page: 1,
+                  num:0,
+              };
+
+          },
+          created:function() {
+              this.getData();
+          },
+          methods: {
+              /* 消息弹框事件 */
+              openMsg: function () {
+                  this.dialogVisible = true;
+                  if(this.tableList.length > 0){
+                      this.setData(0);
+                  }
+              },
+              handleClickTable: function (index) {
+                  this.title = this.tableList[index].title;
+                  this.content = this.tableList[index].content;
+                  this.datetime = this.tableList[index].create_time;
+                  this.admin = this.tableList[index].author;
+                  this.currentIndex = index;
+                  this.tableList[index].type = true;
+                  this.setData(index);
+              },
+              setData:function(index){
+                  var that = this;
+                  if(this.tableList[index].look==1)return;
+                  that.tableList[index].look=1;
+                  $.post("{:url('index/setMsg')}", {id: this.tableList[index].id}, function (res) {
+                      if(res.data == 0)that.num=0;
+                  })
+              },
+              getData: function () {
+                  var that = this;
+                  $.post("{:url('index/msg')}", {page: this.page}, function (res) {
+                      if (res.code == 1) {
+                          that.tableList = res.data.list;
+                          that.total = res.data.total;
+                          that.num = res.data.num;
+                          if (that.tableList.length > 0) {
+                              that.state = 1;
+                              that.title = that.tableList[0].title;
+                              that.content = that.tableList[0].content;
+                              that.datetime = that.tableList[0].create_time;
+                              that.admin = that.tableList[0].author;
+                          } else {
+                              that.state = 0;
+                          }
+                      } else {
+                          layer.msg('网络错误');
+                      }
+                  })
+              },
+              setPage:function(val) {
+                  this.page = val;
+                  this.getData();
+              },
+          }
+      })
+  </script>

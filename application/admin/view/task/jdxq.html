@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>接单详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+
+    <style>
+        .p1 {
+            color: red;
+        }
+
+        .p2 {
+            color: rgb(25, 105, 52);
+        }
+        .layui-table-cell {
+            font-size:14px;
+            padding:0 5px;
+            height:auto;
+            overflow:visible;
+            text-overflow:inherit;
+            white-space:normal;
+            word-break: break-all;
+        }
+        .layui-table-fixed {
+            display: none!important;
+        }
+        .layui-table-fixed-r{
+            display: none!important;
+        }
+    </style>
+</head>
+
+<body class="childrenBody">
+    <form class="layui-form">
+
+        <table id="userList" lay-filter="userList"></table>
+
+        <!--审核状态-->
+        <script type="text/html" id="state">
+			{{#  if(d.newsStatus == "2"){ }}
+			<span class="layui-red">不通过</span>
+			{{#  } else if(d.newsStatus == "1"){ }}
+			<span class="layui-blue">等待审核</span>
+			{{#  } else if(d.newsStatus == "0"){ }}
+				审核通过
+			{{#  } else { }}
+				无法识别
+			{{#  }}}
+		</script>
+    </form>
+    <script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+    <script>
+        layui.use(['form', 'layer', 'table', 'laytpl', 'laydate', 'upload'], function () {
+            var form = layui.form,
+                layer = parent.layer === undefined ? layui.layer : top.layer,
+                $ = layui.jquery,
+                laytpl = layui.laytpl,
+                table = layui.table,
+                upload = layui.upload;
+            laydate = layui.laydate;
+           //操作
+           var userListBar = function (d) {
+               var giveup='';
+            if(d.state!="已取消"){
+                giveup  +=`<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="giveUp">取消任务</a>`
+            }
+               giveup+=`<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="setTop2">查 看</a>`;
+               giveup+=`<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="Regression">回退到待收货</a>`;
+               return giveup;
+            };
+
+            var sellername = function (d) {
+                return '<p class="p2">'+d.seller_info.seller_name+'</p>';
+            };
+
+            var username = function (d) {
+                return '<p class="p2">'+d.user_info.username+'</p>';
+            };
+            var express = function (d) {
+                return '<p class="p2">'+d.delivery+`:`+d.delivery_num+'</p>';
+            };
+            var DeltaskType = function (d) {
+                return '<p class="p2">'+d.deltask_type+'</p>';
+            };
+
+            var DeltaskType = function (d) {
+                if(d.deltask_type){
+                    return '<p class="p2">'+d.deltask_type+'</p>';
+                }else{
+                    return '<p class="p2">'+d.state+'</p>';
+                }
+            };
+            var commission = function (d) {
+                return '<p class="p2">'+d.commission+`+`+d.user_divided+'</p>';
+            };
+            //用户列表
+            var taskid = {$id};  //id
+            var tableIns = table.render({
+                elem: '#userList',
+                url: '/index.php/admin/task/jdxq/taskid/'+taskid,
+                method:'post',
+                page: true,
+                limits: [5, 10, 15, 20],
+                limit: 5,
+                id: "userListTable",
+                cols: [[
+                    { field: 'id', title: '序号', width: 80, align: "center" },
+                    { field: 'type', title: '商家用户名', minWidth: 50, width: 80, align: "center" ,templet: sellername},
+                    { field: 'userType', title: '买手用户名', minWidth: 55, width: 80, align: "center",templet: username },
+                    { field: 'user_buyno_wangwang', title: '买号旺旺号', minWidth: 50, width: 100, align: "center" },
+                    { field: 'task_number', title: '任务编号', minWidth: 50, width: 100, align: "center" },
+                    { field: 'create_time', title: '领取时间', minWidth: 50, width: 100, align: "center" },
+                    //{ field: 'delivery', title: '快递公司', width: 95, align: "center" },
+                    { field: 'delivery_num', title: '快递单号', minWidth: 50, width: 100, align: "center" ,templet:express },
+                    //{ field: 'terminal', title: '终端', minWidth: 50, width: 80, align: "center" },
+                    { field: 'principal', title: '本金', minWidth: 50, width: 80, align: "center" },
+                    { field: 'commission', title: '佣金', minWidth: 50, width: 80, align: "center"  , templet:commission},
+                    { field: 'seller_principal', title: '返款金额', minWidth: 50, width: 80, align: "center" },
+                    { field: 'delivery_state', title: '状态', minWidth: 50, width: 100, align: "center" },
+                    { field: 'state', title: '订单状态', minWidth: 50, width: 100, align: "center" , templet:DeltaskType},
+                    { title: '操作', minWidth: 90, width: 250, fixed: "right", align: "center", templet: userListBar }
+                ]]
+            });
+            //列表操作
+            table.on('tool(userList)', function (obj) {
+                var that = this;
+                var layEvent = obj.event,
+                    data = obj.data;
+                if (layEvent === 'setTop2') {
+                    setTop2(data.id)
+                }else if(layEvent === 'giveUp'){
+                    giveUp(data.id)
+                }else if(layEvent === 'Regression'){
+                    Regression(data.id)
+                }
+            });
+
+            function giveUp2222(id){
+                layer.prompt({title: '请输入取消备注，并确认',value:"", formType: 0}, function(pass, index){
+                    var taskid=id;
+                    $.post("/index.php/admin/task/cancel_task",{id:taskid,key:pass},function (res) {
+                        if(res.code==0){
+                            layer.msg(res.msg,{icon:2,time:1000});
+                        }else {
+                            return  layer.msg(res.msg,{icon:1},function () {
+                                parent.window.location.reload();
+                                window.location.reload()
+                            });
+                        }
+
+                    })
+                    layer.close(index);
+                });
+            }
+            function giveUp(id){
+                layer.confirm('确定取消？', {icon: 3, title: '提示信息'}, function (index) {
+                    $.post("/index.php/admin/task/cancel_task",{id:id},function (res) {
+                        if(res.code==0){
+                            layer.msg(res.msg,{icon:2,time:1000});
+                        }else {
+                            return  layer.msg(res.msg,{icon:1},function () {
+                                parent.window.location.reload();
+                                window.location.reload()
+                            });
+                        }
+
+                    })
+                })
+            }
+
+            //验证数据
+            form.verify({
+
+            });
+
+            function tixian() {
+                layui.layer.open({
+                    type: 2,
+                    content: "tixian.html",
+                    area: ['900px', '650px'],
+                    title: '提现',
+                })
+            }
+            function xiaoxi() {
+                layui.layer.open({
+                    type: 2,
+                    content: "xiaoxi.html",
+                    area: ['1000px', '650px'],
+                    title: '消息',
+                })
+            }
+
+            function Regression(id) {
+                layui.layer.open({
+                    type: 2,
+                    content:"/index.php/admin/task/regression/id/"+id,
+                    area: ['900px', '300px'],
+                    title: '违规备注',
+                    success : function(layero, index){
+                        var body = layui.layer.getChildFrame('body', index);
+                        //审核模态框中需要数据
+                        //因为名字我不知道 就简单写了两个 模仿即可
+
+                        setTimeout(function(){
+                            layui.layer.tips('点击此处返回', '.layui-layer-setwin .layui-layer-close', {
+                                tips: 3
+                            });
+                        },500)
+                    }
+                })
+            }
+
+            function bianji(edit) {
+                layui.layer.open({
+                    type: 2,
+                    content: "bianji.html",
+                    title: '编辑资料',
+
+                    success: function (layero, index) {
+                        var body = layui.layer.getChildFrame('body', index);
+                        //审核模态框中需要数据
+                        //因为名字我不知道 就简单写了两个 模仿即可
+                        if (edit) {
+                            var selected1 = '';
+                            var selected2 = '';
+                            if (edit.newsStatus == 0) {
+                                selected1 = 'selected'
+                            } else if (edit.newsStatus == 1) {
+                                selected2 = 'selected'
+                            }
+                            body.find(".name").val(edit.newsName);
+                            body.find(".phone").val(edit.abstract);
+                            body.find(".examine").val(edit.abstract);
+                            var optionStr = '<option value="0" ' + selected1 + '>是</option><option value="1" ' + selected2 + '>否</option>';
+                            body.find(".vip").append(optionStr);
+                        }
+                        setTimeout(function () {
+                            layui.layer.tips('点击此处返回', '.layui-layer-setwin .layui-layer-close', {
+                                tips: 3
+                            });
+                        }, 500)
+                    }
+                })
+            }
+            function setTop2(id) {
+                var index = layui.layer.open({
+                    type: 2,
+                    content:"/index.php/admin/task/jdxq2/id/"+id,
+                    area: ['900px', '600px'],
+                    title: '接单详情',
+                    success: function (layero, index) {
+                        setTimeout(function () {
+                            layui.layer.tips('点击此处返回', '.layui-layer-setwin .layui-layer-close', {
+                                tips: 3
+                            });
+                        }, 500)
+                    }, btn: ['关闭']
+                    , btn2: function (index, layero) {
+                        //按钮【按钮二】的回调
+                        //return false 开启该代码可禁止点击该按钮关闭
+                    }
+                })
+            }
+
+        })
+
+    </script>
+</body>
+
+</html>

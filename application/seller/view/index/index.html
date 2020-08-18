@@ -1,0 +1,426 @@
+
+			{include file="public/header" /}
+			<link rel="stylesheet" type="text/css" href="/static/seller/css/myCenter.css" />
+			<!-- 右边盒子部分 -->
+			<div class="right" v-cloak>
+				<!-- 用户信息盒子 -->
+				<div class="right_box_item">
+					<!-- 用户信息 -->
+					<div class="user_info">
+						<img class="user_touxiang" src="/static/seller/img/imgheade.png" alt="" />
+						<div class="user_name">
+							<p class="user_name_left1">{$seller.seller_name} <b>/会员用户名</b></p>
+							<p class="user_name_left2">绑定手机号: <b>{$seller.mobile}</b></p>
+						</div>
+						<div class="vip_name">
+							<p class="vip_name_left1">{if $seller.vip==1} vip会员 {else/} 普通用户 {/if}<b>/会员状态</b></p>
+							<p class="vip_name_left2">到期时间: <b>{:date('Y-m-d',$seller.vip_time)}</b> <a href="javascript:;" @click="vip()"><<<strong>延时VIP</strong>>></a></p>
+						</div>
+					</div>
+				</div>
+				<!-- 充值入口 -->
+				<div class="chongzhi">
+					<div class="chongzhi_top">
+						<a class="select_on">充值入口</a>
+					</div>
+					<div class="chongzhi_row">
+						<!-- 我的押金 -->
+						<div class="mybenjin">
+							<p class="mybenjin_title">我的押金</p>
+							<div class="mybenjin_row">
+								<img src="/static/seller/img/yuanbao2.png" alt="" />
+								<span class="mybenjin_price"> {$seller.balance} 元</span>
+								<span class="mybenjin_txt">(可用押金)</span>
+							</div>
+							<!--<div class="mybenjin_row">
+								<img src="/static/seller/img/yuanbao4.png" alt="" />
+								<span class="mybenjin_price_color"> 0.00 元</span>
+								<span class="mybenjin_txt">(冻结押金)</span>
+							</div>
+							<div class="mybenjin_row">
+								<img src="/static/seller/img/yuanbao1.png" alt="" />
+								<span class="mybenjin_price">{$seller.balance} 元</span>
+								<span class="mybenjin_txt">(总押金)</span>
+							</div>-->
+							<div class="myyingding_btn">
+								<el-button size="small" @click="chongzi()">充值</el-button>
+								<el-button size="small" @click="cash()" type="primary">提现</el-button>
+							</div>
+						</div>
+						<!-- 我的银锭 -->
+						<div class="myyingding">
+							<p class="myyingding_title">我的银锭</p>
+							<div class="myyingding_row">
+								<img src="/static/seller/img/yuanbao3.png" alt="" />
+								<span class="myyingding_price">{$seller.reward} 银锭</span>
+								<span class="myyingding_txt">(可用银锭)</span>
+							</div>
+							<div class="myyingding_row">
+								<img src="/static/seller/img/yuanbao4.png" alt="" />&nbsp;&nbsp;&nbsp;
+								<span class="myyingding_txt" style="color: red"> 银锭不可提现</span>
+							</div>
+							<div class="myyingding_row">
+								<img src="/static/seller/img/yuanbao1.png" alt="" />
+								<span class="myyingding_price">{$ejang} 银锭</span>
+								<span class="myyingding_txt">(推荐额外奖励)</span>
+							</div>
+							<div class="myyingding_btn">
+								<el-button size="small" @click="chongzi()">充值</el-button>
+							</div>
+						</div>
+						<!-- 邀请好友 -->
+						<div class="myyaoqing">
+							<p class="myyaoqing_title">邀请好友</p>
+							<div class="myyaoqing_row">
+								<img src="/static/seller/img/jinpai.png" alt="" />
+								<span class="myyaoqing_price">总计获得奖励: {$seller.tj_award} 银锭</span>
+							</div>
+							<div class="myyaoqing_row">
+								<img src="/static/seller/img/user_lan.png" alt="" />
+								<span class="myyaoqing_price">总计邀请人数: {$num} 人</span>
+							</div>
+							<div class="myyaoqing_row_p">
+								<span class="myyaoqing_price myyaoqing_margin">今 日 获 得 奖 励: {$seller.tj_award_day} 银锭</span>
+							</div>
+							<div class="myyaoqing_row_p">
+								<span class="myyaoqing_price myyaoqing_margin">今 日 邀 请 人 数: {$num_day} 人</span>
+							</div>
+							<div class="myyingding_btn">
+								<el-button size="small" @click="recommend()" type="primary">邀请</el-button>
+							</div>
+						</div>
+					</div>
+					<!-- 历史记录 -->
+					<!--<div class="lishijilu">
+						<span>历史记录:</span>
+						<a href="javascript:;">押金记录</a>
+						<a href="javascript:;">银锭记录</a>
+						<a href="javascript:;">提现记录</a>
+					</div>-->
+				</div>
+				<!-- 网站公告 -->
+				<!--<div class="web_gonggao">
+					<div class="gonggao_row">
+						<div class="gonggao_top">
+							<a href="javascript:;" class="select_on">网站公告</a>
+						</div>
+						<div class="gonggao_top">
+							<a href="javascript:;">常见问题</a>
+						</div>
+					</div>
+					<div class="web_news"></div>
+				</div>-->
+				<!-- 任务管理 -->
+				<div class="renwuguanli_box">
+					<!-- 任务管理标题 -->
+					<div class="renwuguanli">
+						<div class="renwuguanli_item">
+							<a href="javascript:;" class="renwuguanli_item_select">任务管理</a>
+						</div>
+					</div>
+					<div class="switch">
+						<el-tabs v-model="activeName" @tab-click="handleClick">
+							<el-tab-pane label="所有任务" name="first"></el-tab-pane>
+							<el-tab-pane label="待付款" name="second"></el-tab-pane>
+							<el-tab-pane label="待审核" name="third"></el-tab-pane>
+							<el-tab-pane label="已通过" name="fourth"></el-tab-pane>
+							<el-tab-pane label="已拒绝" name="fifth"></el-tab-pane>
+							<el-tab-pane label="已取消" name="eighth"></el-tab-pane>
+							<el-tab-pane label="已完成" name="sixth"></el-tab-pane>
+							<el-tab-pane label="今日订单" name="seventh"></el-tab-pane>
+						</el-tabs>
+					</div>
+					<!-- 选项卡第一行 -->
+					<div class="select_row_one">
+						<p>终端:</p>
+						<el-select class="el_select label" v-model="info.terminal" clearable placeholder="全部" size="small">
+							<el-option label="PC端" value="1"></el-option>
+							<el-option label="移动端" value="2"></el-option>
+						</el-select>
+						<p> 店铺:</p>
+						<el-select class="el_select label2" v-model="info.shop_id" clearable placeholder="全部" size="small">
+							<el-option v-for="(item,key) in shop" :key="key" :label="item.shop_name" :value="item.id">
+							</el-option>
+						</el-select>
+						<p>任务类型:</p>
+						<el-select class="el_select label6" v-model="info.task_type" clearable placeholder="全部" size="small">
+							<el-option v-for="(item,key) in taskType" :key="key" :label="item" :value="key">
+							</el-option>
+						</el-select>
+					</div>
+					<!-- 选项卡第二行 -->
+					<div class="select_row_two">
+						<p>任务起止时间:</p>
+						<el-date-picker class="el_date label3" v-model="info.searchTime" type="daterange" range-separator="至"
+														start-placeholder="开始日期" end-placeholder="结束日期" size="small" value-format="yyyy-MM-dd">
+						</el-date-picker>
+						<p>任务编号 : </p>
+						<el-input v-model="info.search" placeholder="请输入内容" class="label5" size="small"></el-input>
+						<p>淘宝单号 : </p>
+						<el-input v-model="info.order_number" placeholder="请输入淘宝单号" class="label5" size="small"></el-input>
+					</div>
+					<div class="select_row_two">
+						<p>商品价格区间 : </p>
+						<el-input v-model="info.min_price" placeholder="请输入最小价格" class="label5" size="small"></el-input>-
+						<el-input v-model="info.max_price" placeholder="请输入最大价格" class="label5" size="small"></el-input>
+						<el-button type="primary" size="small" @click="search()"><i class="el-icon-search"></i> 搜索</el-button>
+						<!--<el-button class="el_daochu" type="primary" size="small"><i class="el-icon-download"></i> 导出</el-button>-->
+					</div>
+					<!-- 切换 -->
+					<div>
+						<div class="swell">
+							<div v-if="list.length == 0">
+								<div class="no_null">暂无数据</div>
+							</div>
+							<div class="sample" v-for="(item,index) in list" :key="index">
+								<div class="sample-top">
+									<div class="sample-top-left">
+										<img :src="item.shop_id.img" alt="" /> {{item.shop_id.shop_name.substr(0,3)+"..."}}
+									</div>
+									<div class="sample-top-right">
+										<p>任务编号：<b>{{item.task_number}} [ <a href="javascript:void (0)" @click="view(item.id)">查看详情</a> ]</b></p>
+										<p>发布时间：<b>{{item.publish_time}}</b></p>
+										<p>任务类型：<strong>{{item.task_type}}</strong></p>
+									</div>
+								</div>
+								<div class="sample-center">
+									<img onerror="imgError(this)" :src="url+item.goods_id[0].pc_img" alt="" />
+									{{item.goods_id[0].name}}
+									<div class="center-btn">
+										<el-button type="warning" size="small" class="el-button" v-if="item.status==1" @click="goToPay(item.id)"><i class="el-icon-d-arrow-right"></i> 继续发布
+										</el-button>
+										<el-button type="warning" size="small" class="el-button" v-if="item.nums==1" @click="goToCancel(item.id)"> 取消
+										</el-button>
+										<el-button type="warning" size="small" class="el-button" v-if="item.status >= 3 && item.status != 4 && item.is_shengji==2" @click="goTo(item.id)"> 一键发布
+										</el-button>
+									</div>
+								</div>
+								<div class="sample-bottm">
+									<div>
+										<p>任务状态:<b>{{item.status_type}}</b></p>
+										<p>进行中:(<b>{{item.jxz}}</b>)</p>
+										<p>待发货:(<b>{{item.dfh}}</b>)</p>
+										<p>待收货:(<b>{{item.dsh}}</b>)</p>
+										<p>待返款:(<b>{{item.dfk}}</b>)</p>
+										<p>已完成:(<b>{{item.ywc}}</b>)</p>
+										<p>未接:(<b>{{item.incomplete_num}}</b>)</p>
+									</div>
+									<div>
+										<p>押金:<b>{{item.deposit}}</b>元</p>
+										<p>银锭:<b>{{item.silver_ingot}}</b>银锭</p>
+									</div>
+								</div>
+							</div>
+							<!-- 分页 -->
+							<div class="fenye">
+								<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+															 :page-sizes="sizes" :page-size="info.size" layout="total, sizes, prev, pager, next, jumper" :total="total"
+															 background>
+								</el-pagination>
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<el-dialog title="提示" :visible.sync="type" width="700px">
+					<span>
+						<p>关于平台特色</p> 
+						 <p>★☆★☆★☆★☆★</p>
+						<p>【一】物流篇</p>
+						<p>1.有些喜欢操作拍a发b的商家可以换来这边啦！大大减少您的营销成本及人力成本.一切我们包！礼物免费送！</p>
+						<p>2.真实物流真实包裹在快递环节解决您所有后顾之忧！</p>
+						<p>【二】风控篇</p>
+						<p>平台买手均一证一号，自有验号渠道从包括但不仅限于芝麻信用、淘气值、账号消费比重等维度评估，确保每一个买号都是自用买号。且平台秉承一周一小检，一月一大查的力度过滤买号环境，尽可能的对于黑化买号早发现早处理...对于新买手的引进力度，我们只能说：只要资源足够好，要多少钱给多少 。</p>
+						<p>【三】财务篇</p>
+						<p>商家银行卡的变更需要经过客服人工审核（店铺主旺旺对暗号），保证您的资金安全，避免运营人员更替之后的平台财务风险。为确保一证一号，买家绑定的银行卡须与其买号所绑定的支付宝姓名一致.......平台对补单过程中的资金安全承担责任，如遇到恶意工作室退款、售后...在商家配合我们的前提下，平台承担损失...我们历史上已经成功击退很多批恶意退款工作室.有效保障了商家的合理利益。</p>
+						<p>【四】服务篇</p>
+						<p>平台数十个客服9-23点全天候确保您的售前、售后能得到快速保障.工作时间闪电速度响应。</p>
+						<p>【五】数据篇</p>
+						<p>平台商家、买手数据保留2-3个月，以外数据全部清空.保护商家补单隐私...若平台遭 受不可逆因素打击，我们也有类似一键自毁的功能.将会瞬间清空所有商家、买手的一切资料...请无需担心，关于账户注册信息及财务数据由独立隐秘服务器备份保存...届时将有专职人员主动联系您退款之事宜...</p>
+						<p>同福客栈五年稳定运营，只想做一家佛系小众的补单平台...在商家与买手的支持下，相信未来五年依然会平稳发展，为大家提供优质服务...平台未完善之地方欢迎广大商家、买手积极提议...合理的框架内我们会积极落实！也欢迎有高质量买手资源的伙伴来洽谈合作...先定一个调！资源好，五五开起步！提醒：补单如劲酒，且莫要贪杯...警告：这里只是避风港不是安全屋.补单有风险，被查要认命！</p>
+					</span>
+					<span slot="footer" class="dialog-footer">
+					<el-button @click="lookMsgDo()">不在提示</el-button>
+					<el-button type="primary" @click="type= false">关闭</el-button>
+				  </span>
+				</el-dialog>
+
+			</div>
+			<script type="text/javascript">
+				$(function() {
+					/* 为element-ui组件提供数据绑定和事件 */
+					var vm = new Vue({
+						el: ".right",
+						data: function() {
+							return {
+								// /* 待处理数据 */
+								// activeName: "first",
+								// /* 下拉选项卡数据 */
+                                url:'http://tfkzpic.oss-cn-hangzhou.aliyuncs.com',
+								info:{
+									shop_id:'',
+									task_type:'',
+									searchTime:'',
+									terminal:'',
+									order_number:'',
+									search:'',
+									min_price:'',
+									max_price:'',
+									size:10,
+									page:1,
+									is_day:0,
+									status:0,
+								},
+								shop:{},
+								taskType: ["全部","文字好评","淘口令","二维码","直通车","通道任务"],
+								sizes:[5,10,15,20,25],
+								total:0,
+								list:{},
+								zhuangtai: '待付款', //状态
+								activeName: 'first', //默认选项卡第一
+								multipleTable: true,
+								isActive: true,
+								tabId: 0,
+								type:false,
+							}
+						},
+						created:function(){
+							that = this;
+							this.getShop();
+							this.getData();
+							this.getMsg();
+						},
+						methods: {
+							getShop:function(){
+								$.post("{:url('task/shop')}",{},function(res){
+									if(res.code==1){
+										that.shop = res.data;
+									}else{
+										layer.msg('网络错误',{icon:2});
+									}
+								})
+							},
+							getMsg:function(){
+								$.post("{:url('index/lookMsg')}",{},function(res){
+									if(res.code==1){
+										that.type = true;
+									}
+								})
+							},
+							lookMsgDo:function(){
+								$.post("{:url('index/lookMsgDo')}",{},function(res){
+									if(res.code==1){
+										that.type = false;
+									}
+								})
+							},
+							chongzi:function(){
+								location.href = "{:url('recharge/recharge')}";
+							},
+							cash:function(){
+								location.href = "{:url('recharge/cash')}";
+							},
+							recommend:function(){
+								location.href = "{:url('recommend/index')}";
+							},
+							vip:function(){
+								location.href = "{:url('vip/index')}";
+							},
+							getData:function(){
+								var loading = layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:6000 });
+								$.post("{:url('task/getData')}",this.info,function(res){
+									console.log(res.data);
+									if(res.code==1){
+										that.list = res.data.list;
+										that.total = res.data.total;
+										layer.close(loading);
+									}else{
+										layer.msg('网络错误',{icon:2});
+										layer.close(loading);
+									}
+								})
+							},
+							search:function(){
+								this.info.page = 1;
+								this.info.size = 10;
+								this.getData();
+							},
+							/* 分页事件 */
+							handleSizeChange: function(val) {
+								this.info.size = val;
+								this.info.page = 1;
+								this.getData();
+							},
+							/*分页跳转*/
+							handleCurrentChange: function(val) {
+								this.info.page = val;
+								this.getData();
+							},
+							// 标签页
+							handleClick(tab, event) {
+								console.log(tab.index);
+								this.zhuangtai = tab.label;
+								this.info.is_day=0;
+								this.info.page = 1;
+								this.info.size = 10;
+								if(tab.index==0)this.info.status = 0;
+								if(tab.index==1)this.info.status = 1;
+								if(tab.index==2)this.info.status = 2;
+								if(tab.index==3)this.info.status = 3;
+								if(tab.index==4)this.info.status = 4;
+								if(tab.index==5)this.info.status = 5;
+								if(tab.index==6)this.info.status = 6;
+								if(tab.index==7){
+									this.info.status = 0;
+									this.info.is_day=1;
+								}
+								this.getData();
+							},
+							view:function(id){
+								window.open("{:url('task/status','','',true)}/id/"+id);
+							},
+							goToPay:function(id){
+								window.open("{:url('task/gotopay','','',true)}/id/"+id);
+							},
+							goTo:function(id){
+								var that = this;
+								this.$confirm('此操作将发布一单同样的订单, 是否继续?', '友情提示', {
+									confirmButtonText: '确定',
+									cancelButtonText: '取消',
+									type: 'warning'
+								}).then(function() {
+									$.post("{:url('release/release')}",{id:id},function(res){
+										if(res.code==1){
+											location.href = res.url;
+										}else{
+											layer.msg(res.msg,{icon:2});
+										}
+									})
+								}).catch(function() {});
+							},
+							goToCancel:function(id){
+								var that = this;
+								this.$confirm('此操作将取消该订单, 取消后支付的押金/银锭自动退回账户,是否继续?', '友情提示', {
+									confirmButtonText: '确定',
+									cancelButtonText: '取消',
+									type: 'warning'
+								}).then(function() {
+									$.post("{:url('task/taskCancel')}",{id:id},function(res){
+										if(res.code==1){
+											layer.msg('取消成功',{icon:1},function(){
+												that.getData();
+											});
+										}else{
+											layer.msg(res.msg,{icon:2});
+										}
+									})
+								}).catch(function() {});
+							},
+
+						}
+					});
+				});
+			</script>
+		{include file="public/footer" /}
+
+

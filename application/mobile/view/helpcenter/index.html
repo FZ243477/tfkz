@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>帮助中心</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        type: 1,
+                        state: 1,
+                        inputValue: "",
+                        inputValue2: "",
+                        /* 默认显示的栏目 */
+                        msg: "",
+                        /* 表单数据 */
+                        list: [],
+                        list2: [],
+                        total: 0,
+                        total2: 0,
+                        page1: 1,
+                        page2: 1,
+                    };
+                },
+                // 调用混入
+                mixins: [tabMixin, singlePersonMixin],
+                methods: {
+                    ggClick: function (id) {
+                        location.href="{:url('helpcenter/detail','','',true)}/id/"+id;
+                    },
+                    wtClick: function (id) {
+                        location.href="{:url('helpcenter/detail','','',true)}/id/"+id;
+                    },
+                    handleCurrentChange1(val) {
+                        var that = this;
+                        this.page1 = val;
+                        $.post("{:url('helpcenter/getggData')}", {search: this.inputValue, page: this.page1}, function (res) {
+                            if (res.code == 1) {
+                                that.list = res.data.list;
+                                that.total = res.data.total;
+                            } else {
+                                alertError('网络错误');
+                            }
+                        })
+                    },
+                    handleCurrentChange2(val) {
+                        var that = this;
+                        this.page2 = val;
+                        $.post("{:url('helpcenter/getwtData')}", {search: this.inputValue2, page: this.page2}, function (res) {
+                            if (res.code == 1) {
+                                that.list2 = res.data.list2;
+                                that.total2 = res.data.total2;
+                            } else {
+                                alertError('网络错误');
+                            }
+                        })
+                    },
+                    getSearch:function(){
+                        var that = this;
+                        if(this.type == 1){
+                            this.page1 = 1;
+                            $.post("{:url('helpcenter/getggData')}", {search: this.inputValue, page: this.page1}, function (res) {
+                                if (res.code == 1) {
+                                    that.list = res.data.list;
+                                    that.total = res.data.total;
+                                } else {
+                                    alertError('网络错误');
+                                }
+                            })
+                        }else{
+                            this.page2 = 1;
+                            console.log(this.inputValue2);
+                            $.post("{:url('helpcenter/getwtData')}", {search: this.inputValue2, page: this.page2}, function (res) {
+                                if (res.code == 1) {
+                                    that.list2 = res.data.list;
+                                    that.total2 = res.data.total;
+                                } else {
+                                    alertError('网络错误');
+                                }
+                            })
+                        }
+                    },
+                    getData: function () {
+                        var that = this;
+                        $.post("{:url('helpcenter/index')}", {}, function (res) {
+                            console.log(res);
+                            if (res.code == 1) {
+                                that.list = res.data.list;
+                                that.total = res.data.total;
+                                that.list2 = res.data.list2;
+                                that.total2 = res.data.total2;
+                            } else {
+                                alertError('网络错误');
+                            }
+                        })
+                    },
+                },
+                mounted: function () {
+                    publicFunction();
+                    this.getData();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">帮助中心</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉列表 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span :class="{active:type===1}" data-type='1' @click="type=1">公告</span>
+            <span :class="{active:type===2}" data-type="2" @click="type=2">常见问题</span>
+        </div>
+
+        <!-- 帮助中心1 -->
+        <div class="help-center" v-show="type==1">
+            <!-- 帮助中心搜索框 -->
+            <div class="public-help-search">
+                <div class="help-search-input">
+                    <input type="text" placeholder="请输入内容" v-model="inputValue" />
+                </div>
+                <div class="help-search-btn" @click="getSearch">
+                    <van-icon class="help-search-btn-item" name="search"></van-icon>
+                </div>
+            </div>
+            <!-- 帮助中心新闻列表 -->
+            <div class="help-center-list">
+                <div
+                        class="help-center-list-item"
+                        v-for="(item,index) in list"
+                        :key="index" @click="ggClick(item.id)">
+                    <p v-html="item.title"></p>
+                    <div class="help-center-list-item-time">
+                        <van-icon class="help-center-list-item-time-icon" name="clock-o"></van-icon>
+                        <span v-html="item.create_time"></span>
+                    </div>
+                </div>
+            </div>
+            <!-- 分页 -->
+            <div class="public-page">
+                <van-pagination
+                        class="public-page-item"
+                        @change="handleCurrentChange1"
+                        v-model="page1"
+                        :items-per-page="10"
+                        :total-items="total"
+                        :show-page-size="2"
+                        force-ellipses></van-pagination>
+            </div>
+        </div>
+
+        <!-- 帮助中心2 -->
+        <div class="help-center" v-show="type==2">
+            <!-- 帮助中心搜索框 -->
+            <div class="public-help-search">
+                <div class="help-search-input">
+                    <input type="text" placeholder="请输入内容" v-model="inputValue2" />
+                </div>
+                <div class="help-search-btn" @click="getSearch">
+                    <van-icon class="help-search-btn-item" name="search"></van-icon>
+                </div>
+            </div>
+            <!-- 帮助中心新闻列表 -->
+            <div class="help-center-list">
+                <div
+                        class="help-center-list-item"
+                        @click="wtClick(item.id)"
+                        v-for="(item,index) in list2"
+                        :key="index">
+                    <p>{{item.title}}</p>
+                    <div class="help-center-list-item-time">
+                        <van-icon class="help-center-list-item-time-icon" name="clock-o"></van-icon>
+                        <span>{{item.create_time}}</span>
+                    </div>
+                </div>
+            </div>
+            <!-- 分页 -->
+            <div class="public-page">
+                <van-pagination
+                        class="public-page-item"
+                        @change="handleCurrentChange2"
+                        v-model="page2"
+                        :items-per-page="10"
+                        :total-items="total2"
+                        :show-page-size="2"
+                        force-ellipses></van-pagination>
+            </div>
+        </div>
+
+    </div>
+
+    {include file="public/footer" /}

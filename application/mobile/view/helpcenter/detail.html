@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+  <title>详情</title>
+  <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+  <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+  <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+  <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+  <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+  <script>
+      $(function () {
+          var vm = new Vue({
+              el: ".tfkz-container",
+              data: function () {
+                  return {
+                      list:{
+                          title:'',
+                          create_time:'',
+                          content:'',
+                          type:'',
+                      },
+                  };
+              },
+              // 调用混入
+              mixins: [tabMixin, singlePersonMixin],
+              methods: {
+                  getData:function(){
+                      var id = "{$id}";
+                      var that = this;
+                      $.post("{:url('helpcenter/detail')}", {id: id}, function (res) {
+                          if (res.code == 1) {
+                              that.list = res.data;
+                          } else {
+                              alertError('网络错误');
+                          }
+                      })
+                  },
+              },
+              mounted: function () {
+                  publicFunction();
+                  this.getData();
+              }
+          });
+      });
+  </script>
+
+  <style>
+    .help-detail-content img{
+     max-width: 250px;
+    }
+  </style>
+</head>
+<body>
+<div class="tfkz-container">
+
+  <!-- 页面头部 -->
+  <div class="page-header">
+    <div class="arrow-left" onclick="javascript:history.back(-1);">
+      <van-icon class="arrow-left-item" name="arrow-left" @click="history.go(-1)"/>
+    </div>
+    <div class="page-title">详情</div>
+    <div class="menu-box" onclick="slideBarClick()">
+      <van-icon class="menu-box-item" name="bars" />
+    </div>
+  </div>
+  <!-- 下拉列表 -->
+  {include file="public/left" /}
+
+  <!-- 滚动容器 -->
+  <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+    <!-- 帮助详情 -->
+    <div class="help-detail">
+      <h1 class="help-detail-title">{{list.title}}</h1>
+      <div class="help-detail-content" id="tt" v-html="list.content"></div>
+      <p class="help-detail-fenlei">文章分类：{{list.type}}</p>
+      <p class="help-date">{{list.create_time}}</p>
+    </div>
+
+  </div>
+
+  {include file="public/footer" /}
+
+</div>
+</body>
+</html>

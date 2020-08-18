@@ -1,0 +1,252 @@
+{include file="public/header" /}
+<link rel="stylesheet" type="text/css" href="/static/seller/css/daiChuLi.css" />
+<style>
+	.el-checkbox {
+		margin-right: 30px!important;
+	}
+	.el-dialog{
+		width: 400px!important;
+	}
+</style>
+<div class="right" v-cloak>
+	<!-- 基本信息标题 -->
+	<div class="right-top">
+		<b>个人中心 / 任务情况 /<strong> 待处理任务 </strong></b>
+	</div>
+	<div class="user_content">
+		<div class="line">
+			状态: &nbsp;&nbsp;
+			<el-select style="width: 200px;" v-model="info.type" @change="handleChangeSelect" placeholder="全部"  size="small">
+				<el-option v-for="(item,key) in type" :key="key" :label="item" :value="key"></el-option>
+			</el-select>
+			&nbsp;&nbsp;店铺: &nbsp;&nbsp;
+			<el-select style="width: 200px;" v-model="info.shop_id" placeholder="全部"  size="small">
+				<el-option v-for="(item,key) in shop" :key="key" :label="item.shop_name" :value="item.id"></el-option>
+			</el-select>
+			<br>
+			<br>
+			&nbsp;&nbsp; 订单号:  &nbsp;&nbsp;
+			<el-input v-model="info.task_number" placeholder="请输入内容" size="small" style="width: 250px;"></el-input>
+			<el-button type="primary" size="small" @click="searchData()"><i class="el-icon-search"></i>搜索</el-button>
+			<el-button type="primary" size="small" @click="download()"><i class="el-icon-download"></i></i>导出</el-button>
+		</div>
+		<!-- 全选 -->
+		<!--<div class="select_entile">
+			<el-checkbox v-model="checkedAll" @change="handleSelectAll()">全选</el-checkbox>
+			<el-button type="danger" size="small" @click="rebates()">批量返款</el-button>
+		</div>-->
+		<div>
+			<div v-if="list.length == 0">
+				<div class="no_null">暂无数据</div>
+			</div>
+			<div class="entile" v-for="(item,index) in list" :key="index">
+				<div class="entile-top">
+					<span>
+						<!--<el-checkbox v-model="item.checked" @change="handleSelectItem"></el-checkbox>-->
+						<p>任务编号：<b>{{item.seller_task_id.task_number}}</b>&nbsp;&nbsp;&nbsp; 店铺：<b>{{item.shop}}</b></p>
+					</span>
+					<a href="javascript:void (0)" @click="view(item.id)" >查看详情</a>
+				</div>
+				<div class="entile-top">
+					<p>子任务编号：<b>{{item.task_number}}</b></p>
+					<div>
+						<strong>买号： <b> {{item.user_buyno_wangwang}}  </b></strong>&nbsp;&nbsp;&nbsp;
+						<strong>状态： <b> {{item.state}} </b></strong>&nbsp;&nbsp;&nbsp;
+						<!--<strong>进店方式： <b> {{item.seller_task_id.task_type}} </b></strong>-->
+					</div>
+					<button type="button"  class='small el-button--danger' @click="returnPay(item.id,item.principal)" v-if="item.state=='待返款'">返款</button>
+				</div>
+				<div class="entile-top">
+					<p>淘宝订单号：<b>{{item.table_order_id}}</b></p>
+					<div>
+						<strong>快递：{{item.delivery}}&nbsp;&nbsp;{{item.delivery_num}}</strong>
+					</div>
+				</div>
+				<div class="entile-top">
+					<div><p>返款金额：<b>{{item.principal}}</b>元</p></div>
+					<div>
+						<strong>买手实付金额： <b>{{item.user_principal}}</b>元</strong>&nbsp;&nbsp;&nbsp;
+					</div>
+					<div>
+						<p>创建日期：<b>{{item.create_time}}</b></p>
+					</div>
+				</div>
+				
+			</div>
+			<div class="fenye">
+				<el-pagination @size-change="sizeChange" @current-change="pageChange" :current-page="info.page"
+											 :page-sizes="sizes" :page-size="info.size" layout="total, sizes, prev, pager, next, jumper" :total="total"
+											 background>
+				</el-pagination>
+			</div>
+		</div>
+	</div>
+	<el-dialog title="填写返款金额" width="400px" :visible.sync="returnState" >
+		<el-form :model="form">
+			<el-form-item label="返款金额">
+				<el-input v-model="form.price" autocomplete="off"></el-input>
+			</el-form-item>
+		</el-form>
+		<div slot="footer" class="dialog-footer">
+			<el-button @click="returnState = false">取 消</el-button>
+			<el-button type="primary" @click="returnPayDo()">确 定</el-button>
+		</div>
+	</el-dialog>
+</div>
+<script type="text/javascript">
+	$(function () {
+
+		/* 初始化一个Vue */
+		var vm = new Vue({
+			el: ".right",
+			data: function () {
+				return {
+					info:{
+						type:'',
+						task_number:'',
+						shop_id:'',
+						page:1,
+						size:5,
+					},
+					shop:[],
+					sizes:[5,10,15,20,25],
+					total:0,
+					type:{
+						0:"进行中",
+						3: "待发货",
+						11: "已录入单号，待确认发货",
+						4: "已发货，待买手确认收货",
+						5: "买手已收货，待商家返款",
+						6: "商家已返款,待买手确认返款",
+						1: "已完成",
+					},
+					list:{},
+					returnState:false,
+					user_price:'',
+					form:{
+						id:'',
+						price:'',
+					},
+					checkedAll:false,
+				}
+			},
+			created:function(){
+				that = this;
+				this.getShop();
+				this.getData();
+			},
+			methods: {
+				getData:function(){
+					var loading = layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:6000 });
+					$.post("{:url('task/getUserTask')}",this.info,function(res){
+						if(res.code==1){
+							that.list = res.data.list;
+							that.total = res.data.total;
+							layer.close(loading);
+						}else{
+							layer.msg('网络错误！',{icon:2});
+							layer.close(loading);
+						}
+					})
+				},
+				getShop:function(){
+					$.post("{:url('task/shop')}",{},function(res){
+						if(res.code==1){
+							that.shop = res.data;
+						}else{
+							layer.msg('网络错误！',{icon:2});
+						}
+					})
+				},
+				sizeChange:function(val){
+					this.info.size = val;
+					this.info.page = 1;
+					this.getData();
+				},
+				pageChange:function(val){
+					this.info.page = val;
+					this.getData();
+				},
+				searchData:function(){
+					this.info.size = 5;
+					this.info.page = 1;
+					console.log(12312);
+					this.getData();
+				},
+				view:function(id){
+					location.href = "{:url('task/detail','','',true)}/id/"+id;
+				},
+
+				handleChangeSelect:function(){
+					console.log(this.info.type);
+				},
+				/* 全选 */
+				handleSelectAll: function() {
+					for (var i = 0; i < this.list.length; i++) {
+						this.list[i].checked = this.checkedAll;
+					}
+				},
+				/* 单选 */
+				handleSelectItem: function() {
+					for (var i = 0; i < this.list.length; i++) {
+						if (!this.list[i].checked) {
+							this.checkedAll = false;
+							return false;
+						}
+					}
+					this.checkedAll = true;
+				},
+				returnPay: function(id,price){
+					this.form.id = id;
+					this.user_price = price;
+					this.form.price = '';
+					this.returnState=true;
+				},
+				returnPayDo: function(){
+					var that = this;
+					if(this.form.price < (this.user_price * 0.8))return layer.msg('返款金额向下只能在预付金额20%浮动！',{icon:2,time:2500});
+					$.post("{:url('task/returnPay')}",this.form,function(res){
+						if(res.code==1){
+							layer.msg(res.msg,{icon:1},function(){
+								that.returnState=false;
+								that.getData();
+							});
+						}else{
+							layer.msg(res.msg,{icon:2},function(){
+								that.getData();
+							});
+						}
+					})
+				},
+				download:function () {
+					window.open("{:url('task/excel','','',false)}/type/"+this.info.type);
+				},
+
+
+				rebates: function(){
+					var ids = [];
+					for (var i = 0; i < this.list.length; i++) {
+						if (this.list[i].checked) {
+							ids.push(this.list[i].id);
+						}
+					}
+					if(ids.length <= 0)return layer.msg('请选择要返款的订单！',{icon:2});
+					$.post("{:url('task/allReturnPay')}",{ids:ids},function(res){
+						if(res.code==1){
+							layer.msg(res.msg,{icon:1},function(){
+								this.returnState=false;
+								location.reload();
+							});
+						}else{
+							layer.msg(res.msg,{icon:2},function(){
+								location.reload();
+							});
+						}
+					})
+				}
+			},
+		});
+
+	});
+</script>
+{include file="public/footer" /}

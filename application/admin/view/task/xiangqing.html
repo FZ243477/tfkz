@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+
+    <link href="/admin_style/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/plugins/summernote/summernote.css" rel="stylesheet">
+
+    <link href="/admin_style/assets/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Template Styles -->
+    <link href="/admin_style/assets/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/plugins.min.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/pages/formlayout.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/responsive.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/theme-color.css" rel="stylesheet" type="text/css" />
+    <!-- 提示 -->
+    <link rel="stylesheet" href="/admin_style/assets/plugins/jquery-toast/dist/jquery.toast.min.css">
+</head>
+
+<body class="childrenBody">
+<form class="layui-form">
+    <div class="table-wrap">
+        {volist name="$task['goods']" id='vo'}
+        <div class="table-responsive text-center">
+            <table class="table display product-overview mb-30 table-bordered" id="support_table5" style="padding-top:0px;padding-bottom: 0px; ">
+                <thead>
+                <a href="javascript:void (0)" onclick="editgoods({$vo['id']},{$task['id']})" > <h3>{$vo.type}</h3></a>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>商品名称</td>
+                    <td>
+                        <input type="text" class="name form-control" name="name" lay-verify="name"
+                               value="{$vo.name}" readonly></td>
+                    <td>商品链接</td>
+                    <td>
+                        <input type="text" class="link form-control" name="link" lay-verify="link"
+                               value="{$vo.link}" readonly></td>
+                    <!--                                        <a href="{$vo.link}" target="_blank">查看链接</a></td>-->
+                    <td>规格</td>
+
+                    <td>
+                        <input type="text" class="phone form-control" name="phone" lay-verify=""
+                               value="{$vo.goods_spec}" readonly></td>
+                    <!--                                        <input type="text" class="phone form-control" name="phone" lay-verify=""-->
+                    <!--                                        value="{$vo.spec_name}/{$vo.spec_value}" readonly></td>-->
+                </tr>
+                <tr>
+                    <td>关键词</td>
+                    <td colspan="3">
+                        {volist name="$vo['key_world']" id='key_worldvo'}
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$key_worldvo}" readonly>
+                        {/volist}
+                    </td>
+                    <td>核对数字</td>
+                    <td colspan="2">
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$vo.number}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>单品价格</td>
+                    <td>
+                        <input type="text" name="time" lay-verify="time" autocomplete="off"
+                               class="time form-control layui-input time" value="{$vo.task_price}" readonly>
+                    <td>购买数量</td>
+                    <td>
+                        <input type="text" name="time" lay-verify="time" autocomplete="off"
+                               class="time form-control layui-input time"  value="{$vo.task_num}" readonly>
+                    </td>
+                    <td>合计</td>
+                    <td>
+                        <input type="text" name="time" lay-verify="time" autocomplete="off"
+                               class="time form-control layui-input time text-danger" value="{$vo.task_num*$vo.task_price}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>搜索页面展示价格</td>
+                    <td colspan="1">
+                        <input type="text" class="qq form-control" name="qq"  value="{$vo.show_price}" readonly>
+                    </td>
+                    <td>淘宝发货地址</td>
+                    <td colspan="1">
+                        <input type="text" class="qq form-control" name="qq"  value="{$task['shop_id']['sheng']}-{$task['shop_id']['shi']}-{$task['shop_id']['qu']}" readonly>
+                    </td>
+                    <td>商品主图
+                        <button type="button" onclick="upimg({$task['id']},{$vo['id']})">同步主图</button>
+                    </td>
+                    <td colspan="2">
+                        <img style="width: 140px;height: 140px;" src="{$vo['pc_img']}"  class="img-rounded">
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+
+        </div>
+        {/volist}
+        <div class="table-responsive text-center">
+            <table class="table display product-overview mb-30 table-bordered" id="support_table5">
+                <thead>
+                <h3>订单信息</h3>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>平台</td>
+                    <td>
+                        <input type="text" class="name form-control" name="name" lay-verify="name"
+                               value="{$task['shop_id']['shop_type']}" readonly></td>
+                    <td>店铺</td>
+                    <td>
+                        <input type="text" class="phone form-control" name="phone" lay-verify=""
+                               value="{$task['shop_id']['shop_name']}"  readonly></td>
+                    <td>任务类型</td>
+                    <td>
+                        <input type="text" class="phone form-control" name="phone" lay-verify=""
+                               value="{$task['task_type']}" readonly></td>
+                </tr>
+                <tr>
+                    <td>刷单数量</td>
+                    <td>
+                        <input type="text" name="time" lay-verify="time" autocomplete="off"
+                               class="time form-control layui-input time" value="{$task.num}" readonly>
+                    <td>终端</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq"  value="{$task.terminal}" readonly>
+                    </td>
+                    <td>剩余单数</td>
+                    <td>
+                        <input type="text" name="time" lay-verify="time" autocomplete="off"
+                               class="time form-control layui-input time"  value="{$task.incomplete_num}" readonly>
+                        <a href="#" class="djxg">点击修改</a>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>套餐服务费</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq"  value="{$task.service_price}" readonly>
+                    </td>
+                    <td>多商品费用</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq"  value="{$task.goods_more_fee}" readonly>
+                    </td>
+                    <td>返款服务费</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.refund_service_price}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>文字好评费用</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.praise_fee}" readonly>
+                    </td>
+                    <td>视频费用</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.video_praise_fee}" readonly>
+                    </td>
+
+                    </td>
+                    <td>图片好评费用</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.img_praise_fee}" readonly>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td>任务加赏佣金</td>
+                    <td colspan="1">
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.add_reward}" readonly>
+                    </td>
+                    <td>定时付款</td>
+                    <td colspan="1">
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.timing_time}" readonly>
+                    </td>
+                    <td>定时发布</td>
+                    <td colspan="1">
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.publish_time}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td>任务接单间隔（分）</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.union_interval_time}" readonly >
+                    </td>
+
+                    <td>延长买家购买周期</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.cycle}" readonly>
+                    </td>
+                    <td>移动端加成</td>
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.phone_fee}" readonly>
+                    </td>
+                </tr>
+                <tr>
+                    <td> 隔天任务服务费</td>
+
+                    <td>
+                        <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="{$task.next_day_fee}元"  readonly>
+                    </td>
+                    <td>邮费</td>
+                    <td>
+                        <input type="text" class="qq form-control " name="qq" lay-verify="qq" value="{$task.postage}"  readonly>
+                    </td>
+                    <td>邮费押金</td>
+                    <td>
+                        <input type="text" class="qq form-control " name="qq" lay-verify="qq" value="{$task.margin}"  readonly>
+                    </td>
+
+
+                </tr>
+                <tr>
+                    <td>押金总金额</td>
+                    <td >
+                        <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.deposit}元"  readonly>
+                    </td>
+                    <td>订单总银锭</td>
+                    <td >
+                        <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.silver_ingot}银锭" readonly>
+                    </td>
+                    <td>回购服务费</td>
+                    <td >
+                        <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.repay}元"  readonly>
+                    </td>
+
+
+                </tr>
+                <td>包裹重量</td>
+                <td>
+                    <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.weight}KG"  readonly>
+                </td>
+                <tr>
+                </tr>
+                <tr>
+                    <td>是否预售</td>
+                    <td >
+                        <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.is_ys}"  readonly>
+                    </td>
+                    <td>预付款</td>
+                    <td >
+                        <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.yf_price}" readonly>
+                    </td>
+                    <td>尾款</td>
+                    <td>
+                        <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.wk_price}"  readonly>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td>预售时间</td>
+                    <td >
+                        <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.ys_time}"  readonly>
+                    </td>
+                    <td>预售服务费</td>
+                    <td >
+                        <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.ys_fee}" readonly>
+                    </td>
+                </tr>
+                {if condition="$task.qr_code"}
+                <td>二维码</td>
+                <td colspan="3">
+                    <img style="width: 140px;height: 140px;" src="{$task.qr_code}"  class="img-rounded">
+                </td>
+                {/if}
+                {if condition="$task.tao_word"}
+                <td>淘口令</td>
+                <td >
+                            <textarea class="form-control memo" rows="3" name=""
+                                      lay-verify=""  readonly >{$task['tao_word']}</textarea></td>
+                </td>
+                {/if}
+                {if condition="$task.channel_name"}
+                <td>通道</td>
+                <td >
+                    <input type="text" class="qq form-control text-danger" name="qq" lay-verify="qq" value="{$task.channel_name}" readonly>
+                </td>
+                {/if}
+                <tr>
+                    <td>商家要求</td>
+                    <td colspan="3">
+                                <textarea class="form-control memo" rows="3" name="memo"
+                                          lay-verify="memo"  >{$task['memo']}</textarea></td>
+                    <input type="hidden" name="id" lay-verify="id" value="{$task['id']}">
+
+                    <!--                            <td>备注</td>-->
+                    <!--                            <td colspan="1">-->
+                    <!--                                <textarea class="form-control memo" rows="3" name="remarks"-->
+                    <!--                                          lay-verify="remarks"  >{$task['remarks']}</textarea></td>-->
+                    <!--                            <td>审核状态</td>-->
+                    <!--                            <input type="hidden" name="id" lay-verify="id" value="{$task['id']}">-->
+                    <!--                            <td>-->
+                    <!--                                <select class="state" name="state"  lay-verify="state" >-->
+                    <!--                                </select>-->
+                    <!--                            </td>-->
+                </tr>
+
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-type="reload" lay-filter="reload"
+                    lay-submit> 保 存 </button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+
+<!-- start js include path -->
+<script src="/admin_style/assets/plugins/jquery/jquery.min.js"></script>
+<!-- 提示 -->
+<script src="/admin_style/assets/plugins/jquery-toast/dist/jquery.toast.min.js"></script>
+<script src="/admin_style/assets/plugins/jquery-toast/dist/toast.js"></script>
+<link rel="stylesheet" href="/static/seller/css/main.css">
+<script src="/static/seller/js/app.js"></script>
+<script>
+    function upimg(task_id,goods_id) {
+        $.post("/index.php/admin/goods/changeGoods",{task_id:task_id,goods_id:goods_id},function (res) {
+            if(res.code==1){
+                return  layer.msg(res.msg,{icon:1},function () {
+                    location.reload();
+                });
+            }else{
+                return  layer.msg(res.msg,{icon:2});
+            }
+
+        })
+
+    }
+    function editgoods(id,task_id){
+        app.openSidebar({
+            title: '商品编辑',
+            area: ['80%', '80%'],
+            url:'{:url("task/edit","","",true)}/id/'+id+'/task_id/'+task_id,
+        });
+    }
+
+    $('.img-rounded').click(function(){
+        var img = $(this).attr('src');
+        layer.open({
+            type: 1,
+            skin: 'layui-layer-rim', //加上边框
+            area: ['600px', '600px'], //宽高
+            shadeClose: true, //开启遮罩关闭
+            end: function (index, layero) {
+                return false;
+            },
+            content: '<div style="text-align:center"><img src='+img+' style="width:90%"/></div>'
+        });
+    })
+
+    $(function(){
+        $('.editgoods').click(function(){
+            var id = 1;
+            app.openSidebar({
+                title: '商品编辑',
+                shade: 0.8,
+                shadeClose : false,
+                area: ['1000px', '700px'],
+                url:'{:url("task/edit","","",true)}/id/'+id,
+            });
+        })
+    })
+    layui.use(['form', 'layer', 'table', 'laytpl', 'laydate'], function () {
+        var form = layui.form,
+            layer = parent.layer === undefined ? layui.layer : top.layer,
+            $ = layui.jquery,
+            laytpl = layui.laytpl,
+            table = layui.table;
+        laydate = layui.laydate;
+        state="{$task['status']}";
+        var selected1="";
+        var selected2="";
+        var selected3="";
+        var selected4="";
+        var selected5="";
+        var selected6="";
+        if(state==1){
+            selected1='selected'
+        }else if(state==2){
+            selected2='selected'
+        }else if(state==3){
+            selected3='selected'
+        }else if(state==4){
+            selected4='selected'
+        }else if(state==5){
+            selected5='selected'
+        }else if(state==6){
+            selected6='selected'
+        }else {
+        }
+        var optionStr = '<option value="2" '+selected2+'>已支付，待审核</option><option value="3" '+selected3+'>已通过</option><option value="4" '+selected4+'>已拒绝</option>';
+        $('.state').append(optionStr);
+        //赋予完成 重新渲染select
+        // $.toast({
+        //     heading: 'Welcome to my Elite admin',
+        //     text: 'Use the predefined ones, or specify a custom position object.',
+        //     position: 'top-right',
+        //     loaderBg:'#ff6849',
+        //     icon: 'error',
+        //     hideAfter: 3500
+        // });
+        form.render(); //刷新select选择框渲染
+
+        //申请时间
+        var date2 = laydate.render({
+            elem: '#application-Time'
+            , type: 'datetime'
+            , format: 'yyyyMMdd'
+        })
+        //表单提交
+        form.on("submit(reload)", function (data) {
+            var field = data.field;
+            console.log(field);
+            $.post("/index.php/admin/task/task_to_modify",{data:field},function (res) {
+                if(res.code == 0){
+                    layer.msg(res.msg, {icon: 2});
+                    layer.closeAll("iframe");
+                    //刷新父页面
+                    //parent.location.reload();
+                }else{
+                    layer.msg(res.msg, {icon: 1},function () {
+                        parent.location.reload();
+                    });
+
+                }
+            })
+        });
+
+        //prompt层
+        $('.djxg').click(function(){
+            layer.prompt({title: '请输入剩余单数，并确认',value:"{$task['incomplete_num']}", formType: 0}, function(pass, index){
+                var taskid="{$task['id']}"
+                var price=pass;
+                $.post("/index.php/admin/task/incomplete_num",{taskid:taskid,price:price},function (res) {
+                    if(res.code==1){
+                        $(".fk_price").html(pass);
+                        return  layer.msg(res.msg,{icon:1});
+                    }else{
+                        return  layer.msg(res.msg,{icon:2});
+                    }
+
+                })
+                layer.close(index);
+            });
+        })
+
+
+    })
+
+</script>
+</body>
+
+</html>

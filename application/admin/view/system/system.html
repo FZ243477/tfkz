@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>系统配置</title>
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+    <!-- icons -->
+    <link href="/admin_style/assets/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+    <!--bootstrap -->
+    <link href="/admin_style/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <!-- Material Design Lite CSS -->
+    <link rel="stylesheet" href="/admin_style/assets/plugins/material/material.min.css">
+    <link rel="stylesheet" href="/admin_style/assets/css/material_style.css">
+    <!-- animation -->
+    <link href="/admin_style/assets/css/pages/animate_page.css" rel="stylesheet">
+    <!-- Template Styles -->
+    <link href="/admin_style/assets/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/plugins.min.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/pages/formlayout.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/responsive.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/theme-color.css" rel="stylesheet" type="text/css" />
+    <!-- favicon -->
+    <link rel="shortcut icon" href="/admin_style/assets/img/favicon.ico" />
+    <style>
+        .wgbz {
+            color: red;
+        }
+    </style>
+</head>
+
+<body class="childrenBody">
+    <!-- <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+        <legend>基本演示</legend>
+    </fieldset>
+    <div class="layui-btn-container">
+        <button type="button" class="layui-btn layui-btn-sm" lay-demo="getChecked">
+            获取选中节点数据
+        </button>
+        <button type="button" class="layui-btn layui-btn-sm" lay-demo="setChecked">
+            勾选指定节点
+        </button>
+        <button type="button" class="layui-btn layui-btn-sm" lay-demo="search">
+            搜 索
+        </button>
+    </div> -->
+    <form class="layui-form form-horizontal">
+        <br>
+        <div class="container">
+            <div class="row">
+
+                <div class="form-group col-6">
+                    <label>验证开关：</label>
+                    <div class="input-group spinner">
+                        <input type="checkbox" name="switch" class="verification_switch"  lay-filter="verification_switch" lay-skin="switch" lay-text="开启|关闭">
+                    </div>
+                    <span class="help-block text-danger"></span>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>买手注册赠送银锭数：</label>
+                    <div class="input-group spinner">
+                        <input type="number" class="form-control text-center" name="user_num" value="{$data.user_num}" min="0.00"
+                            step="0.1" lay-verify="input1">
+                    </div>
+                </div>
+
+
+
+                <div class="form-group col-6">
+                    <label>买手注册vip赠送天数：</label>
+                    <div class="input-group spinner">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="dwn" type="button">
+                                <span class="fa fa-minus"></span>
+                            </button>
+                        </span>
+                        <input type="number" class="form-control text-center" value="{$data.user_vip_time}" min="1" lay-verify="input2"
+                            name="user_vip_time"> <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="up" type="button">
+                                <span class="fa fa-plus"></span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>商家注册赠送银锭数：</label>
+                    <div class="input-group spinner">
+                        <input type="number" class="form-control text-center" name="seller_num" value="{$data.seller_num}" min="0.00"
+                               step="0.1" lay-verify="input12">
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label>商家注册vip赠送天数：</label>
+                    <div class="input-group spinner">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="dwn" type="button">
+                                <span class="fa fa-minus"></span>
+                            </button>
+                        </span>
+                        <input type="number" class="form-control text-center" value="{$data.seller_vip_time}" min="1" lay-verify="input13"
+                               name="seller_vip_time"> <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="up" type="button">
+                                <span class="fa fa-plus"></span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label>买手提现本金最低金额：</label>
+                    <div class="input-group spinner">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="dwn" type="button">
+                                <span class="fa fa-minus"></span>
+                            </button>
+                        </span>
+                        <input type="number" class="form-control text-center" value="{$data.user_min_money}" min="1" lay-verify="input3"
+                            name="user_min_money"> <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="up" type="button">
+                                <span class="fa fa-plus"></span>
+                            </button>
+                        </span>
+                    </div>
+                    <span class="help-block text-danger">买手垫付的本金提现最金额</span>
+                </div>
+                <div class="form-group col-6">
+                    <label>买手提现银锭最低数：</label>
+                    <div class="input-group spinner">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="dwn" type="button">
+                                <span class="fa fa-minus"></span>
+                            </button>
+                        </span>
+                        <input type="number" class="form-control text-center" value="{$data.user_min_reward}" min="1" lay-verify="input4"
+                            name="user_min_reward"> <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="up" type="button">
+                                <span class="fa fa-plus"></span>
+                            </button>
+                        </span>
+                    </div>
+                    <span class="help-block text-danger">买手提现银锭最少多少个起</span>
+                </div>
+                <div class="form-group col-6">
+                    <label>买手提现银锭单价：</label>
+                    <div class="input-group spinner">
+                        <input type="number" class="form-control text-center" value="{$data.reward_price}" min="0.00" step="0.1"
+                            lay-verify="input5" name="reward_price">
+                    </div>
+                    <span class="help-block text-danger">1银锭=多少元 0.9 既1个人银锭等于0.9元</span>
+                </div>
+                <div class="form-group col-6">
+                    <label>商家提现押金最低金额：</label>
+                    <div class="input-group spinner">
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="dwn" type="button">
+                                <span class="fa fa-minus"></span>
+                            </button>
+                        </span>
+                        <input type="number" class="form-control text-center" value="{$data.seller_min_money}" min="1" lay-verify="input6"
+                            name="seller_min_money"> <span class="input-group-btn">
+                            <button class="btn btn-default" data-dir="up" type="button">
+                                <span class="fa fa-plus"></span>
+                            </button>
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label>商家提现押金手续费：</label>
+                    <div class="input-group spinner">
+                        <input type="number" class="form-control text-center" value="{$data.seller_cash_fee}" min="0.00" step="0.1"
+                            lay-verify="input7" name="seller_cash_fee">
+                    </div>
+                    <span class="help-block text-danger">0.003 既提现操作平台将收取0.3%的手续费</span>
+                </div>
+                <div class="form-group col-6">
+                    <label>短信宝账号：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.msg_username}" placeholder="请输入内容" lay-verify="input8"
+                            name="msg_username">
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label>短信宝密码：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.msg_password}" placeholder="请输入内容" lay-verify="input9"
+                            name="msg_password">
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label>支付宝收款账号：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.alipay}" placeholder="请输入内容" lay-verify="input10"
+                            name="alipay">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>接单间隔服务费：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.union_interval}" placeholder="请输入内容" lay-verify="input12"
+                               name="union_interval">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>用户vip开通金额：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.user_vip}" placeholder="请输入内容" lay-verify="input12"
+                               name="user_vip">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>商家vip开通金额：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.seller_vip}" placeholder="请输入内容" lay-verify="input12"
+                               name="seller_vip">
+                    </div>
+                </div>
+
+
+
+                <div class="form-group col-6">
+                    <label>接单间隔服务费：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.union_interval}" placeholder="请输入内容" lay-verify="input12"
+                               name="union_interval">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>多商品费用：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.goods_more_fee}" placeholder="请输入内容" lay-verify="input12"
+                               name="goods_more_fee">
+                    </div>
+                </div>
+
+
+                <div class="form-group col-6">
+                    <label>返款服务费用：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.refund_service_price}" placeholder="请输入内容" lay-verify="input12"
+                               name="refund_service_price">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>手机端加成服务费：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.phone_fee}" placeholder="请输入内容" lay-verify="input12"
+                               name="phone_fee">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>pc端加成服务费：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.pc_fee}" placeholder="请输入内容" lay-verify="input12"
+                               name="pc_fee">
+                    </div>
+                </div>
+
+
+
+                <div class="form-group col-6">
+                    <label>定时付款服务费：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.timing_pay}" placeholder="请输入内容" lay-verify="input12"
+                               name="timing_pay">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>定时发布服务费：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.timing_publish}" placeholder="请输入内容" lay-verify="input12"
+                               name="timing_publish">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>文字好评费用：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.praise}" placeholder="请输入内容" lay-verify="input12"
+                               name="praise">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>图片好评费用：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.img_praise}" placeholder="请输入内容" lay-verify="input12"
+                               name="img_praise">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>视频好评费用：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.video_praise}" placeholder="请输入内容" lay-verify="input12"
+                               name="video_praise">
+                    </div>
+                </div>
+
+
+                <div class="form-group col-6">
+                    <label>邮费/单：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.postage}" placeholder="请输入内容" lay-verify="input12"
+                               name="postage">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>买手提现免手续费金额：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.user_fee_max_price}" placeholder="请输入内容" lay-verify="input12"
+                               name="user_fee_max_price">
+                    </div>
+                </div>
+
+
+                <div class="form-group col-6">
+                    <label>买手提现押金手续费：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.user_cash_free}" placeholder="请输入内容" lay-verify="input12"
+                               name="user_cash_free">
+                    </div>
+                </div>
+
+
+                <div class="form-group col-6">
+                    <label>隔天任务服务费：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.next_day}" placeholder="请输入内容" lay-verify="input12"
+                               name="next_day">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>买手任务佣金分成比例：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.divided}" placeholder="请输入内容" lay-verify="input12"
+                               name="divided">
+                    </div>
+                </div>
+
+                <div class="form-group col-6">
+                    <label>禁止注册的手机号：</label>
+                    <div class="input-group spinner">
+                        <textarea type="text" class="form-control text-center" value="" placeholder="请输入内容" lay-verify="input11"
+                                  name="limit_mobile">
+                            {$data.limit_mobile}
+                        </textarea>
+                    </div>
+                    <span class="help-block text-danger">一行一个，使用英文","隔开  禁止的手机号码将无法收到注册验证码</span>
+                </div>
+                <div class="form-group col-6">
+                    <label>买手邀请链接要求：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.invitation_num}" placeholder="请输入内容" lay-verify="input12"
+                               name="invitation_num">
+                    </div>
+                </div>
+                <div class="form-group col-6">
+                    <label>回购任务发布费用：</label>
+                    <div class="input-group spinner">
+                        <input type="text" class="form-control text-center" value="{$data.re_pay}" placeholder="回购任务发布费用" lay-verify="input12"
+                               name="re_pay">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="container">
+            <div class="layui-inline">
+                <div class="layui-input-inline">
+                    <a class="layui-btn search_btn" data-type="reload" lay-filter="reload" lay-submit>
+                        保 存
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </form>
+    <div class="layui-inline">
+        <div id="test12" class="demo-tree-more"></div>
+    </div>
+    <script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+    <script type="text/javascript" src="/admin_style/basicParameter.js"></script>
+    <!-- start js include path -->
+    <script src="/admin_style/assets/plugins/jquery/jquery.min.js"></script>
+    <script src="/admin_style/assets/plugins/popper/popper.min.js"></script>
+    <script src="/admin_style/assets/plugins/jquery-blockui/jquery.blockui.min.js"></script>
+    <script src="/admin_style/assets/plugins/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+    <!-- bootstrap -->
+    <script src="/admin_style/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/admin_style/assets/plugins/bootstrap-inputmask/bootstrap-inputmask.min.js"></script>
+    <script src="/admin_style/assets/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
+    <script src="/admin_style/assets/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker-init.js"></script>
+    <script src="/admin_style/assets/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js"></script>
+    <script src="/admin_style/assets/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker-init.js"></script>
+    <!-- Common js-->
+    <script src="/admin_style/assets/js/app.js"></script>
+    <script src="/admin_style/assets/js/layout.js"></script>
+    <script src="/admin_style/assets/js/theme-color.js"></script>
+    <!-- Material -->
+    <script src="/admin_style/assets/plugins/material/material.min.js"></script>
+    <!-- animation -->
+    <script src="/admin_style/assets/js/pages/ui/animations.js"></script>
+    <!-- dropzone -->
+    <script src="/admin_style/assets/plugins/dropzone/dropzone.js"></script>
+    <!--tags input-->
+    <script src="/admin_style/assets/plugins/jquery-tags-input/jquery-tags-input.js"></script>
+    <script src="/admin_style/assets/plugins/jquery-tags-input/jquery-tags-input-init.js"></script>
+    <!--select2-->
+    <script src="/admin_style/assets/plugins/select2/js/select2.js"></script>
+    <script src="/admin_style/assets/js/pages/select2/select2-init.js"></script>
+    <script>
+        layui.use(["tree", "util", 'form', 'layer', 'table', 'laytpl', 'laydate', 'upload'], function () {
+            var tree = layui.tree,
+                util = layui.util,
+                form = layui.form,
+                layer = parent.layer === undefined ? layui.layer : top.layer,
+                $ = layui.jquery,
+                laytpl = layui.laytpl,
+                table = layui.table,
+                upload = layui.upload;
+            laydate = layui.laydate;
+
+            newsTop=false;
+            form.on('switch(newsTop)', function(data){
+                newsTop = data.elem.checked;
+            });
+            var verification_switch="{$data['switch']}";
+            console.log(verification_switch);
+            if(verification_switch == "0"){
+                verification_switch = false;
+
+            } else if (verification_switch == "1"){
+                verification_switch = true;
+            }
+            $(".verification_switch").prop("checked",verification_switch);
+            form.render();
+
+            //表单提交
+            form.on("submit(reload)", function (data) {
+                var field = data.field;
+                //弹出loading 加载
+                var index = top.layer.msg('数据提交中，请稍候', { icon: 16, time: false, shade: 0.8 });
+                //全部
+                console.log(field)
+                $.post("{:url('system/setting_system')}",{data:field},function (res) {
+                    return  top.layer.msg(res.msg);
+                })
+                //一个
+                setTimeout(function () {
+                    top.layer.close(index);
+                    top.layer.msg("添加成功！");
+                }, 500);
+                return false;
+            });
+        });
+    </script>
+</body>
+
+</html>

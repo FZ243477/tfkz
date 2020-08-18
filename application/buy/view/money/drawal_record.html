@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css"/>
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/tiXianRecord.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png" />
+    <script src="/static/buy/js/vue-2.6.10.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            /* 初始化一个Vue */
+            var vm = new Vue({
+               el: ".center_box",
+                data: function () {
+                    return {
+                        /* 起止日期value值 */
+                        dateValue: "",
+                        /* 搜索框value值 */
+                        searchInput: "",
+                        /* 表格数据 */
+                        list: [],
+                        /* 默认选中第一页 */
+                        currentPage: 1,
+                        total:0,
+                        size:10,
+                        sizes:[10,20,30,40,50],
+                        currentPage2: 1
+                    }
+                },
+                created: function () {
+                    this.getData();
+                },
+                methods: {
+                    /* 下拉菜单事件 */
+                    handleOpen: function (key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    handleClose: function (key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    /* 消息弹框事件 */
+                    openMsg: function () {
+                        this.$alert("暂无消息通知", "个人通知", {});
+                    },
+                    /* 给表格1上色 */
+                    cellStyle: function (e) {
+                        var price = this.list[e.rowIndex].price;
+                        price = Number(price);
+
+                        if (e.columnIndex === 1) {
+                            if (price >= 1) {
+                                return "color: rgb(103, 194, 58);";
+                            } else if (price <= 0) {
+                                return "color:red;";
+                            }
+                        }
+                    },
+                    getData:function(){
+                        var that = this;
+                        $.post("{:url('money/drawal_record')}",{
+                            page:this.currentPage,
+                            inputcontent:this.searchInput,
+                            datetime:this.dateValue,
+                            size:this.size
+                        },function (res) {
+                            console.log(res);
+                            if(res.code==1){
+                                that.list = res.data.list;
+                                that.total = res.data.total;
+                            }else{
+                                vm.alertError(res.msg);
+                            }
+                        })
+                    },
+                    search:function(){
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    /* 分页事件1 */
+                    handleSizeChange(val) {
+                        this.size = val;
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    handleCurrentChange(val) {
+                        this.currentPage = val;
+                        this.getData();
+                    },
+                }
+            });
+
+            /* 初始化jQuery */
+            $(function () {
+
+                /* 调用jQuery实现选择导航栏效果 */
+                $(".title a").click(function () {
+                    $(this).addClass("add_color").siblings().removeClass("add_color");
+                });
+
+                /* 默认银锭记录这栏不显示 */
+                $(".shuju_table2").hide();
+
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;账号信息&nbsp;/&nbsp;<span class="msg_title_txt">本金提现</span></p>
+            </div>
+            <div class="user_content">
+
+                <!-- 本金提现 -->
+                <div class="web_gonggao">
+                    <div class="gonggao_row">
+                        <div class="gonggao_top">
+                            <a href="javascript:" class="select_on">本金提现</a>
+                        </div>
+                        <div class="gonggao_top">
+                            <a href="{:url('money/silver_record',['hnav'=>'3','nav'=>'3'])}">银锭提现</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 本金提现部分 -->
+                <div class="shuju_table">
+                    <!-- 搜索区域 -->
+                    <div class="benjin_search">
+                        <!--<el-input placeholder="请输入提现流水号" v-model="searchInput" clearable style="width: 200px;margin-right: 20px;"-->
+                                  <!--clearable>-->
+                        <!--</el-input>-->
+                        <el-date-picker class="el_date" v-model="dateValue" type="daterange" range-separator="至"
+                                        start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
+                        </el-date-picker>
+                        <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
+                    </div>
+                    <!-- 数据列表 -->
+                    <el-table :data="list" border header-cell-style="background:#f5f7fa;" :cell-style="cellStyle">
+                        <el-table-column prop="id" label="流水号" align="center">
+                        </el-table-column>
+                        <el-table-column prop="price" label="提现金额" align="center">
+                        </el-table-column>
+                        <el-table-column prop="toaccount" label="实际到账金额" align="center">
+                        </el-table-column>
+                        <el-table-column prop="yprice" label="结余" align="center">
+                        </el-table-column>
+                        <el-table-column prop="create_time" label="日期" align="center">
+                        </el-table-column>
+                        <el-table-column prop="state" label="状态" align="center">
+                        </el-table-column>
+                        <el-table-column prop="memo" label="备注" align="center">
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页 -->
+                    <div class="fenye">
+                        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes=sizes :page-size=size
+                                       layout="total, sizes, prev, pager, next, jumper" :total=total
+                                       background>
+                        </el-pagination>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

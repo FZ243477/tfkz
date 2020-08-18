@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css" />
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/vipRecord.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png" />
+    <script src="/static/buy/js/vue-2.6.10.min.js"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function() {
+            /* 初始化一个Vue */
+            var vm = new Vue({
+               el: ".center_box",
+                data: function() {
+                    return {
+                        dateValue: "",
+                        /* 表格数据 */
+                        list: [],
+                        /* 默认选中第一页 */
+                        currentPage: 1,
+                        total:0,
+                        size:10,
+                        sizes:[10,20,30,40,50],
+                        currentPage2: 1
+                    }
+                },
+                created: function () {
+                    this.getData();
+                },
+                methods: {
+                    /* 失败的弹框 */
+                    alertError: function(e) {
+                        this.$message.error(e);
+                    },
+                    /* 成功的弹框 */
+                    alertSuccess: function(e) {
+                        this.$message({
+                            message: e,
+                            type: "success"
+                        });
+                    },
+                    /* 下拉菜单事件 */
+                    handleOpen: function(key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    handleClose: function(key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    /* 消息弹框事件 */
+                    openMsg: function() {
+                        this.$alert("暂无消息通知", "个人通知", {
+
+                        });
+                    },
+                    /* 给表格上色 */
+                    cellStyle({
+                                  row,
+                                  column,
+                                  rowIndex,
+                                  columnIndex
+                              }) {
+                        // console.log(columnIndex);
+                        if (columnIndex === 1 || columnIndex === 3) {
+                            return "color:red;"
+                        } else if (columnIndex === 2) {
+                            return "color:rgb(30, 144, 255);"
+                        }
+                    },
+                    getData:function(){
+                        var that = this;
+                        $.post("{:url('my/vip_record')}",{
+                            page:this.currentPage,
+                            datetime:this.dateValue,
+                            size:this.size
+                        },function (res) {
+                            console.log(res);
+                            if(res.code==1){
+                                that.list = res.data.list;
+                                that.total = res.data.total;
+                            }else{
+                                vm.alertError(res.msg);
+                            }
+                        })
+                    },
+                    search:function(){
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    handleSizeChange(val) {
+                        this.size = val;
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    handleCurrentChange(val) {
+                        this.currentPage = val;
+                        this.getData();
+                    },
+                    search:function(){
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    /* 分页事件 */
+                    // handleSizeChange: function(val) {
+                    //     console.log("每页" + val + "条");
+                    // },
+                    // handleCurrentChange: function(val) {
+                    //     console.log("当前页" + val);
+                    // },
+                }
+            });
+
+            /* 初始化jQuery */
+            $(function() {
+
+                /* 调用jQuery实现选择导航栏效果 */
+                $(".title a").click(function() {
+                    $(this).addClass("add_color").siblings().removeClass("add_color");
+                });
+
+            });
+
+        });
+    </script>
+
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;账号信息&nbsp;/&nbsp;<span class="msg_title_txt">会员VIP记录</span></p>
+            </div>
+            <div class="user_content">
+
+                <!-- 充值会员 -->
+                <div class="chongzhi_vip">
+
+                    <div class="web_gonggao">
+                        <div class="gonggao_row">
+                            <div class="gonggao_top">
+                                <a href="{:url('my/vip_recharge')}">充值会员</a>
+                            </div>
+                            <div class="gonggao_top">
+                                <a href="{:url('my/vip_record')}" class="select_on">会员VIP记录</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 选择日期 -->
+                    <div class="selete_date">
+                        <el-date-picker class="el_date" v-model="dateValue" type="daterange" range-separator="至"
+                                        start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
+                        </el-date-picker>
+                        <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
+                    </div>
+
+                    <!-- 数据列表 -->
+                    <div class="shuju_table">
+                        <template>
+                            <el-table :data="list" border style="width: 100%;" header-cell-style="background:#f5f7fa;"
+                                      :cell-style="cellStyle">
+                                <el-table-column prop="create_time" label="付款日期" align="center">
+                                </el-table-column>
+                                <el-table-column prop="price" label="金额" align="center">
+                                </el-table-column>
+                                <el-table-column prop="expire_time" label="到期日期" align="center">
+                                </el-table-column>
+                                <!--<el-table-column prop="type" label="类型" align="center">-->
+                                <!--</el-table-column>-->
+                                <el-table-column prop="remarks" label="备注" align="center">
+                                </el-table-column>
+                            </el-table>
+                        </template>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="fenye">
+                        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes=sizes :page-size=size
+                                       layout="total, sizes, prev, pager, next, jumper" :total=total
+                                       background>
+                        </el-pagination>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

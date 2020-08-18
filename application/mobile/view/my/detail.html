@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>任务详情</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        taskData: {
+                            maiHao: "{$list.wwid}",
+                            type: "{$list.task_type}",
+                            zhongDuan: "{$list.terminal}",
+                            benJin: "{$list.seller_principal}",
+                            yongJin: "{$list.commission}",
+                            user_divided:"{$list.user_divided}",
+                            money: "{$list.seller_principal}",
+                            dianPu: "{$list.shop_name}",
+                            taskNum: "{$list.task_number}",
+                            time: "{$list.create_time}",
+                            taskType: "{$list.state}",
+                            delType:"{$list.deltask_type}",
+                            goods_price:"{$list.goods_price}",
+                            seller_name:"{$list.seller_name}"
+                        },
+                        /* 数据2 */
+                        taskData2: {
+                            img: "{$list.keywordimg}",
+                            img2: "{$list.chatimg}",
+                            zhiFu: "已上传订单",
+                            order:"{$list.table_order_id}",
+                            style: "{$list.delivery}",
+                            num: "{$list.delivery_num}",
+                            type1: "{$list.state}",
+                            time: "{$list.update_time}",
+                            step_two_complete:"{$list.step_two_complete}",
+                            upload_order_time:"{$list.upload_order_time}",
+                            delivery_time:"{$list.delivery_time}",
+                            platform_refund_time:"{$list.platform_refund_time}"
+                        },
+                    };
+                },
+                methods: {
+                    shouImg1:function (img) {
+                        if(img.length>0){
+                            var arr=[];
+                            arr.push(img);
+                            vant.ImagePreview({
+                                images: arr,
+                            });
+                        }else {
+                            alertError("当前没有图片");
+                        }
+                    },
+                    shouImg2:function (img) {
+                        if(img.length>0){
+                            var arr=[];
+                            arr.push(img);
+                            vant.ImagePreview({
+                                images: arr,
+                            });
+                        }else {
+                            alertError("当前没有图片");
+                        }
+                    }
+                },
+                // 调用混入
+                mixins: [singlePersonMixin],
+                mounted: function () {
+                    publicFunction();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">任务详情</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span class="active">任务详情</span>
+        </div>
+
+        <!-- 任务详情 -->
+        <div class="task-detail">
+
+            <!-- 任务信息 -->
+            <div class="public-card">
+                <div class="public-card-title">
+                    <div class="public-card-title-one" style="color: red">任务信息</div>
+                    <div class="public-card-title-two">
+                        <a href="{:url('money/withsilver',['editpass'=>1])}">银锭记录</a>
+                        <a href="{:url('money/withdrawal',['editpass'=>1])}">本金记录</a>
+                    </div>
+                </div>
+                <div class="pulic-card-content">
+                    <!-- 卡片 -->
+                    <div class="task-detail-card">
+                        <p>买号：</p>
+                        <p>{{taskData.maiHao}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>任务类型：</p>
+                        <p>{{taskData.type}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>下单终端：</p>
+                        <p>{{taskData.zhongDuan}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>佣金：</p>
+                        <p>{{taskData.yongJin}}+{{taskData.user_divided}}银锭</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>任务金额：</p>
+                        <p>{{taskData.goods_price}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>垫付金额：</p>
+                        <p>{{taskData.benJin}}元</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>返款金额：</p>
+                        <p>{{taskData.money}}元</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>任务编号：</p>
+                        <p>{{taskData.taskNum}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>商家用户名：</p>
+                        <p>{{taskData.seller_name}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>店铺：</p>
+                        <p>{{taskData.dianPu.substr(0,3)+"..." }}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>创建时间：</p>
+                        <p>{{taskData.time}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>任务状态：</p>
+                        <p>{{taskData.taskType}}<span v-if="taskData.taskType =='已取消'" style="margin-left: 10px;">{{taskData.delType}}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 任务进度 -->
+            <div class="public-card">
+                <div class="public-card-title">
+                    <div class="public-card-title-one" style="color: red">任务进度</div>
+                </div>
+                <div class="pulic-card-content">
+                    <div class="task-progress">
+                        <!-- 表格 -->
+                        <div class="public-table">
+                            <table>
+                                <thead>
+                                <tr>
+                                    <th>服务项目</th>
+                                    <th>完成状态</th>
+                                    <th>完成时间</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>浏览店铺及在线客服聊天</td>
+                                    <td>
+                                        <div class="task-progress-pic">
+                                            <a href="javascript:" @click="shouImg1(taskData2.img)">点击查看</a>
+                                            <a href="javascript:" @click="shouImg2(taskData2.img2)">点击查看</a>
+                                        </div>
+                                    </td>
+                                    <td>{{taskData2.step_two_complete}}</td>
+                                </tr>
+                                <tr>
+                                    <td>下单/支付</td>
+                                    <td>{{taskData2.zhiFu}}</td>
+                                    <td>{{taskData2.upload_order_time}}</td>
+                                </tr>
+                                <tr>
+                                    <td>买手已完成订单号</td>
+                                    <td>{{taskData2.order}}</td>
+                                    <td>{{taskData2.upload_order_time}}</td>
+                                </tr>
+                                <tr>
+                                    <td>商家发货</td>
+                                    <td>
+                                        <div class="task-progress-fahuo">
+                                            <p>快递方式：<span>{{taskData2.style}}</span></p>
+                                            <p>快递单号：<span>{{taskData2.num}}</span></p>
+                                        </div>
+                                    </td>
+                                    <td>{{taskData2.delivery_time}}</td>
+                                </tr>
+                                <tr>
+                                    <td>平台返款</td>
+                                    <td>
+                                        <span v-if="taskData2.type1 =='待确认返款'">已返款</span>
+                                        <span v-if="taskData2.type1 =='已完成'">已返款</span>
+                                        <span v-else>待返款</span>
+                                    <td>{{taskData2.platform_refund_time}}</td>
+                                </tr>
+                                <tr>
+                                    <td>任务状态</td>
+                                    <td>{{taskData2.type1}}</td>
+                                    <td>{{taskData2.time}}</td>
+                                </tr>
+                                {volist name="product" id="vo"}
+                                <tr>
+                                    <td class="task-progress-img">
+                                        <img src="{$vo.pc_img}" alt="">
+                                    </td>
+                                    <td style="color: red">好评内容：<span style="color: #333333">{$vo.text_praise}</span></td>
+                                    <td>暂无内容</td>
+                                </tr>
+                                {/volist}
+                                <tr>
+                                    <td>图片</td>
+
+                                    <td class="task-progress-img">
+                                        {volist name="$list['img_praise']" id="vo"}
+                                        <img src="{$vo}" alt="">
+                                        {/volist}
+                                    </td>
+
+                                    <td>暂无内容</td>
+                                </tr>
+                                <tr>
+                                    <td>视频</td>
+                                    <td class="task-progress-video">
+                                        <video src="{$list['video_praise']}" controls="controls"><h1>您的浏览器不支持 video 视频</h1></video>
+                                    </td>
+                                    <td><a href="{$list['video_praise']}" download='视频'>下载</a></td>
+                                    <td>暂无内容</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    {include file="public/footer" /}

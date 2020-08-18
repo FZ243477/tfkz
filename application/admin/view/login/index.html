@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html class="loginHtml">
+<head>
+	<meta charset="utf-8">
+	<title>同福客栈后台管理系统</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="icon" href="/admin_style/favicon.ico">
+	<link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+	<link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+
+
+	<link rel="stylesheet" type="text/css" href="/admin_style/css/normalize.css" />
+<link rel="stylesheet" type="text/css" href="/admin_style/css/demo.css" />
+<!--必要样式-->
+<link rel="stylesheet" type="text/css" href="/admin_style/css/component.css" />
+	<link rel="stylesheet" href="/admin_style/css/demo.css">
+</head>
+<body class="loginBody">
+		<!-- <form class="layui-form" >
+				<div class="login_face"><img src="../../images/face.jpg" class="userAvatar"></div>
+				<div class="layui-form-item input-item">
+					<label for="userName">用户名</label>
+					<input type="text" placeholder="请输入用户名" autocomplete="off" id="userName" class="layui-input" lay-verify="required" >
+				</div>
+				<div class="layui-form-item input-item">
+					<label for="password">密码</label>
+					<input type="password" placeholder="请输入密码" autocomplete="off" id="password" class="layui-input" lay-verify="required">
+				</div>
+				<div class="layui-form-item input-item" id="imgCode">
+					<label for="code">验证码</label>
+					<input type="text" placeholder="请输入验证码" autocomplete="off" id="code" class="layui-input">
+					<img src="../../images/code.jpg">
+				</div>
+				<div class="layui-form-item">
+					<button class="layui-btn layui-block" lay-filter="login" lay-submit>登录</button>
+				</div>
+				<div class="layui-form-item layui-row">
+					<a href="javascript:;" class="seraph icon-qq layui-col-xs4 layui-col-sm4 layui-col-md4 layui-col-lg4"></a>
+					<a href="javascript:;" class="seraph icon-wechat layui-col-xs4 layui-col-sm4 layui-col-md4 layui-col-lg4"></a>
+					<a href="javascript:;" class="seraph icon-sina layui-col-xs4 layui-col-sm4 layui-col-md4 layui-col-lg4"></a>
+				</div>
+			</form> -->
+	<div class="container demo-1">
+			<div class="content">
+				<div id="large-header" class="large-header">
+					<canvas id="demo-canvas"></canvas>
+					<div class="logo_box">
+						<h3>欢迎你</h3>
+						<form  action="#" name="f" method="post" >
+							<div class="input_outer">
+								<span class="u_user"></span>
+								<input name="logname" class="text" style="color: #FFFFFF !important"  lay-filter="logname" placeholder="请输入账户">
+							</div>
+							<div class="input_outer">
+								<span class="us_uer"></span>
+								<input name="logpass" class="text" style="color: #FFFFFF !important; position:absolute; z-index:100;"value="" type="password" lay-filter="logpass" placeholder="请输入密码">
+							</div>
+							<div class="mb2"><a class="act-but submit"   lay-submit href="javascript:;"  onclick="login()" style="color: #FFFFFF">登录</a></div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div><!-- /container -->
+		<script src="/admin_style/js/TweenLite.min.js"></script>
+		<script src="/admin_style/js/EasePack.min.js"></script>
+		<script src="/admin_style/js/rAF.js"></script>
+		<script src="/admin_style/js/demo-1.js"></script>
+	<script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+	<script type="text/javascript" src="/admin_style/login.js"></script>
+	<script type="text/javascript" src="/admin_style/js/cache.js"></script>
+	<script type="text/javascript" src="/static/seller/js/jquery.min.js"></script>
+<script>
+	/*点击回车登录*/
+	$(document).on('keydown', function(e){
+		if(event.keyCode == 13){
+			e.preventDefault();//防止两次询问
+			if($(".layui-layer-btn0").length<1){
+				login();
+			}
+		}
+
+	})
+
+ function login(){
+			var name = $('input[name=logname]').val();
+			var pwd = $('input[name=logpass]').val();
+			$(".submit").text("登录中...");
+			$.post("/index.php/admin/login/login_in",{user_name:name,password:pwd},function (res) {
+				if(res.code==0){
+					layer.msg(res.msg,{icon:2,time:1000},function () {
+						$(".submit").text("登录");
+					});
+
+				}else {
+					return  layer.msg(res.msg,{icon:1},function () {
+						window.location.href = res.url;
+					});
+				}
+
+			})
+		}
+
+
+
+</script>
+</body>
+</html>

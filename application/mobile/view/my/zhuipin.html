@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>追评任务</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        testData: [
+                            {volist name="product" id="vo"  }
+                            {
+                                taskBianHao: "{$list.task_number}",
+                                time: "{$list.create_time}",
+                                type: "{$list.task_type}",
+                                title: "{$vo.name}",
+                                content: `{$vo.wenzi}`,
+                                img:"{$vo.img}",
+                                video:"{$vo.video}",
+                                maiHao: "{$list.wwid}",
+                                kuaiDi: "{$list.delivery}",
+                                danHao: "{$list.delivery_num}",
+                                price: "{$list.seller_principal}"
+                            },
+                            {/volist}
+                        ],
+                        /*任务ID*/
+                        task_id:"{$list.id}",
+                        // 弹框
+                        dialogVisible: false,
+                        // 图片临时路径
+                        fileList:[],
+                        // 图片base64路径
+                        localFile: [],
+                    };
+                },
+                methods: {
+                    //复制文字
+                    copyText: function (text) {
+                        var oInput = document.createElement("input");
+                        oInput.value = text;
+                        document.body.appendChild(oInput);
+                        oInput.select(); // 选择对象
+                        document.execCommand("Copy"); // 执行浏览器复制命令
+                        oInput.className = "oInput";
+                        oInput.style.display = "none";
+                        alertSuccess("追评内容复制成功");
+                    },
+                    // 删除图片
+                    handleRemove:function (file) {
+                        this.localFile.splice(file.content,1);
+                    },
+                    // 图片改变事件
+                    handleChange:function (file){
+                        this.localFile.push(file.content);
+                    },
+                    // 阻止弹框默认关闭
+                    beforeClose: function (action, done) {
+                        if (action === "confirm") {
+                            done(false);
+                        } else {
+                            done();
+                        }
+                    },
+                    // 确认上传图片
+                    dialogConfirm:function(){
+                        console.log(this.localFile);
+                        var that = this;
+                        if(that.localFile.length===0) return alertError("请上传好评截图！");
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('mobile/my/take_zhuipin')}",
+                            async : true,
+                            data : {
+                                "high_praise_img":that.localFile,
+                                "task_id":that.task_id,
+                            },
+                            success : function(data){
+                                if(data.code==1){
+                                    this.dialogVisible = false;
+                                    alertSuccess(data.msg);
+                                    setTimeout(function(){
+                                        return location.href=data.url;
+                                    },3000)
+                                }else{
+                                    return alertError(data.msg);
+                                }
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                    }
+                },
+                // 调用混入
+                mixins: [singlePersonMixin],
+                mounted: function () {
+                    publicFunction();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">追评任务</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper">
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span class="active">追评任务</span>
+        </div>
+
+        <!-- 追评任务 -->
+        <div class="zhuipin-task">
+            <!-- 确认追评按钮 -->
+            <div class="zhuipin-btn">
+                <van-button type="danger" @click="dialogVisible = true">确认追评</van-button>
+            </div>
+            <!-- 追评任务内容 -->
+            <div :key="index" class="zhuipin-task-content" v-for="(item,index) in testData">
+                <div class="zhuipin-task-content-item">
+                    <span>任务编号：</span>
+                    <span>{{item.taskBianHao}}</span>
+                </div>
+                <div class="zhuipin-task-content-item">
+                    <span>发布时间：</span>
+                    <span>{{item.time}}</span>
+                </div>
+                <div class="zhuipin-task-content-item">
+                    <span>任务类型：</span>
+                    <span>{{item.type}}</span>
+                </div>
+                <div class="zhuipin-task-content-item">
+                    <span>任务标题：</span>
+                    <span>{{item.title}}</span>
+                </div>
+                <div class="zhuipin-task-text">
+                    <div class="zhuipin-task-text-b">
+                        <b>追评内容：</b>
+                        <b class="zhuipin-task-text-copy">{{item.content}}</b>
+                    </div>
+                    <div class="zhuipin-task-btn">
+                        <van-button type="danger" size="small" @click="copyText(item.content)">一键复制</van-button>
+                    </div>
+                </div>
+                <div class="zhuipin-task-content-item" v-if="item.img.split(',').length!==0">
+                    <span>图片：</span>
+                    <p>
+                        <img :key="index" alt="" :src="item2" v-for="(item2,index2) in item.img.split(',')">
+                    </p>
+                </div>
+                <div class="zhuipin-task-content-item" v-if="item.video">
+                    <span>视频：</span>
+                    <p>
+                        <video :src="item.video" controls="controls"></video>
+                    </p>
+                </div>
+                <div class="zhuipin-task-bottom">
+                    <p><span>买号：</span>{{item.maiHao}}</p>
+                    <p><span>快递：</span>{{item.kuaiDi}}</p>
+                    <p><span>单号：</span>{{item.danHao}}</p>
+                </div>
+                <div class="zhuipin-task-content-item">
+                    <span>付款金额：</span>
+                    <span>{{item.price}}元</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 上传图片弹框 -->
+        <van-dialog @confirm="dialogConfirm" :before-close="beforeClose" v-model="dialogVisible" title="温馨提示" show-cancel-button>
+            <div class="zhuipin-task-upload">
+                <p>请上传好评截图：</p>
+                <van-uploader
+                        @delete="handleRemove"
+                        :after-read="handleChange"
+                        v-model="fileList"
+                        multiple
+                        :max-count="3"></van-uploader>
+            </div>
+        </van-dialog>
+
+    </div>
+
+    {include file="public/footer" /}

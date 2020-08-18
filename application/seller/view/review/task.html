@@ -1,0 +1,201 @@
+{include file="public/header" /}
+<link rel="stylesheet" type="text/css" href="/static/seller/css/daFuKuan.css" />
+<div class="right" v-cloak>
+	<!-- 基本信息标题 -->
+	<div class="right-top">
+		<b>个人中心 / 追评任务 /<strong> 任务列表 </strong></b>
+	</div>
+	<div class="user_content">
+		<!-- 任务管理 -->
+		<div class="renwuguanli_box">
+			<!-- 任务管理标题 -->
+			<div class="renwuguanli">
+				<div class="renwuguanli_item">
+					<a href="javascript:;" class="renwuguanli_item_select">任务管理</a>
+				</div>
+			</div>
+			<!-- 选项卡第一行 -->
+			<div class="select_row_one">
+				<p> 店铺:</p>
+				<el-select class="el_select label2" v-model="info.shop_id" clearable placeholder="全部" size="small">
+					<el-option v-for="(item,key) in shop" :key="key" :label="item.shop_name" :value="item.id">
+					</el-option>
+				</el-select>
+				<p>任务状态:</p>
+				<el-select class="el_select label6" v-model="info.type" clearable placeholder="全部" size="small">
+					<el-option label="未支付" value=0></el-option>
+					<el-option label="已支付" value=1></el-option>
+					<el-option label="已审核" value=2></el-option>
+					<el-option label="已上传好评截图" value=3></el-option>
+					<el-option label="已完成" value=4></el-option>
+					<el-option label="已取消" value=5></el-option>
+					<el-option label="已拒接" value=6>
+					</el-option>
+				</el-select>
+			</div>
+			<!-- 选项卡第二行 -->
+			<div class="select_row_two">
+				<p>任务起止时间:</p>
+				<el-date-picker class="el_date label3" v-model="info.searchTime" type="daterange" range-separator="至"
+				 start-placeholder="开始日期" end-placeholder="结束日期" size="small" value-format="yyyy-MM-dd">
+				</el-date-picker>
+				<p>任务编号 : </p>
+				<el-input v-model="info.search" placeholder="请输入内容" class="label5" size="small"></el-input>
+				<p>淘宝单号 : </p>
+				<el-input v-model="info.order_number" placeholder="请输入淘宝单号" class="label5" size="small"></el-input>
+				<el-button type="primary" size="small" @click="search()"><i class="el-icon-search"></i> 搜索</el-button>
+			</div>
+			<!-- 切换 -->
+			<div>
+				<div class="swell">
+					<div v-if="list.length == 0">
+						<div class="no_null">暂无数据</div>
+					</div>
+					<div class="sample" v-for="(item,index) in list" :key="index">
+						<div class="sample-top">
+							<div class="sample-top-left">
+								<img onerror="imgError(this)" :src="item.shop_id.img" alt="" /> {{item.shop_id.shop_name.substr(0,3)+"..."}}
+							</div>
+							<div class="sample-top-right">
+								<p>任务编号：<b>{{item.task_number}} [ <a href="javascript:void (0)" @click="view(item.id)">查看详情</a> ]</b></p>
+								<p>发布时间：<b>{{item.create_time}}</b></p>
+								<p>旺旺号：<strong>{{item.buy_id}}</strong></p>
+							</div>
+						</div>
+						<div class="sample-center">
+							<img onerror="imgError(this)" :src="url+item.goods.pc_img" alt="" />
+							{{item.goods.name}}
+							<div class="center-btn">
+								<el-button type="warning" size="small" class="el-button" v-if="item.status==1" @click="goToPay(item.id)"><i class="el-icon-d-arrow-right"></i> 继续发布
+								</el-button>
+								<el-button type="warning" size="small" class="el-button" v-if="item.nums==1" @click="goToCancel(item.id)"> 取消
+								</el-button>
+								<el-button type="warning" size="small" class="el-button" v-if="item.status >= 3 && item.status != 4 && item.is_shengji==2" @click="goTo(item.id)"> 一键发布
+								</el-button>
+							</div>
+						</div>
+						<div class="sample-bottm">
+							<div>
+								<p>任务状态:<b>{{item.state}}</b></p>
+								<p>买手支付金额:<b>{{item.pay_price}}</b></p>
+								<p>淘宝单号:<b>{{item.taobao_number}}</b></p>
+							</div>
+							<div>
+								<p>商家支付:<b>{{item.money}}</b>元/银锭</p>
+							</div>
+						</div>
+					</div>
+					<!-- 分页 -->
+					<div class="fenye">
+						<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="info.page"
+						 :page-sizes="sizes" :page-size="info.size" layout="total, sizes, prev, pager, next, jumper" :total="total"
+						 background>
+						</el-pagination>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+</div>
+<script type="text/javascript">
+	$(function() {
+		/* 初始化一个Vue */
+		var vm = new Vue({
+			el: ".right",
+			data: function() {
+				return {
+                    url:'http://tfkzpic.oss-cn-hangzhou.aliyuncs.com',
+					info:{
+						shop_id:'',
+						type:'',
+						searchTime:'',
+						terminal:'',
+						search:'',
+						order_number:'',
+						size:10,
+						page:1,
+						is_day:0,
+						status:0,
+					},
+					shop:{},
+					sizes:[5,10,15,20,25],
+					total:0,
+					list:{},
+				}
+			},
+			created:function(){
+				that = this;
+				this.getShop();
+				this.getData();
+			},
+			methods: {
+				getShop:function(){
+					$.post("{:url('task/shop')}",{},function(res){
+						if(res.code==1){
+							that.shop = res.data;
+						}else{
+							layer.msg('网络错误',{icon:2});
+						}
+					})
+				},
+				getData:function(){
+					var loading = layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:6000 });
+					$.post("{:url('review/getTaskData')}",this.info,function(res){
+								if(res.code==1){
+									that.list = res.data.list;
+									that.total = res.data.total;
+									layer.close(loading);
+								}else{
+									layer.msg('网络错误',{icon:2});
+									layer.close(loading);
+								}
+						})
+				},
+				search:function(){
+						this.info.page = 1;
+						this.info.size = 10;
+					this.getData();
+				},
+				/* 分页事件 */
+				handleSizeChange: function(val) {
+					this.info.size = val;
+					this.info.page = 1;
+					this.getData();
+				},
+				/*分页跳转*/
+				handleCurrentChange: function(val) {
+					this.info.page = val;
+					this.getData();
+				},
+				// 标签页
+				view:function(id){
+					window.open("{:url('review/view','','',true)}/id/"+id);
+				},
+				goToPay:function(id){
+					window.open("{:url('review/pay','','',true)}/id/"+id);
+				},
+				goToCancel:function(id){
+					var that = this;
+					this.$confirm('此操作将取消该订单, 取消后支付的押金/银锭自动退回账户,是否继续?', '友情提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(function() {
+						$.post("{:url('review/taskCancel')}",{id:id},function(res){
+							if(res.code==1){
+								layer.msg('取消成功',{icon:1},function(){
+									that.getData();
+								});
+							}else{
+								layer.msg(res.msg,{icon:2});
+							}
+						})
+					}).catch(function() {});
+				},
+			},
+		})
+	})
+</script>
+{include file="public/footer" /}		

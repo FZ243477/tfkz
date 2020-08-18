@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title>任务管理</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        checkedAll: false,
+                        /* 淘宝数据 */
+                        taoBaoList:[],
+                        // select数据
+                        /* 下拉选项卡数据 */
+                        options1: [
+                            {
+                                value1: "1",
+                                label1: "已打印快递单，待发货"
+                            }, {
+                                value1: "2",
+                                label1: "已发货，待确认收货"
+                            },
+                            {
+                                value1: "3",
+                                label1: "已确认收货，待商家返款"
+                            },
+                            {
+                                value1: "4",
+                                label1: "商家已返款，待确认返款"
+                            },
+                            {
+                                value1: "5",
+                                label1: "已完成"
+                            },
+                            {
+                                value1: "6",
+                                label1: "已超时"
+                            },
+                            {
+                                value1: "7",
+                                label1: "已取消"
+                            },
+                            {
+                                value1: "8",
+                                label1: "自动放弃"
+                            },
+                        ],
+                        options2: [
+                            {volist name="buyno" id="vo"}
+                            {
+                                value2: "{$vo.id}",
+                                label2: "{$vo.wwid}"
+                            },
+                            {/volist}
+                        ],
+                        options3: [{
+                            value3: 0,
+                            label3: "全部"
+                        }, {
+                            value3: 1,
+                            label3: "文字好评"
+                        }, {
+                            value3: 2,
+                            label3: "淘口令"
+                        }, {
+                            value3: 3,
+                            label3: "二维码"
+                        }, {
+                            value3: 4,
+                            label3: "直通车"
+                        }, {
+                            value3: 5,
+                            label3: "通道任务"
+                        }],
+                        options4: [{
+                            value4: "3",
+                            label4: "全部"
+                        }, {
+                            value4: "2",
+                            label4: "手机"
+                        }, {
+                            value4: "1",
+                            label4: "电脑"
+                        }],
+                        options5: [
+                            {
+                                value5: "1",
+                                label5: "待处理追评任务"
+                            },
+                            {
+                                value5: "2",
+                                label5: "待返款追评任务"
+                            },
+                            {
+                                value5: "3",
+                                label5: "已完成追评任务"
+                            },
+                            {
+                                value5: "4",
+                                label5: "已拒接追评任务"
+                            },
+                        ],
+                        value1: "",
+                        value2: "",
+                        value3: "",
+                        value4: "",
+                        value5: "",
+                        // 搜索框
+                        indexorder:"",
+                        currentPage: 1,
+                        total: 0,
+                        arrchecedk:[],
+                        // 按钮文字
+                        buttonvalue: `{if condition="$value ==2"}去收货{elseif condition="$value ==4"/}确认返款{else /}查看详情{/if}`,
+                        buttonvalue2:"去追评",
+                        // 链接值
+                        urlvalue:"",
+                        urlvalue2:""
+                    };
+                },
+                mounted: function () {
+                    {notempty name="$value"}
+                    var val={$value};
+                    this.value1=val+"";
+                    this.getChooseValue(val);
+                    console.log(this.value1);
+                    {/notempty}
+                    publicFunction();
+                    this.getData(this.defaultDate,this.defaultDate2);
+                },
+                // 调用混入
+                mixins: [dateMixin, singlePersonMixin],
+                methods: {
+                        // 点击搜索
+                        searchOrder:function(val){
+                            this.currentPage = 1;
+                            var that = this;
+                            $.post("{:url('mobile/my/taskmanagement')}", {
+                                page: that.currentPage,
+                                indexorder:that.indexorder,
+                            }, function (res) {
+                                if (res.code == 1) {
+                                    that.taoBaoList = res.data.list;
+                                    that.total = res.data.total;
+                                    for (var i = 0; i < that.taoBaoList.length; i++) {
+                                        that.taoBaoList[i].progress = that.taoBaoList[i].progress + "%"
+                                    }
+                                } else {
+                                    alertError(res.msg);
+                                }
+                            })
+                        },
+                        getData: function (date1,date2) {
+                            var that = this;
+                            $.post("{:url('mobile/my/taskmanagement')}", {
+                                page: that.currentPage,
+                                datetime1:date1,
+                                datetime2:date2,
+                                choose_a:that.value1,
+                                buyno:that.value2,
+                                task_type:that.value3,
+                                terminal:that.value4,
+                                zhuipin:that.value5,
+                            }, function (res) {
+                                if (res.code == 1) {
+                                    that.taoBaoList = res.data.list;
+                                    that.total = res.data.total;
+                                    for (var i = 0; i < that.taoBaoList.length; i++) {
+                                        that.taoBaoList[i].progress = that.taoBaoList[i].progress + "%"
+                                    }
+                                } else {
+                                    alertError(res.msg);
+                                }
+                            })
+                        },
+                        /*查看详情，去收货*/
+                        chooseTiao:function(id){
+                            var val = this.urlvalue;
+                            {notempty name="$value"}
+                            var value={$value};
+                            {/notempty}
+                                {empty name="$value"}
+                                var value=1;
+                                {/empty}
+                            if(val == 4 || value ==4){
+                                location.href='/index.php/mobile/my/shoukuan/id/'+id+'';
+                            }else if(val == 2 || value ==2){
+                                location.href='/index.php/mobile/my/shouhuo/id/'+id+'';
+                            }else {
+                                location.href='/index.php/mobile/my/detail/id/'+id+'';
+                            }
+                        },
+                        // 默认按钮
+                        defaultBtn:function(value){
+                            if(value == 4){
+                                return "确认返款";
+                            } else if(value == 2){
+                                return "去收货";
+                            }else {
+                                return "查看详情";
+                            }
+                        },
+                        // 默认按钮跳转链接
+                        defaultBtnClick:function(val,id){
+                            if(!val || val==="4"){
+                                location.href='/index.php/mobile/my/shoukuan/id/'+id+'';
+                            }else if(val==="2"){
+                                location.href='/index.php/mobile/my/shouhuo/id/'+id+'';
+                            }else{
+                                location.href='/index.php/mobile/my/detail/id/'+id+'';
+                            }
+                        },
+                        // 去追评链接
+                        chooseTiao2:function(review_task_id){
+                            var that=this;
+                            var val = that.urlvalue2;
+                            if(val == 1){
+                                this.$dialog.confirm({
+                                    title: "温馨提示",
+                                    message: "您确定要拒接任务吗？"
+                                }).then(function () {
+                                    $.ajax({
+                                        type: "POST",
+                                        url: "{:url('mobile/my/refuse_zhuipin')}",
+                                        async: true,
+                                        data: {
+                                            'id': review_task_id,
+                                        },
+                                        success: function (data) {
+                                            if (data.code == 1) {
+                                                alertSuccess(data.msg);
+                                                setTimeout(function () {
+                                                    return location.href = data.url;
+                                                }, 3000);
+                                            } else {
+                                                return alertError(data.msg);
+                                            }
+                                        },
+                                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                            alert(XMLHttpRequest.status + "," + textStatus);
+                                        }
+                                    });
+                                }).catch(function(){
+                                    that.$message({
+                                        type: 'info',
+                                        message: '您取消了操作'
+                                    });
+                                })
+                            }else {
+                                location.href='/index.php/mobile/my/zhuidetail/id/'+review_task_id+'';
+                            }
+                        },
+                        // 去追评zhuipin
+                        goZhuiPin(review_task_id){
+                            location.href='/index.php/mobile/my/zhuipin/id/'+review_task_id+'';
+                        },
+                        //获取待处理事项
+                        getChooseValue:function(value){
+                            // console.log(value);
+                            this.value5="";
+                            this.urlvalue=value;
+                            this.currentPage = 1;
+                            this.getData();
+                            if(value == 4){
+                                this.buttonvalue = "确认返款";
+                            } else if(value == 2){
+                                this.buttonvalue = "去收货";
+                            }else{
+                                this.buttonvalue = "查看详情";
+                            }
+                        },
+                        //获取买号
+                        getBuynoValue:function(val){
+                            console.log(val);
+                            this.currentPage = 1;
+                            this.getData();
+                        },
+                        // 获取追评任务
+                        getZhuiPingValue(value){
+                            // console.log(value);
+                            this.value1="";
+                            this.urlvalue2=value;
+                            this.currentPage = 1;
+                            this.getData();
+                            if(value == 1){
+                                this.buttonvalue = "拒接任务";
+                            } else{
+                                this.buttonvalue = "查看详情";
+                            }
+                        },
+                        // 获取任务类型的值
+                        getTaskValue: function (val) {
+                            console.log(val);
+                            this.currentPage = 1;
+                            this.getData();
+                        },
+                        // 获取任务终端的值
+                        getTaskTerminal: function (val) {
+                            console.log(val);
+                            this.currentPage = 1;
+                            this.getData();
+                        },
+                        // 分页事件
+                        pageChange: function (val) {
+                            this.currentPage = val;
+                            this.getData();
+                        },
+                        // 全选
+                        setCheckedAll() {
+                            for (var i = 0; i < this.taoBaoList.length; i++) {
+                                this.taoBaoList[i].checked = !this.checkedAll;
+                                this.arrchecedk.splice(i,1,this.taoBaoList[i].id);
+                            }
+                        },
+                        // 反选
+                        setCheckedItem() {
+                            var arr = this.taoBaoList.filter(function (item) {
+                                return item.checked === true;
+                            });
+                            this.checkedAll = arr.length === this.taoBaoList.length;
+                            for(var i = 0;i<arr.length;i++){
+                                this.arrchecedk[i]=arr[i].id;
+                            }
+                        },
+                        // 确认返款
+                        allfankuan:function () {
+                            var that = this;
+                            $.post("{:url('mobile/task/all_seller_principal')}", {
+                                taskid: that.arrchecedk,
+                            }, function (res) {
+                                if (res.code == 1) {
+                                    that.all_seller_principal = res.data.all_seller_principal;
+                                    that.principal = res.data.principal;
+                                    that.$dialog.confirm({
+                                        title: "温馨提示",
+                                        message: '商家确认返款金额为:' + that.principal
+                                    }).then(function() {
+                                        var id=that.arrchecedk;
+                                        $.ajax({
+                                            type: "POST",
+                                            url: "{:url('mobile/task/allfankuan')}",
+                                            async: true,
+                                            data: {
+                                                'taskid': that.arrchecedk,
+                                            },
+                                            success: function (data) {
+                                                if (data.code == 1) {
+                                                    alertSuccess(data.msg);
+                                                    setTimeout(function () {
+                                                        return location.href = data.url;
+                                                    }, 3000);
+                                                } else {
+                                                    return alertError(data.msg);
+                                                }
+                                            },
+                                            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                                alert(XMLHttpRequest.status + "," + textStatus);
+                                            }
+                                        });
+                                    }).catch(function() {
+                                        that.$message({
+                                            type: 'info',
+                                            message: '您取消了操作'
+                                        });
+                                    });
+                                } else {
+                                    alertError(res.msg);
+                                }
+                            })
+                        },
+                    // select框change事件
+                    selectChange(val) {
+                        // console.log(val);
+                    },
+                    selectChange2(val) {
+                        // console.log(val);
+                    },
+                    selectChange3(val) {
+                        // console.log(val);
+                    },
+                    selectChange4(val) {
+                        // console.log(val);
+                    },
+                    // 日期事件
+                    dateChange: function (val) {
+                        // 转换标准时间为时间戳
+                        this.defaultDate = val.getTime();
+                        console.log(this.defaultDate);
+                    },
+                    dateChange2: function (val) {
+                        // 转换标准时间为时间戳
+                        this.defaultDate2 = val.getTime();
+                        console.log(this.defaultDate,this.defaultDate2);
+                        this.getData(this.defaultDate,this.defaultDate2);
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">任务管理</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+        <!-- 多列表框 -->
+        <div class="task-list-kuang">
+
+            <!-- 公共搜索框 -->
+            <div class="public-help-search">
+                <div class="help-search-input">
+                    <input type="text" placeholder="请输入任务编号" v-model="indexorder" />
+                </div>
+                <div class="help-search-btn">
+                    <van-icon class="help-search-btn-item" @click="searchOrder(indexorder)" name="search"></van-icon>
+                </div>
+            </div>
+            <div class="public-help-search" style="margin-top: 0.3rem;margin-bottom: 0;">
+                <button v-if="value1==4" @click="allfankuan" class="taskCenter-right-btn van-button van-button--warning van-button--normal">
+                    <span class="van-button__text">确认返款</span>
+                </button>
+            </div>
+
+            <!-- 列表框 -->
+            <div class="task-admin">
+                <div class="task-admin-item">
+                    <span class="task-admin-item-title" style="width: auto;white-space: nowrap;">待处理事项：</span>
+                    <div class="public-select">
+                        <mu-select @change="getChooseValue" style="width: auto" class="public-select-item" placeholder="请选择" v-model="value1" full-width>
+                            <mu-option
+                                    v-for="(item,index) in options1"
+                                    :key="item.value1"
+                                    :label="item.label1"
+                                    :value="item.value1"></mu-option>
+                        </mu-select>
+                    </div>
+                    <span class="task-admin-item-title" style="width: auto;white-space: nowrap;">买号：</span>
+                    <div class="public-select">
+                        <mu-select @change="getBuynoValue" style="width: auto" class="public-select-item" placeholder="请选择" v-model="value2" full-width>
+                            <mu-option
+                                    v-for="(item,index) in options2"
+                                    :key="item.value2"
+                                    :label="item.label2"
+                                    :value="item.value2"></mu-option>
+                        </mu-select>
+                    </div>
+                </div>
+                <div class="task-admin-item">
+                    <span class="task-admin-item-title" style="width: auto;white-space: nowrap;">任务类型：</span>
+                    <div class="public-select">
+                        <mu-select @change="getTaskValue" style="width: auto" class="public-select-item" placeholder="请选择" v-model="value3" full-width>
+                            <mu-option
+                                    v-for="(item,index) in options3"
+                                    :key="index"
+                                    :label="item.label3"
+                                    :value="item.value3"></mu-option>
+                        </mu-select>
+                    </div>
+                    <span class="task-admin-item-title" style="width: auto;white-space: nowrap;">终端：</span>
+                    <div class="public-select">
+                        <mu-select @change="getTaskTerminal" style="width: auto" placeholder="请选择" class="public-select-item" v-model="value4" full-width>
+                            <mu-option
+                                    v-for="(item,index) in options4"
+                                    :key="item.value4"
+                                    :label="item.label4"
+                                    :value="item.value4"></mu-option>
+                        </mu-select>
+                    </div>
+                </div>
+                <div class="task-admin-item">
+                    <span class="task-admin-item-title" style="width: auto;white-space: nowrap;">追评任务：</span>
+                    <div class="public-select">
+                        <mu-select @change="getZhuiPingValue" style="width: auto" class="public-select-item" placeholder="请选择" v-model="value5" full-width>
+                            <mu-option
+                                    v-for="(item,index) in options5"
+                                    :key="item.value5"
+                                    :label="item.label5"
+                                    :value="item.value5"></mu-option>
+                        </mu-select>
+                    </div>
+                </div>
+                <div class="task-admin-item">
+                    <span class="task-admin-item-title">任务起止时间：</span>
+                    <!-- 选择日期 -->
+                    <div class="public-select-date">
+                        <mu-date-input
+                                @change="dateChange"
+                                class="public-select-date-item"
+                                v-model="defaultDate"
+                                label="选择开始日期"></mu-date-input>
+                        <mu-date-input
+                                @change="dateChange2"
+                                class="public-select-date-item"
+                                v-model="defaultDate2"
+                                label="选择结束日期"></mu-date-input>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 列表内容 -->
+        <div class="taskchecked">
+            <van-checkbox v-model="checkedAll" shape="square" @click="setCheckedAll">全选</van-checkbox>
+        </div>
+        <div class="taskHezi" v-for="(item,index) in taoBaoList">
+            <div class="task-line">
+                <div class="taskLine-left">
+                    <van-checkbox v-model="item.checked" shape="square" @change="setCheckedItem"></van-checkbox>
+                    <img :src="item.shop_img" />
+                    <p>{{item.type}}店铺：{{item.shop_name+"..."}}</p>
+                </div>
+                <div class="taskLine-right">
+                    <p>任务类型：<b>{{item.task_type}}</b></p>
+                </div>
+            </div>
+            <div class="task-line">
+                <div class="taskLine-left">
+                </div>
+                <div class="taskLine-right">
+                    <img src="/static/mobile/img/shou.png" alt="" />
+                    <p>任务编号：{{item.task_number}}</p>
+                </div>
+            </div>
+
+            <div class="task-center">
+                <div class="taskCenter-left">
+                    <img v-if="item.main_product_pc_img" :src="item.main_product_pc_img" alt="" />
+                    <!--<img src="" alt="" />-->
+                    <p>{{item.main_product_name}}</p>
+                </div>
+                <div class="taskCenter-right">
+                    <p>{{item.create_time}}</p>
+                    <!-- 默认按钮 -->
+                    <van-button
+                            class="taskCenter-right-btn"
+                            style="margin-right: 0.3rem"
+                            @click="defaultBtnClick(item.index_state,item.id)"
+                            v-if="!value5 && !value1"
+                            type="warning">
+                        {{defaultBtn(item.index_state)}}
+                    </van-button>
+                    <!-- 根据条件渲染的按钮 -->
+                    <van-button
+                            v-if="value5 || value1"
+                            class="taskCenter-right-btn"
+                            @click="value5?chooseTiao2(item.review_task_id):chooseTiao(item.id)"
+                            type="warning">
+                        {{buttonvalue}}
+                    </van-button>
+                    <!-- 去追评按钮 -->
+                    <van-button
+                            class="taskCenter-right-btn"
+                            style="margin-right: 0.3rem"
+                            @click="goZhuiPin(item.review_task_id)"
+                            v-if="value5==='1'"
+                            type="warning">
+                        {{buttonvalue2}}
+                    </van-button>
+                </div>
+            </div>
+            <div class="task-bottom">
+                <div>
+                    <p>任务状态：<b>{{item.state}}</b></p>
+                    <p>买号：<b>{{item.wwid}}</b></p>
+                </div>
+                <div>
+                    <p>佣金：<b>{{item.commission}}+{{item.user_divided}}</b>银锭</p>
+                    <p class="pRight">垫付资金：<b>{{item.user_principal}}</b>元</p>
+                </div>
+            </div>
+        </div>
+        <!-- 分页 -->
+        <div class="public-page">
+            <span class="public-page-total">共 {{taoBaoList.length}} 条</span>
+            <van-pagination
+                    class="public-page-item"
+                    @change="pageChange"
+                    v-model="currentPage"
+                    :items-per-page="10"
+                    :total-items="total"
+                    :show-page-size="2"
+                    force-ellipses></van-pagination>
+        </div>
+    </div>
+
+    {include file="public/footer" /}

@@ -1,0 +1,95 @@
+<link rel="stylesheet" type="text/css" href="/static/mobile/css/table.css"/>
+<!-- 下拉菜单 -->
+<div class="silde-bar">
+    <div class="slide-bar-item">
+        <div class="slide-bar-item-title {notempty name="topnav"}{if condition="$topnav ==1"}add-color{/if}{/notempty}">
+            <img src="/static/mobile/img/mycenter_active.png" alt="">
+            <a href="{:url('my/index',['hnav'=>'0','nav'=>'1'])}">个人中心</a>
+        </div>
+    </div>
+    <div class="slide-bar-item">
+        <div class="slide-bar-item-title">
+            <img src="/static/mobile/img/helpcenter.png" alt="">
+            <a href="{:url('helpcenter/index')}">帮助中心</a>
+        </div>
+    </div>
+    <div class="slide-bar-item">
+        <div class="slide-bar-item-title">
+            <img src="/static/mobile/img/yindingchongzhi.png" alt="">
+            <span>银锭充值</span>
+            <van-icon class="slide-arrow" name="arrow-down" />
+        </div>
+        <div class="slide-bar-item-detail">
+            <a href="{:url('money/withsilver')}">银锭充值</a>
+            <a href="{:url('money/withsilver',['show'=>'2'])}">银锭记录</a>
+        </div>
+    </div>
+    <div class="slide-bar-item">
+        <div class="slide-bar-item-title">
+            <img src="/static/mobile/img/benjintixian.png" alt="">
+            <span>提现</span>
+            <van-icon class="slide-arrow" name="arrow-down" />
+        </div>
+        <div class="slide-bar-item-detail">
+            <a href="{:url('money/withdrawal')}">提现</a>
+            <a href="{:url('money/withdrawal',['show'=>'2'])}">本金记录</a>
+        </div>
+    </div>
+    <div class="slide-bar-item">
+        <div class="slide-bar-item-title">
+            <img src="/static/mobile/img/renwudating.png" alt="">
+            <a href="{:url('task/index')}">任务大厅</a>
+        </div>
+    </div>
+    <div class="slide-bar-item">
+        <div class="slide-bar-item-title">
+            <img src="/static/mobile/img/renwuguanli.png" alt="">
+            <a href="{:url('my/taskmanagement')}">任务管理</a>
+        </div>
+    </div>
+<div class="slide-bar-item">
+    <div class="slide-bar-item-title">
+        <img src="/static/mobile/img/loginout.png" alt="">
+        <a class="tuichu" href="javascript:void (0)" >退出登录</a>
+    </div>
+</div>
+</div>
+<script>
+    $(function () {
+        var timer = setInterval(function(){
+            $.post("{:url('login/getSession')}",{},function(res){
+                console.log(12);
+                if(res.code==1){
+                    location.href="{:url('login/index')}";
+                }else{
+
+                }
+            })
+        },10000);
+        $(".tuichu").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: "{:url('mobile/login/logout')}",
+                async: true,
+                data: {
+                    "aoData": 'aaaa',//测试数据,
+                },
+                success: function (data) {
+                    console.log(data);
+                    if (data.code == 1) {
+                        alertSuccess(data.msg);
+                        setTimeout(function () {
+                            return location.href = data.url;
+                        }, 3000)
+
+                    } else {
+                        return alertError(data.msg);
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest.status + "," + textStatus);
+                }
+            });
+        });
+    });
+</script>

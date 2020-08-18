@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta content="width=device-width, initial-scale=1" name="viewport" />
+	<meta name="description" content="Responsive Admin Template" />
+	<meta name="author" content="SmartUniversity" />
+	<title></title>
+	<!-- google font -->
+	<link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet" type="text/css" />
+	<!-- icons -->
+	<link href="/admin_style/assets/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+	<link href="/admin_style/assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+	<!--bootstrap -->
+	<link href="/admin_style/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+	<link href="/admin_style/assets/plugins/summernote/summernote.css" rel="stylesheet">
+	<!-- morris chart -->
+	<link href="/admin_style/assets/plugins/morris/morris.css" rel="stylesheet" type="text/css" />
+	<!-- Material Design Lite CSS -->
+	<link rel="stylesheet" href="/admin_style/assets/plugins/material/material.min.css">
+	<link rel="stylesheet" href="/admin_style/assets/css/material_style.css">
+	<!-- animation -->
+	<link href="/admin_style/assets/css/pages/animate_page.css" rel="stylesheet">
+	<!-- Template Styles -->
+	<link href="/admin_style/assets/css/plugins.min.css" rel="stylesheet" type="text/css" />
+	<link href="/admin_style/assets/css/style.css" rel="stylesheet" type="text/css" />
+	<link href="/admin_style/assets/css/responsive.css" rel="stylesheet" type="text/css" />
+	<link href="/admin_style/assets/css/theme-color.css" rel="stylesheet" type="text/css" />
+	<!-- favicon -->
+	<link rel="shortcut icon" href="/admin_style/assets/img/favicon.ico" />
+	<style>
+		.page-content-wrapper .page-content {
+			margin-left: 0px !important;
+			margin-top: 0;
+			min-height: 600px;
+			padding: 25px 20px 10px;
+		}
+	</style>
+</head>
+<!-- END HEAD -->
+
+<body
+	class="page-header-fixed sidemenu-closed-hidelogo page-content-white page-md header-white dark-sidebar-color logo-dark">
+	<div class="page-wrapper">
+		<!-- end sidebar menu -->
+		<!-- start page content -->
+		<div class="page-content-wrapper">
+			<div class="page-content" style="margin-top:0px;">
+				<!-- start widget -->
+				<div class="state-overview">
+					<div class="row">
+						<div class="col-xl-3 col-md-6 col-12">
+							<div class="info-box bg-blue">
+								<span class="info-box-icon push-bottom"><i class="material-icons">style</i></span>
+								<div class="info-box-content">
+									<span class="info-box-text">今日发布任务总数</span>
+									<span class="info-box-number">{$data['today_task_num']}</span>
+									<div
+										class="progressbar-xs progress-rounded progress-striped progress ng-isolate-scope active">
+										<div class="progress-bar progress-bar-cyan width-100" role="progressbar"
+											aria-valuenow="56" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<span class="progress-description">
+
+									</span>
+								</div>
+								<!-- /.info-box-content -->
+							</div>
+							<!-- /.info-box -->
+						</div>
+						<!-- /.col -->
+						<div class="col-xl-3 col-md-6 col-12">
+							<div class="info-box bg-orange">
+								<span class="info-box-icon push-bottom"><i class="material-icons">card_travel</i></span>
+								<div class="info-box-content">
+									<span class="info-box-text">今日发单总数</span>
+									<span class="info-box-number">{$data['today_user_task_num']}</span>
+									<div
+										class="progressbar-xs progress-rounded progress-striped progress ng-isolate-scope active">
+										<div class="progress-bar progress-bar-orange width-100" role="progressbar"
+											aria-valuenow="68" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<span class="progress-description">
+										电脑端: {$data['today_pc_task_num']} | 手机端: {$data['today_phone_task_num']}
+									</span>
+								</div>
+								<!-- /.info-box-content -->
+							</div>
+							<!-- /.info-box -->
+						</div>
+						<!-- /.col -->
+						<div class="col-xl-3 col-md-6 col-12">
+							<div class="info-box bg-purple">
+								<span class="info-box-icon push-bottom"><i class="fa fa-money"></i></span>
+								<div class="info-box-content">
+									<span class="info-box-text">今日提现总额</span><span>￥</span>
+									<span class="info-box-number">{$data['cash_price']}</span>
+									<div
+										class="progressbar-xs progress-rounded progress-striped progress ng-isolate-scope active">
+										<div class="progress-bar progress-bar-purple width-100" role="progressbar"
+											aria-valuenow="52" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<span class="progress-description">
+									</span>
+								</div>
+								<!-- /.info-box-content -->
+							</div>
+							<!-- /.info-box -->
+						</div>
+						<!-- /.col -->
+						<div class="col-xl-3 col-md-6 col-12">
+							<div class="info-box bg-success">
+								<span class="info-box-icon push-bottom"><i class="material-icons">monetization_on</i>
+								</span>
+								<div class="info-box-content">
+									<span class="info-box-text">今日充值总额</span><span>￥</span>
+									<span class="info-box-number">{$data['recharge_price']}</span>
+									<div
+										class="progressbar-xs progress-rounded progress-striped progress ng-isolate-scope active">
+										<div class="progress-bar progress-bar-green width-100" role="progressbar"
+											aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+									</div>
+									<span class="progress-description">
+									</span>
+								</div>
+								<!-- /.info-box-content -->
+							</div>
+							<!-- /.info-box -->
+						</div>
+						<!-- /.col -->
+					</div>
+				</div>
+				<!-- end widget -->
+				<!-- chart start -->
+				<div class="row">
+					<div class="col-md-12">
+						<div class="card card-box">
+							<div class="card-head">
+								<header>发布任务量 / 接手任务量</header>
+								<div class="tools">
+									<a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
+									<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+									<a class="t-close btn-color fa fa-times" href="javascript:;"></a>
+								</div>
+							</div>
+
+							<div class="card-body no-padding height-9">
+								<div class="row text-center">
+									<div class="col-sm-3 col-6">
+										<h4 class="margin-0"> 今天出单 </h4>
+										<p class="text-muted">
+											发布: <span class="info-box-number" style="color: rgb(97, 97, 97);">209</span>
+											| 接手: <span class="info-box-number"
+												style="color: rgb(0, 206, 209);">209</span> | 放弃: <span
+												class="info-box-number" style="color: rgb(255, 117, 142);">209</span>
+										</p>
+									</div>
+									<div class="col-sm-3 col-6">
+										<h4 class="margin-0"> 今天出单 </h4>
+										<p class="text-muted">
+											发布: <span class="info-box-number" style="color: rgb(97, 97, 97);">209</span>
+											| 接手: <span class="info-box-number"
+												style="color: rgb(0, 206, 209);">209</span> | 放弃: <span
+												class="info-box-number" style="color: rgb(255, 117, 142);">209</span>
+										</p>
+									</div>
+									<div class="col-sm-3 col-6">
+										<h4 class="margin-0"> 今天出单 </h4>
+										<p class="text-muted">
+											发布: <span class="info-box-number" style="color: rgb(97, 97, 97);">209</span>
+											| 接手: <span class="info-box-number"
+												style="color: rgb(0, 206, 209);">209</span> | 放弃: <span
+												class="info-box-number" style="color: rgb(255, 117, 142);">209</span>
+										</p>
+									</div>
+									<div class="col-sm-3 col-6">
+										<h4 class="margin-0"> 今天出单 </h4>
+										<p class="text-muted">
+											发布: <span class="info-box-number" style="color: rgb(97, 97, 97);">209</span>
+											| 接手: <span class="info-box-number"
+												style="color: rgb(0, 206, 209);">209</span> | 放弃: <span
+												class="info-box-number" style="color: rgb(255, 117, 142);">209</span>
+										</p>
+									</div>
+								</div>
+								<div class="row">
+									<!-- <div class="col-lg-12 col-md-12 col-sm-12 col-12">
+										<div class="card-body no-padding height-9">
+											<div class="row">
+												<canvas id="myChart2"></canvas>
+											</div>
+										</div>
+									</div> -->
+									<div class="col-md-6 col-sm-6 col-6">
+										<div class="btn-group">
+											<a class="btn btn-info">
+												最近7天 <i class="fa fa-plus"></i>
+											</a>
+											<a class="btn btn-info">
+												最近30天 <i class="fa fa-plus"></i>
+											</a>
+										</div>
+									</div>
+									<div class="col-md-6 col-sm-6 col-6">
+										<div class="btn-group pull-right">
+											<a class="btn deepPink-bgcolor  btn-outline dropdown-toggle"
+												data-toggle="dropdown">工具
+												<i class="fa fa-angle-down"></i>
+											</a>
+											<ul class="dropdown-menu pull-right">
+												<li>
+													<a href="javascript:;">
+														<i class="fa fa-print"></i> 打印 </a>
+												</li>
+												<li>
+													<a href="javascript:;">
+														<i class="fa fa-file-pdf-o"></i> 生成PDF </a>
+												</li>
+												<li>
+													<a href="javascript:;">
+														<i class="fa fa-file-excel-o"></i> 生成Excel </a>
+												</li>
+											</ul>
+										</div>
+									</div>
+									<!-- 图表 -->
+									<div class="col-lg-12 col-md-12 col-sm-12 col-12 text-center">
+										<div id="area_line_chart" class="width-100"></div>
+									</div>
+									<!-- 分页 -->
+									<div class="col-lg-6 el-col-md-push-6 col-sm-6 col-6 text-justify">
+										<button type="button" class="btn default btn-outline m-b-10">
+											<font style="vertical-align: inherit;">
+												<font style="vertical-align: inherit;"> 上一页 </font>
+											</font>
+										</button>
+									</div>
+									<div class="col-lg-6 col-md-6 col-sm-6 col-6 text-right">
+										<button type="button" class="btn default btn-outline m-b-10">
+											<font style="vertical-align: inherit;">
+												<font style="vertical-align: inherit;"> 下一页 </font>
+											</font>
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+						<div class="card card-box">
+							<div class="card-head">
+								<header>平台近期新增用户量</header>
+
+								<div class="tools">
+									<a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
+									<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+									<a class="t-close btn-color fa fa-times" href="javascript:;"></a>
+								</div>
+							</div>
+							<div class="card-body no-padding height-9">
+								<div class="row">
+									<div class="col-md-6 col-sm-6 col-6">
+										<div class="btn-group">
+											<a class="btn btn-info">
+												最近7天 <i class="fa fa-plus"></i>
+											</a>
+											<a class="btn btn-info">
+												最近30天 <i class="fa fa-plus"></i>
+											</a>
+										</div>
+									</div>
+									<div class="col-md-6 col-sm-6 col-6">
+										<div class="btn-group pull-right">
+											<a class="btn deepPink-bgcolor  btn-outline dropdown-toggle"
+												data-toggle="dropdown">工具
+												<i class="fa fa-angle-down"></i>
+											</a>
+											<ul class="dropdown-menu pull-right">
+												<li>
+													<a href="javascript:;">
+														<i class="fa fa-print"></i> 打印 </a>
+												</li>
+												<li>
+													<a href="javascript:;">
+														<i class="fa fa-file-pdf-o"></i> 生成PDF </a>
+												</li>
+												<li>
+													<a href="javascript:;">
+														<i class="fa fa-file-excel-o"></i> 生成Excel </a>
+												</li>
+											</ul>
+										</div>
+									</div>
+									<canvas id="bar-chart"></canvas>
+									<!-- 分页 -->
+									<div class="col-lg-6 el-col-md-push-6 col-sm-6 col-6 text-justify">
+										<button type="button" class="btn default btn-outline m-b-10">
+											<font style="vertical-align: inherit;">
+												<font style="vertical-align: inherit;"> 上一页 </font>
+											</font>
+										</button>
+									</div>
+									<div class="col-lg-6 col-md-6 col-sm-6 col-6 text-right">
+										<button type="button" class="btn default btn-outline m-b-10">
+											<font style="vertical-align: inherit;">
+												<font style="vertical-align: inherit;"> 下一页 </font>
+											</font>
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-lg-6 col-md-12 col-sm-12 col-12">
+							<div class="card card-box">
+								<div class="card-head">
+									<header>平台近期新增用户量</header>
+									<div class="tools">
+										<a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
+										<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+										<a class="t-close btn-color fa fa-times" href="javascript:;"></a>
+									</div>
+								</div>
+								<div class="card-body no-padding height-9">
+									<div class="row">
+										<div class="col-md-6 col-sm-6 col-6">
+											<div class="btn-group">
+												<a class="btn btn-info">
+													最近7天 <i class="fa fa-plus"></i>
+												</a>
+												<a class="btn btn-info">
+													最近30天 <i class="fa fa-plus"></i>
+												</a>
+											</div>
+										</div>
+										<div class="col-md-6 col-sm-6 col-6">
+											<div class="btn-group pull-right">
+												<a class="btn deepPink-bgcolor  btn-outline dropdown-toggle"
+													data-toggle="dropdown">工具
+													<i class="fa fa-angle-down"></i>
+												</a>
+												<ul class="dropdown-menu pull-right">
+													<li>
+														<a href="javascript:;">
+															<i class="fa fa-print"></i> 打印 </a>
+													</li>
+													<li>
+														<a href="javascript:;">
+															<i class="fa fa-file-pdf-o"></i> 生成PDF </a>
+													</li>
+													<li>
+														<a href="javascript:;">
+															<i class="fa fa-file-excel-o"></i> 生成Excel </a>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<canvas id="myChart"></canvas>
+										<!-- 分页 -->
+										<div class="col-lg-6 el-col-md-push-6 col-sm-6 col-6 text-justify">
+											<button type="button" class="btn default btn-outline m-b-10">
+												<font style="vertical-align: inherit;">
+													<font style="vertical-align: inherit;"> 上一页 </font>
+												</font>
+											</button>
+										</div>
+										<div class="col-lg-6 col-md-6 col-sm-6 col-6 text-right">
+											<button type="button" class="btn default btn-outline m-b-10">
+												<font style="vertical-align: inherit;">
+													<font style="vertical-align: inherit;"> 下一页 </font>
+												</font>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="col-lg-6 col-md-12 col-sm-12 col-12">
+							<div class="card  card-box" style="height: 540px !important;">
+								<div class="card-head">
+									<header>平台当前用户数量</header>
+									<div class="tools">
+										<a class="fa fa-repeat btn-color box-refresh" href="javascript:;"></a>
+										<a class="t-collapse btn-color fa fa-chevron-down" href="javascript:;"></a>
+										<a class="t-close btn-color fa fa-times" href="javascript:;"></a>
+									</div>
+								</div>
+								<div class="card-body no-padding height-9">
+									<div class="row text-center">
+										<div class="col-sm-4 col-6">
+											<h4 class="margin-0"> 209 </h4>
+											<p class="text-muted"> 刷手用户</p>
+										</div>
+										<div class="col-sm-4 col-6">
+											<h4 class="margin-0"> 837 </h4>
+											<p class="text-muted">全部用户</p>
+										</div>
+										<div class="col-sm-4 col-6">
+											<h4 class="margin-0"> 3410 </h4>
+											<p class="text-muted">商家用户</p>
+										</div>
+									</div>
+									<div class="row">
+										<div class="col-md-12 col-sm-12 col-12">
+											<div class="btn-group pull-right">
+												<a class="btn deepPink-bgcolor  btn-outline dropdown-toggle"
+													data-toggle="dropdown">工具
+													<i class="fa fa-angle-down"></i>
+												</a>
+												<ul class="dropdown-menu pull-right">
+													<li>
+														<a href="javascript:;">
+															<i class="fa fa-print"></i> 打印 </a>
+													</li>
+													<li>
+														<a href="javascript:;">
+															<i class="fa fa-file-pdf-o"></i> 生成PDF </a>
+													</li>
+													<li>
+														<a href="javascript:;">
+															<i class="fa fa-file-excel-o"></i> 生成Excel </a>
+													</li>
+												</ul>
+											</div>
+										</div>
+										<div id="donut_chart" class="width-100 height-250"></div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<!-- start js include path -->
+	<script src="/admin_style/assets/plugins/jquery/jquery.min.js"></script>
+	<script src="/admin_style/assets/plugins/popper/popper.min.js"></script>
+	<script src="/admin_style/assets/plugins/jquery-blockui/jquery.blockui.min.js"></script>
+	<script src="/admin_style/assets/plugins/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+	<!-- bootstrap -->
+	<script src="/admin_style/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+	<script src="/admin_style/assets/plugins/sparkline/jquery.sparkline.min.js"></script>
+	<script src="/admin_style/assets/js/pages/sparkline/sparkline-data.js"></script>
+	<!-- Common js-->
+	<script src="/admin_style/assets/js/app.js"></script>
+	<script src="/admin_style/assets/js/layout.js"></script>
+	<script src="/admin_style/assets/js/theme-color.js"></script>
+	<!-- material -->
+	<script src="/admin_style/assets/plugins/material/material.min.js"></script>
+	<!-- animation -->
+	<script src="/admin_style/assets/js/pages/ui/animations.js"></script>
+	<!-- morris chart -->
+	<script src="/admin_style/assets/plugins/morris/morris.min.js"></script>
+	<script src="/admin_style/assets/plugins/morris/raphael-min.js"></script>
+	<!-- chart js 图表 -->
+	<script src="/admin_style/assets/plugins/chart-js/Chart.bundle.js"></script>
+	<script src="/admin_style/assets/plugins/chart-js/utils.js"></script>
+	<script src="/admin_style/assets/js/pages/chart/chartjs/home-data2.js"></script>
+
+
+	<script>
+		//发布任务量 / 接手任务量
+		jQuery(document).ready(function () {
+			'use strict';
+
+			Morris.Area({
+				element: "area_line_chart",
+				behaveLikeLine: false,
+				data: [
+					{ year: '2019-01-1', x: 1000, y: 1000, z: 500 },
+					{ year: '2019-01-2', x: 500, y: 2000, z: 5000 },
+					{ year: '2019-01-3', x: 500, y: 3000, z: 4000 },
+					{ year: '2019-01-4', x: 1000, y: 1000, z: 500 },
+					{ year: '2019-01-5', x: 500, y: 2000, z: 5000 },
+					{ year: '2019-01-6', x: 500, y: 3000, z: 4000 },
+					{ year: '2019-01-7', x: 1000, y: 1000, z: 500 },
+					{ year: '2019-01-8', x: 500, y: 2000, z: 5000 },
+					{ year: '2019-01-8', x: 500, y: 3000, z: 4000 },
+					{ year: '2019-01-10', x: 1000, y: 1000, z: 500 },
+					{ year: '2019-01-11', x: 500, y: 2000, z: 5000 },
+					{ year: '2019-01-13', x: 500, y: 3000, z: 4000 },
+				],
+				xkey: 'year',
+				ykeys: ['x', 'y', 'z'],
+				labels: ['发布任务量1', '接手任务量2', '放弃任务量3'],
+				pointSize: 2,//圆点大小
+				lineWidth: 0.5,//线粗
+				resize: true,
+				fillOpacity: 0.5,
+				behaveLikeLine: true,
+				gridLineColor: '#e0e0e0',
+				hideHover: 'auto',
+				lineColors: ['rgb(97, 97, 97)', 'rgb(0, 206, 209)', 'rgb(255, 117, 142)']
+			}),
+
+				Morris.Donut({
+					element: "donut_chart",
+					data: [{
+						label: '商家用户',
+						value: 20
+					}, {
+						label: '刷手用户',
+						value: 25
+					}],
+					colors: ['rgb(0, 188, 212)', 'rgb(97, 97, 97)'],
+					formatter: function (y) {
+						return y + '%'
+					}
+				});
+		});
+
+	</script>
+</body>
+
+</html>

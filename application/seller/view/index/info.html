@@ -1,0 +1,428 @@
+{include file="public/header" /}
+			<link rel="stylesheet" type="text/css" href="/static/seller/css/jiBenXinXi.css" />
+			<!-- 右边盒子部分 -->
+			<div class="right">
+				<!-- 基本信息标题 -->
+				<div class="right-top">
+					<b>个人中心 / 账号信息 /<strong> 基本信息 </strong></b>
+				</div>
+				<div class="user_content">
+					<img src="/static/seller/img/imgheade.png" alt="" class="user_touxiang"/>
+					<p class="user_name">{{seller.seller_name}}</p>
+
+					<!-- 用户信息 -->
+					<div class="user_info">
+						<!-- 用户信息左 -->
+						<div class="user_left">
+							<div class="user_detail">
+								<div>用户名:</div>
+								<div class="user_gray">{{seller.seller_name}}</div>
+							</div>
+							<div class="user_detail">
+								<div>会员状态:</div>
+								<div class="user_gray" v-if="seller.vip==1">VIP会员</div>
+								<div class="user_gray" v-else>普通用户</div>
+							</div>
+							<div class="user_detail">
+								<div>VIP时限:</div>
+								<div class="user_gray">{{seller.vip_time}}</div>
+							</div>
+							<div class="user_detail">
+								<div>QQ账号:</div>
+								<div class="user_gray">{{seller.qq}}</div>
+								<el-button type="primary" icon="el-icon-edit" circle size="small" @click="editQQ()"></el-button>
+							</div>
+						</div>
+						<!-- 用户信息右 -->
+						<div class="user_right">
+							<div class="user_detail">
+								<div>手机号码:</div>
+								<div class="user_gray">{{seller.mobile}}</div>
+								<el-button type="primary" icon="el-icon-edit" circle size="small" @click="editMobile()"></el-button>
+							</div>
+							<div class="user_detail">
+								<div>VIP延时:</div>
+								<div><a href="javascript:void (0)" class="user_blue yanshi" @click="vip()">
+										<< 延时vip>>
+									</a></div>
+							</div>
+							<div class="user_detail">
+								<div>登录密码:</div>
+								<div class="user_blue">**********</div>
+								<div class="user_btn">
+									<el-button type="primary" icon="el-icon-edit" circle size="small" @click="editLoginPwd()"></el-button>
+								</div>
+							</div>
+							<div class="user_detail">
+								<div>支付密码:</div>
+								<div class="user_blue">**********</div>
+								<div class="user_btn">
+									<el-button type="primary" icon="el-icon-edit" circle size="small" @click="editPayPwd()"></el-button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- 修改QQ号码弹框 -->
+					<el-dialog title="修改QQ号" :visible.sync="dialogQqNum">
+						<div class="form_box">
+							<el-form ref="form" class="el_form">
+								<div class="el_form_item">
+									<p>原QQ号码:</p>
+									<el-input v-model="seller.qq" class="el_form_width" clearable style='width: 200px;' readonly >
+									</el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>新QQ号码:</p>
+									<el-input v-model="qq" placeholder="请输入新QQ号码"  class="el_form_width">
+									</el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+							</el-form>
+							<div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+								<el-button @click="dialogQqNum = false" size="small">取 消</el-button>
+								<el-button @click="editQQDo()" type="primary" size="small">确 定</el-button>
+							</div>
+						</div>
+					</el-dialog>
+
+					<!-- 修改昵称弹框 -->
+					<el-dialog title="修改昵称" :visible.sync="dialogName">
+						<div class="form_box">
+							<el-form ref="form" class="el_form">
+								<div class="el_form_item">
+									<p>原昵称:</p>
+									<el-input v-model="seller.seller_name" class="el_form_width" clearable style='width: 200px;' readonly >
+									</el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>新昵称:</p>
+									<el-input v-model="name" placeholder="请输入新昵称"  class="el_form_width">
+									</el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+							</el-form>
+							<div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+								<el-button @click="dialogName = false" size="small">取 消</el-button>
+								<el-button @click="editNameDo()" type="primary" size="small">确 定</el-button>
+							</div>
+						</div>
+					</el-dialog>
+
+					<el-dialog title="修改手机号码" :visible.sync="dialogPhoneNum">
+						<div class="form_box">
+							<el-form ref="form" class="el_form">
+								<div class="el_form_item">
+									<p>原手机号码:</p>
+									<el-input v-model="seller.mobile" maxlength="11" class="el_form_width" clearable style='width: 200px;' readonly >
+										<i slot="prefix" class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;">
+											<img src="/static/seller/img/phone.png" alt="" style="width: 24px;" />
+										</i>
+									</el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>支付密码:</p>
+									<el-input type="password" show-password v-model="pay_pwd" placeholder="请输入6位支付密码" class="el_form_width"
+									 maxlength="6"></el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>新手机号码:</p>
+									<el-input v-model="mobile" placeholder="请输入新手机号码" maxlength="11" class="el_form_width"
+									 clearable>
+										<i slot="prefix" class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+											 src="/static/seller/img/phone.png" alt="" style="width: 24px;" /></i>
+									</el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>验证码:</p>
+									<el-input v-model="code" placeholder="请输入验证码" maxlength="6" class="el_form_width" style="width: 160px;margin-right: 40px;"
+									 clearable><i slot="prefix" class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+											 src="/static/seller/img/123.png" alt="" style="width: 24px;" /></i>
+									</el-input>
+									<el-button type="primary" style="width: 100px;padding: 0;height: 40px;line-height: 40px;" @click="sendCode()"
+									 :disabled="yzmDisabled" v-html="yzmMsg"></el-button>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+							</el-form>
+							<!-- 修改密码按钮 -->
+							<div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+								<el-button @click="dialogPhoneNum = false" size="small">取 消</el-button>
+								<el-button @click="editMobileDo()" type="primary" size="small">确 定</el-button>
+							</div>
+						</div>
+					</el-dialog>
+
+					<!-- 修改密码弹框 -->
+					<el-dialog title="修改登录密码" :visible.sync="dialogPassWord">
+						<div class="form_box">
+							<el-form ref="form" class="el_form">
+								<div class="el_form_item">
+									<p>手机号码:</p>
+									<el-input v-model="mobile" maxlength="11" class="el_form_width" clearable style='width: 200px;' readonly >
+										<i slot="prefix" class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;">
+											<img src="/static/seller/img/phone.png" alt="" style="width: 24px;" />
+										</i>
+									</el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>验证码:</p>
+									<el-input v-model="code" placeholder="请输入验证码" maxlength="6" class="el_form_width" style="width: 160px;margin-right: 40px;">
+										<i slot="prefix" class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;">
+											<img src="/static/seller/img/123.png" alt="" style="width: 24px;" />
+										</i>
+									</el-input>
+									<el-button type="primary" style="width: 100px;padding: 0;height: 40px;line-height: 40px;" @click="sendCode()"
+														 :disabled="yzmDisabled" v-html="yzmMsg"></el-button>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>新登录密码:</p>
+									<el-input type="password" show-password v-model="login_pwd" placeholder="请输入新登录密码" class="el_form_width"
+									 maxlength="16"></el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>确认新密码:</p>
+									<el-input type="password" show-password v-model="repwd" placeholder="请确认新登录密码" class="el_form_width"
+									 maxlength="16"></el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+							</el-form>
+							<!-- 修改密码按钮 -->
+							<div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+								<el-button @click="dialogPassWord = false" size="small">取 消</el-button>
+								<el-button @click="editLoginPwdDo()" type="primary" size="small">确 定</el-button>
+							</div>
+						</div>
+					</el-dialog>
+
+					<!-- 支付密码弹框 -->
+					<el-dialog title="修改支付密码" :visible.sync="dialogZhiFuPassWord">
+						<div class="form_box">
+							<el-form ref="form" class="el_form">
+								<div class="el_form_item">
+									<p>手机号码:</p>
+									<el-input v-model="mobile" maxlength="11" class="el_form_width" clearable style='width: 200px;' readonly >
+										<i slot="prefix" class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;">
+											<img src="/static/seller/img/phone.png" alt="" style="width: 24px;" />
+										</i>
+									</el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>验证码:</p>
+									<el-input v-model="code" placeholder="请输入验证码" maxlength="6" class="el_form_width" style="width: 160px;margin-right: 40px;"
+														clearable><i slot="prefix" class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+													src="/static/seller/img/123.png" alt="" style="width: 24px;" /></i>
+									</el-input>
+									<el-button type="primary" style="width: 100px;padding: 0;height: 40px;line-height: 40px;" @click="sendCode"
+														 :disabled="yzmDisabled" v-html="yzmMsg"></el-button>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>新支付密码:</p>
+									<el-input type="password" show-password v-model="pay_pwd" placeholder="请输入6位支付密码"
+									 class="el_form_width" maxlength="6"></el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+								<div class="el_form_item">
+									<p>确认新密码:</p>
+									<el-input type="password" show-password v-model="repwd" placeholder="请确认新支付密码"
+									 class="el_form_width" maxlength="6"></el-input>
+									<span style="margin-left: 10px;color: red;">*</span>
+								</div>
+							</el-form>
+							<!-- 支付密码按钮 -->
+							<div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+								<el-button @click="dialogZhiFuPassWord = false" size="small">取 消</el-button>
+								<el-button type="primary" @click="editPayPwdDo()" size="small">确 定</el-button>
+							</div>
+						</div>
+					</el-dialog>
+
+				</div>
+			</div>
+
+		</div>
+		<script type="text/javascript">
+			$(function() {
+
+				// 手机号正则表达式
+				var phoneReg = /^1[3-9]\d{9}$/;
+				/* 为element-ui组件提供数据绑定和事件 */
+				var vm = new Vue({
+					el: ".right",
+					data: function() {
+						return {
+							seller:{$seller},
+							/* 默认隐藏弹框 */
+							dialogPhoneNum: false,
+							dialogPassWord: false,
+							dialogZhiFuPassWord: false,
+							/* 验证码按钮默认不禁用 */
+							yzmDisabled: false,
+							dialogQqNum:false,
+							dialogName:false,
+							/* 默认的验证码按钮文字内容 */
+							yzmMsg: "发送验证码",
+							pay_pwd:'',
+							login_pwd:'',
+							mobile:'',
+							repwd:'',
+							code:'',
+							qq:'',
+							name:'',
+						}
+					},
+					methods: {
+						/* 下拉菜单事件 */
+						handleOpen: function(key, keyPath) {
+							// console.log(key, keyPath);
+						},
+						handleClose: function(key, keyPath) {
+							// console.log(key, keyPath);
+						},
+						/* 打开弹框并清空表单 */
+						editLoginPwd: function() {
+							this.dialogPassWord = true;
+							this.mobile = this.seller.mobile;
+							this.login_pwd = "";
+							this.code = "";
+							this.yzmMsg= "发送验证码";
+							this.yzmDisabled = false;
+							this.repwd = '';
+						},
+						editPayPwd: function() {
+							this.dialogZhiFuPassWord = true;
+							this.mobile = this.seller.mobile;
+							this.pay_pwd = "";
+							this.code = "";
+							this.yzmMsg= "发送验证码";
+							this.yzmDisabled = false;
+							this.repwd = '';
+						},
+						editMobile: function() {
+							this.dialogPhoneNum = true;
+							this.mobile = '';
+							this.code='';
+							this.pay_pwd='';
+							this.yzmMsg= "发送验证码";
+							this.yzmDisabled = false;
+						},
+						editQQ: function() {
+							this.dialogQqNum = true;
+							this.qq = '';
+						},
+						editName: function() {
+							this.dialogName = true;
+							this.name = '';
+						},
+						vip:function(){
+							location.href = "{:url('vip/index')}";
+						},
+						/* 第一个表单验证 */
+						editMobileDo: function() {
+							var that = this;
+							$.post("{:url('Index/editMobileDo')}",{mobile:this.mobile,pay_pwd:this.pay_pwd,code:this.code},function(res){
+								if(res.code==1){
+									layer.msg(res.msg,{icon:1,time:1500},function(){
+										that.dialogPhoneNum = false;
+										location.reload();
+									});
+								}else{
+									layer.msg(res.msg,{icon:2,time:1500});
+								}
+							});
+						},
+						editQQDo: function() {
+							var that = this;
+							$.post("{:url('Index/editQqDo')}",{qq:this.qq},function(res){
+								if(res.code==1){
+									layer.msg(res.msg,{icon:1,time:1500},function(){
+										that.dialogQqNum = false;
+										location.reload();
+									});
+								}else{
+									layer.msg(res.msg,{icon:2,time:1500});
+								}
+							});
+						},
+						editNameDo: function() {
+							var that = this;
+							$.post("{:url('Index/editNameDo')}",{seller_name:this.name},function(res){
+								if(res.code==1){
+									layer.msg(res.msg,{icon:1,time:1500},function(){
+										that.dialogName = false;
+										location.reload();
+									});
+								}else{
+									layer.msg(res.msg,{icon:2,time:1500});
+								}
+							});
+						},
+						/* 第二个表单验证 */
+						editLoginPwdDo: function() {
+							var that = this;
+							if(this.login_pwd != this.repwd)return layer.msg("确认密码不正确",{icon:1,time:1500});
+							$.post("{:url('Index/editLoginPwdDo')}",{mobile:this.mobile,login_pwd:this.login_pwd,code:this.code},function(res){
+								if(res.code==1){
+									layer.msg(res.msg,{icon:1,time:1500},function(){
+										that.dialogPassWord = false;
+										location.reload();
+									});
+								}else{
+									layer.msg(res.msg,{icon:2,time:1500});
+								}
+							});
+						},
+						/* 第三个表单验证 */
+						editPayPwdDo: function() {
+							var that = this;
+							if(this.pay_pwd != this.repwd)return layer.msg("确认密码不正确",{icon:1,time:1500});
+							$.post("{:url('Index/editPayPwdDo')}",{mobile:this.mobile,pay_pwd:this.pay_pwd,code:this.code},function(res){
+								if(res.code==1){
+									layer.msg(res.msg,{icon:1,time:1500},function(){
+										that.dialogZhiFuPassWord = false;
+										location.reload();
+									});
+								}else{
+									layer.msg(res.msg,{icon:2,time:1500});
+								}
+							});
+						},
+						/* 发送验证码 */
+						sendCode: function() {
+							var num = 60;
+							var that = this;
+							$.post("{:url('Login/mobileDo')}",{mobile:this.mobile},function(res){
+									if(res.code==1){
+										var timer = setInterval(function() {
+											num--;
+											that.yzmDisabled = true;
+											that.yzmMsg = "还剩 " + num + " 秒";
+											if (num <= 0) {
+												clearInterval(timer);
+												that.yzmMsg = "重新发送";
+												that.yzmDisabled = false;
+											} else if (num === 59) {
+												layer.msg("验证码发送成功,若接收失败请耐心等待一分钟后点击重新发送",{icon:1,time:2000});
+											}
+										}, 1000);
+									}else{
+										layer.msg(res.msg,{icon:2});
+									}
+							});
+						},
+					}
+				});
+
+			});
+		</script>
+		{include file="public/footer" /}
+

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link href="/static/seller/node_modules/element-ui/lib/theme-chalk/index.css" rel="stylesheet" type="text/css" />
+  <script src="/static/seller/js/jquery.min.js"></script>
+  <script charset="utf-8" src="/static/seller/js/vue.js" type="text/javascript"></script>
+  <script src="/static/seller/node_modules/element-ui/lib/index.js"></script>
+  <link href="/static/seller/css/new_goods.css" rel="stylesheet" type="text/css" />
+  <script charset="utf-8" src="/static/seller/layer/layer.js" type="text/javascript"></script>
+  <script src="/static/seller/js/axios.min.js"></script>
+  <title></title>
+</head>
+<body>
+<div id="menu" v-cloak>
+  <el-form :model="goods" class="demo-ruleForm" inline-message='false' label-width="100px" ref="ruleForm">
+    <el-form-item label="宝贝链接:" prop="link" style='width:600px;'>
+      <el-input placeholder="请输入内容" v-model="goods.link"></el-input>
+    </el-form-item>
+    <el-form-item label="宝贝名称:" prop="name" style='width:600px;'>
+      <el-input placeholder="请输入内容" v-model="goods.name"></el-input>
+    </el-form-item>
+    <el-form-item label="核对数字:" prop="pass" v-if="state==1">
+      <el-input placeholder="请输入6位纯数字" style='width: 216px;' v-model="goods.number"></el-input>
+    </el-form-item>
+    <el-form-item label="宝贝主图:" prop="img">
+      <div v-for="(item,index) in goods.pc_img" style="display: inline-block;position: relative;margin-right:4.5px;">
+        <img onerror="imgError(this)" :src="item" alt="" style="height: 80px;width: 80px">
+        <i class="el-icon-error" style="position: absolute;top:0px;right: 0px" @click="delImg(index)"></i>
+      </div>
+      <label style="display: inline-block">
+        <input style="position:absolute;opacity:0;" type="file" name="file" accept="image/gif,image/jpeg,image/x-png" @change="getImg($event)"/>
+        <img style="width: 80px;height: 80px;" src="/images/add.jpg">
+      </label>
+    </el-form-item>
+    <el-form-item class='specified' label="下单指定规格:"  prop="size" prop="specified">
+      <el-input placeholder="如-颜色" style='width: 98px;' v-model="goods.spec_name"></el-input>
+      -
+      <el-input placeholder="如-红色" style='width: 98px;' v-model="goods.spec_value"></el-input>
+    </el-form-item>
+    <el-form-item class='specified' label="商品下单金额:" prop="goods">
+      <el-input-number :min="0" @change="picTure" v-model="goods.price"></el-input-number>&nbsp;&nbsp;元
+    </el-form-item>
+    <el-form-item class='goodss' label="每单拍：" prop="goodss">
+      <el-input-number :min="1" @change="picNum" v-model="goods.num"></el-input-number>&nbsp;&nbsp;件
+      <b>(出于安全，建议每单不要超过两件)</b>
+    </el-form-item>
+    <el-form-item class='show' label="搜索页面展示价格：" prop="show">
+      <el-input-number :min="0" v-model="goods.show_price"></el-input-number>&nbsp;&nbsp;元
+      <b>非必填，如该商品有满减、促销、多规格等情况，请填写此金额</b>
+    </el-form-item>
+  </el-form>
+  <p class="p">根据您的设置买家下单预计为 <b v-html='goods_price'></b> 元 </p>
+  <div class="radio">
+    <h2>选择关键词方案 </h2>
+    <el-button @click="open3" size='small' type="primary" v-if="baclk"><i class="el-icon-plus"></i> 新建关键词方案</el-button>
+    <el-button @click="cancel" size='small' type="info" v-if="none"><i class="el-icon-plus"></i> 取消新建</el-button>
+    <p>( 平台默认保存最近5套关键词方案 ) </p>
+    <!-- 循环关键词 -->
+    <div class="keywords" v-for="(item,b) in key_wolds" :key="b">
+      <el-col>
+        <el-menu @close="handleClose" @open="handleOpen" class="el-menu-vertical-demo left-ul" unique-opened>
+          <el-submenu>
+            <template slot="title">
+									<span class="key_left">
+										<el-radio :key="item.id" :label="item.id" v-model="goods.goods_key_id">{{item.name}}</el-radio>
+									</span>
+            </template>
+            <el-menu-item-group>
+              <table border="1" bordercolor="#eee" cellpadding="0" cellspacing="0" class="hinge">
+                <tr>
+                  <th>方案名称</th>
+                  <th>移动端任务搜索词</th>
+                  <th>PC端任务搜索词</th>
+                </tr>
+                <tr>
+                  <td>{{item.name}}</td>
+                  <td>
+                    <strong v-for="(row,index) in item.key_wold" v-if="row.type==2" :key="index">关键词：<b>{{row.key_world}}</b></strong>
+                  </td>
+                  <td>
+                    <strong v-for="(row,index) in item.key_wold" v-if="row.type==1" :key="index">关键词：<b>{{row.key_world}}</b></strong>
+                  </td>
+                </tr>
+              </table>
+            </el-menu-item-group>
+          </el-submenu>
+        </el-menu>
+        <span class="key_right">
+							<strong @click="editor(item,b)">编辑</strong>
+						</span>
+      </el-col>
+    </div>
+    <!-- 编辑 -->
+    <div class="plan" v-if="diapaly">
+      <h5 class="plan_b">{{fangAn[anType]}}关键词方案</h5>
+      <span class="plan_span">
+						<b>方案名称：</b>
+						<el-input placeholder="请输入内容" size="medium" style='width: 350px;' v-model="key_wold.name"></el-input>
+						<strong> ( 方案名称仅为方便您的记忆及区分您的不同方案 )</strong>
+					</span>
+      <div class="usage" v-for="(item,index) in body" :key="index">
+        <div class="checkbox_p">
+          <el-checkbox @change="chazhao(index)" v-model="item.checked1">{{item.name}}</el-checkbox>
+          <b>( {{item.bb}} )</b>
+        </div>
+        <div class="usages" v-if="item.hidden">
+          <el-checkbox @change="guanjiancichazhao(index)" v-model="item.checked2">关键词查找</el-checkbox>
+          <div class="single" v-if="item.singles">
+            <el-radio border id='dan' label="1" size="small" v-model="single">单关键词</el-radio>
+            <el-tooltip class="item" content="搜索词和成交词相同" effect="dark" placement="top">
+              <i class="el-icon-question"></i>
+            </el-tooltip>
+
+            <div class="moder" v-for="(row, key) in key_wold.key_wold" v-if="row.type == item.id" :key="key">
+              <b>关键词：</b>
+              搜索词=
+              <el-input placeholder="请输入内容" size="small" style='width: 250px;' v-model="row.key_world"></el-input>
+              <el-button @click="advanced(row,key)" size="small" type="primary"><i class="el-icon-s-tools"></i>&nbsp;&nbsp;高级设置
+              </el-button>
+              <el-button @click='removes(key)' size="small" type="danger"><i class="el-icon-delete"></i>&nbsp;&nbsp;删除
+              </el-button>
+            </div>
+            <span class="add">
+									<i @click="add(item.id)" class="el-icon-plus"></i>
+									<b style="color: red"> ( 添加加关键词，最多5组 )</b>
+								</span>
+            <!-- 弹出高级设置 -->
+            <el-dialog :visible.sync="gaojiVisible" class="one"  title="【关键词1 搜索词】高级设置" width="1000px">
+              <div class="gaojiSearch">
+                <div class="gaojiSearch_p">
+                  <div class="gaojiSearch_left">折扣服务：</div>
+                  <div class="gaojiSearch_right">
+                    <el-checkbox-group v-model="advanceds.discount">
+                      <el-checkbox :label="item" :value="key" v-for="(item,key) in discount" :key="key"></el-checkbox>
+                    </el-checkbox-group>
+                  </div>
+                </div>
+                <div class="gaojiSearch_p">
+                  <div class="gaojiSearch_left">筛选分类：</div>
+                  <div class="gaojiSearch_right">
+                    <el-input placeholder="分类1" size="small" style='width:100px;margin-right:6px;' v-model="advanceds.filter.class1"></el-input>
+                    <el-input placeholder="分类2" size="small" style='width:100px;margin-right:6px;' v-model="advanceds.filter.class2"></el-input>
+                    <el-input placeholder="分类3" size="small" style='width:100px;margin-right:6px;' v-model="advanceds.filter.class3"></el-input>
+                    <el-input placeholder="分类4" size="small" style='width:100px;margin-right:6px;' v-model="advanceds.filter.class4"></el-input>最多四个分类
+                  </div>
+                </div>
+                <div class="gaojiSearch_p">
+                  <div class="gaojiSearch_left">排序方式：</div>
+                  <div class="gaojiSearch_right">
+                    <el-select placeholder="请选择" size="small" style='width: 128px;' v-model="advanceds.sort">
+                      <el-option :label="item" :value="item" v-for="(item,k) in options" :key="k"></el-option>
+                    </el-select>
+                    &nbsp;价格：
+                    <el-input placeholder="最低价" size="small" style='width:100px;margin-right:6px;' v-model="advanceds.min_price"></el-input>
+                    -&nbsp;
+                    <el-input placeholder="最高价" size="small" style='width:100px;margin-right:6px;' v-model="advanceds.max_price"></el-input>
+                    &nbsp;发货地：
+                    <el-select placeholder="请选择省份" size="small" style='width: 128px;' v-model="advanceds.province">
+                      <el-option :key="key" :label="item" :value="item" v-for="(item,key) in province" :key="key"></el-option>
+                    </el-select>
+                  </div>
+                </div>
+              </div>
+              <div class="gaojiSearch_center">
+                <el-button @click='quxiao' style='width: 200px;'>取消</el-button>
+                <el-button @click='quren()' style='width: 200px;' type="danger">确认</el-button>
+              </div>
+            </el-dialog>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="buttons">
+        <el-button @click="close" size="medium">取消</el-button>
+        <el-button @click="saveKey()" size="medium" type="danger">保存</el-button>
+      </div>
+    </div>
+
+  </div>
+  <div class="el">
+    <el-button @click='storage()' style='width: 198px;' type="danger">保存</el-button>
+  </div>
+</div>
+</body>
+<script>
+    var name = new Vue({
+        el: "#menu",
+        data: function() {
+            return {
+                state:"{$state}",
+                key_id:'',
+                fangAn:['新建','编辑'],
+                anType:0,
+                goods:{
+                    link:'',
+                    shop_id:'',
+                    name:'',
+                    number:'',
+                    spec_name:'',
+                    spec_value:'',
+                    price:'',
+                    num:'',
+                    show_price:'',
+                    pc_img:[],
+                    goods_key_id:'',
+                },
+                subscript:'',
+                goods_price:0,
+                key_wolds:[],
+                shops:[],
+                key_wold:{
+                    name:'',
+                    key_wold:[],
+                },
+                advanceds:{
+                    key_world:'',
+                    discount:[],
+                    filter:{
+                        class1:'',
+                        class2:'',
+                        class3:'',
+                        class4:'',
+                    },
+                    sort:'',
+                    max_price:'',
+                    min_price:'',
+                    province:'',
+                },
+                discount:{
+                    0:'包邮',
+                    1:'公益宝贝',
+                    2:'全球购',
+                    3:'消费者保障',
+                    4:'货到付款',
+                    5:'淘金币抵钱',
+                    6:'天猫',
+                    7:'花呗分期',
+                    8:'7+天退货',
+                    9:'天猫超市',
+                    10:'天猫直送',
+                    11:'通用排序',
+                },
+                province:{},
+                value: '',
+                baclk: true, //新建关键词显示
+                none: false, //新建关键词隐藏
+                diapaly: false, //新建关键词方案隐藏
+                single: '1',//默认单关键词
+                //关键词查找方式
+                body:[
+                    /*{
+                        id:2,
+                        name: '移动端任查找宝贝',
+                        bb: ' 请商家确保所给关键词可以在手机端前20屏找到商品 ',
+                        hidden: false, //查找宝贝隐藏
+                        singles: false, //关键词查找隐藏
+                        checked2: false, //关键词查找复选框状态
+                        checked1: false, //关键词查找复选框状态
+                    },*/
+                    {
+                        id:1,
+                        name: '查找宝贝',
+                        bb: ' 请商家确保所给关键词可以在淘宝前10页找到商品 ',
+                        hidden: false, //查找宝贝隐藏
+                        singles: false, //关键词查找隐藏
+                        checked2: false, //关键词查找复选框状态
+                        checked1: false, //关键词查找复选框状态
+                    },
+                ],
+                //弹出高级设置
+                gaojiVisible: false,
+                //高级第一下拉列表
+                options:{
+                    0:'综合排序',
+                    1:'销量优先',
+                    2:'价格由高到低',
+                    3:'价格由低到高',
+                    4:'信用排序'
+                },
+                bool:true,
+            }
+        },
+        mounted:function(){
+            that=this;
+            this.getData();
+            this.getProvince();
+        },
+        methods: {
+            /* 获取图片的base64路径 */
+            getImg: function (e) {
+                var reader = new FileReader();
+                reader.readAsDataURL(e.target.files[0]);
+                reader.onload=function () {
+                    if(that.goods.pc_img.length >= 3)return layer.msg('最多上传3张图片',{icon:2});
+                    that.goods.pc_img.push(reader.result);
+                }
+            },
+            /* 删除图片 */
+            delImg: function (index) {
+                that.goods.pc_img.splice(index,1);
+            },
+            //取值下单金额添加小数两位
+            picTure: function() {
+                this.goods_price = (this.goods.num * this.goods.price).toFixed(2);
+            },
+            //取值每单拍添加小数两位
+            picNum: function() {
+                this.goods_price = (this.goods.num * this.goods.price).toFixed(2);
+            },
+            getData:function(){
+                var that = this;
+                $.post("{:url('task/edit')}",{id:"{$id}"},function(res){
+                  console.log(res)
+                    if(res.code==1){
+                        that.key_wolds = res.data.list.key_world;
+                        that.goods = res.data.list;
+                        that.shops = res.data.shop;
+                        console.log(that.key_wolds);
+                    }else{
+                        layer.msg('网络错误',{icon:2});
+                    }
+                })
+            },
+            getProvince:function(){
+                var that = this;
+                axios.get("/static/seller/json/province.json").then(function (province) {
+                    that.province = province.data;
+                }).catch(function (error) {
+                })
+            },
+            advanced:function(row,key){
+                this.gaojiVisible=true;
+                this.advanceds = row;
+                this.subscript = key;
+            },
+            // 编辑关键词方案
+            editor(item,b) {
+                this.baclk = false;
+                this.none = true;
+                this.diapaly = true;
+                this.anType = 1;
+                this.key_wold = item;
+                console.log(this.key_wold);
+                this.key_id = b;
+            },
+            // 新建关键词方案
+            open3() {
+                this.baclk = false;
+                this.none = true;
+                this.diapaly = true;
+                this.anType = 0;
+                this.key_wold.name='';
+                this.key_wold.key_wold=[];
+
+            },
+            // 取消关键词方案
+            cancel: function() {
+                this.baclk = true;
+                this.none = false;
+                this.diapaly = false;
+            },
+            // 隐藏关键词方案
+            close: function() {
+                this.baclk = true;
+                this.none = false;
+                this.diapaly = false;
+            },
+            // 保存关键词方案
+            saveKey: function() {
+                var that = this;
+                console.log(this.key_wold);
+                if(this.anType==1){
+                    if (!this.key_wold.name)return this.$message.error('方案名称不能为空');
+                    $.post("{:url('task/goodsKeyEdit')}",this.key_wold,function(res){
+                        if(res.code==1){
+                            that.key_wolds.splice(that.key_id,1,res.data);
+                            that.goods.goods_key_id = res.data.id;
+                            console.log(that.key_wolds);
+                            that.baclk = true;
+                            that.none = false;
+                            that.diapaly = false;
+                        }else{
+                            return layer.msg(res.msg,{icon:2,time:2000});
+                        }
+                    })
+                }else{
+                    if (!this.key_wold.name)return this.$message.error('方案名称不能为空');
+                    $.post("{:url('task/goodsKeyAdd')}",{seller_id:this.goods.seller_id,key_wold:this.key_wold},function(res){
+                        if(res.code==1){
+                            that.key_wolds.push(res.data);
+                            that.goods.goods_key_id = res.data.id;
+                            console.log(that.key_wolds);
+                            that.baclk = true;
+                            that.none = false;
+                            that.diapaly = false;
+                        }else{
+                            return layer.msg(res.msg,{icon:2,time:2000});
+                        }
+                    })
+                }
+
+            },
+            // 选择商品编辑按钮
+            bianji: function(index) {
+                $('.hidden').show(500);
+                this.openIsDisabled = true;
+                this.goods[index].closeIsDisabled = true;
+                this.plays = true;
+                this.play = false;
+            },
+            // 查找宝贝
+            chazhao: function(index) {
+                if (this.body[index].checked1 == true) {
+                    this.body[index].hidden = true;
+                } else {
+                    this.body[index].hidden = false;
+                }
+            },
+            // 关键词查找
+            guanjiancichazhao: function(index) {
+                if (this.body[index].checked2 == true) {
+                    this.body[index].singles = true;
+                } else {
+                    this.body[index].singles = false;
+                }
+            },
+
+            //高级搜索取消
+            quxiao: function() {
+                this.gaojiVisible = false
+            },
+            //高级搜索取消
+            quren: function() {
+                this.gaojiVisible = false;
+                this.key_wold.key_wold[this.subscript] = this.advanceds;
+            },
+            // 添加关键词数组
+            add: function(id) {
+                var long = 0;
+                this.key_wold.key_wold.forEach(function(item){
+                    if(item.type == id){
+                        long++;
+                    }
+                })
+                if(long==5){
+                    return layer.msg('最多添加5组关键词',{icon:3,time:2000});
+                }
+                var arrays = {
+                    key_world:'',
+                    type:id,
+                    discount:[],
+                    filter:{
+                        class1:'',
+                        class2:'',
+                        class3:'',
+                        class4:'',
+                    },
+                    sort:'',
+                    max_price:'',
+                    min_price:'',
+                    province:'',
+                };
+                this.key_wold.key_wold.push(arrays);
+            },
+            // 删除关键词数组
+            removes: function(key) {
+                this.key_wold.key_wold.splice(key,1);
+            },
+            // 整个保存判断
+            storage(){
+                if(this.state==1){
+                    if(!this.goods.number)return layer.msg('请填写核对数字',{icon:2,time:2000});
+                }
+                $.post("{:url('task/goodsEditDo')}",this.goods,function(res){
+                    if(res.code==1){
+                        layer.msg(res.msg,{icon:1,time:2000},function(){
+                            window.parent.location.reload();
+                        });
+                    }else{
+                        return layer.msg(res.msg,{icon:2,time:2000});
+                    }
+                })
+            },
+        },
+        //默认显示买家下单添加小数两位
+        created: function() {
+            this.goods_price = this.goods_price.toFixed(2);
+        }
+    });
+</script>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>邀请记录</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        info:{
+                            state:1,
+                            searchTime1: "",
+                            searchTime2: "",
+                            page:1,
+                            sortNum:1,
+                        },
+                        total:0,
+                        list:[],
+                        /* 默认选中第一页 */
+                        str: '上次接单时间',
+                        // 完成记录弹框
+                        recordDialog: false,
+                        // 完成记录分页
+                        recordPage: 1,
+                        total_task:0,
+                        task_list:[],
+                        get_task:{
+                            id:'',
+                            page:1,
+                            size:3,
+                        },
+                    }
+                },
+                mounted: function () {
+                    publicFunction();
+                    that = this;
+                    this.getData();
+                },
+                mixins: [singlePersonMixin],
+                methods: {
+                    getData:function() {
+                        var that = this;
+                        $.post("{:url('recommend/recordData')}", this.info, function (res) {
+                            if (res.code == 1) {
+                                that.list = res.data.list;
+                                that.total = res.data.total;
+                            } else {
+                                alertError('网络错误！');
+                            }
+                        })
+                    },
+                    /* 给表格上色 */
+                    cellStyle: function (e) {
+                        if (e.columnIndex === 4 && e.row.status==1) {
+                            return "color:red;"
+                        }
+                        if (e.columnIndex === 3 && e.row.state==1) {
+                            return "color:red;"
+                        }
+                    },
+                    pageChange: function (val) {
+                        this.info.page = val;
+                        this.getData();
+                    },
+                    changeTab:function(num){
+                        this.info.state = num;
+                        if(num==1){
+                            this.str = '上次接单时间';
+                        }else{
+                            this.str = '上次发单时间';
+                        }
+                        this.info.page = 1;
+                        this.info.size = 10;
+                        this.info.searchTime1='';
+                        this.info.searchTime2='';
+                        this.getData();
+                    },
+                    search:function(){
+                        this.info.page = 1;
+                        this.info.size = 10;
+                        this.getData();
+                    },
+                    sort:function(num){
+                        this.info.sortNum = num;
+                        this.info.page = 1;
+                        this.info.size = 10;
+                        this.info.searchTime='';
+                        this.getData();
+                    },
+                    setSearchTime:function(num){
+                        if(num==1)this.info.searchTime1 = this.info.searchTime1.getTime();
+                        if(num==2)this.info.searchTime2 = this.info.searchTime2.getTime();
+                    },
+                    // 完成记录分页
+                    recordChange: function (val) {
+                        this.get_task.page = val;
+                        this.getTaskData();
+                    },
+                    getTaskData:function() {
+                        var that = this;
+                        $.post("{:url('recommend/getCTask')}", this.get_task, function (res) {
+                            console.log(res);
+                            if (res.code == 1) {
+                                that.task_list = res.data.list;
+                                that.total_task = res.data.total;
+                            } else {
+                                alertError('网络错误！');
+                            }
+                        })
+                    },
+                    // 查看完成记录
+                    viewRecord: function (id) {
+                        console.log(id);
+                        this.get_task.id = id;
+                        this.getTaskData();
+                        this.recordDialog = true;
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">邀请记录</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span :class="{active:info.state==1}" data-type="0" @click="changeTab(1)">买手记录</span>
+            <span :class="{active:info.state==2}" data-type="1" @click="changeTab(2)">商家记录</span>
+        </div>
+
+        <!-- 本金提现内容 -->
+        <div class="benjin-record" v-show="info.state==1">
+            <div class="select-date">
+                <!-- 选择日期 -->
+                <div class="span-date">
+                    <mu-date-input @change="setSearchTime(1)" class="span-date-item" v-model="info.searchTime1" label="请选择开始日期" label-float></mu-date-input>
+                    <mu-date-input @change="setSearchTime(2)" class="span-date-item" v-model="info.searchTime2" label="请选择结束日期" label-float></mu-date-input>
+                </div>
+                <!-- 按钮 -->
+                <div class="date-btn">
+                    <van-button class="date-btn-item single-date-btn-item"  icon="search" type="info" @click="search">搜索
+                    </van-button>
+                    <van-button class="date-btn-item single-date-btn-item" icon="exchange" type="warning" @click="sort(1)">会员到期排序
+                    </van-button>
+                    <van-button class="date-btn-item single-date-btn-item" icon="exchange" type="warning" @click="sort(2)">接单时间排序
+                    </van-button>
+                </div>
+
+
+                <!-- 卡片 -->
+                <div class="TaskManagement">
+                    <div class="Task-management" v-for="(item,index) in list" :key="index">
+                        <div class="TaskTop">
+                            <div class="managementHeng">
+                                <p>日期：</p>
+                                <p>{{item.create_time}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>用户名QQ：</p>
+                                <p>{{item.qq}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>完成任务数量：</p>
+                                <p>{{item.num}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>会员到期时间：</p>
+                                <p>{{item.vip_time}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>{{str}}：</p>
+                                <p style="color: blue">{{item.last_time}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>奖励银锭：</p>
+                                <p>{{item.price}}</p>
+                            </div>
+                        </div>
+                        <div class="TaskBottom">
+                            <img src="/static/mobile/img/bolang.png" alt="" />
+                            <div class="TaskBottomPosition" style="align-items: center;justify-content: space-between">
+                                <p style="margin-top: 0">完成单数记录：</p>
+                                <a href="javascript:"  @click="viewRecord(item.id)">查看完成记录</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="Task-management" v-if="list.length===0">
+                        <div class="TaskTop" style="text-align: center">暂无内容</div>
+                        <div class="TaskBottom">
+                            <img src="/static/mobile/img/bolang.png" alt="" />
+                            <div class="TaskBottomPosition"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <div class="public-page">
+                    <span class="public-page-total">共 {{total}} 条</span>
+                    <van-pagination
+                            class="public-page-item"
+                            @change="pageChange"
+                            v-model="info.page"
+                            :items-per-page="3"
+                            :total-items="total"
+                            :show-page-size="2"
+                            force-ellipses></van-pagination>
+                </div>
+            </div>
+        </div>
+
+        <!-- 完成记录弹框 -->
+        <van-dialog v-model="recordDialog" title="完成记录" show-cancel-button>
+            <!-- 完成记录的内容 -->
+            <div class="TaskManagement">
+                <div class="Task-management" v-for="(item,index) in task_list" :key="index">
+                    <div class="TaskTop">
+                        <div class="managementHeng">
+                            <p>序号：</p>
+                            <p>{{item.id}}</p>
+                        </div>
+                        <div class="managementHeng">
+                            <p>用户名：</p>
+                            <p>{{item.username}}</p>
+                        </div>
+                        <div class="managementHeng">
+                            <p>月份：</p>
+                            <p>{{item.month}}</p>
+                        </div>
+                        <div class="managementHeng">
+                            <p>完成单数：</p>
+                            <p>{{item.task_number}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 完成记录的分页 -->
+            <div class="public-page">
+                <span class="public-page-total">共 {{total_task}} 条</span>
+                <van-pagination
+                        class="public-page-item"
+                        @change="recordChange"
+                        v-model="recordPage"
+                        :items-per-page="get_task.size"
+                        :total-items="total_task"
+                        :show-page-size="2"
+                        force-ellipses></van-pagination>
+            </div>
+        </van-dialog>
+
+        <!-- 本金记录内容 -->
+        <div class="benjin-record" v-show="info.state==2">
+            <div class="select-date">
+                <!-- 选择日期 -->
+                <div class="span-date">
+                    <mu-date-input  @change="setSearchTime(1)" class="span-date-item"  v-model="info.searchTime1" label="请选择开始日期" label-float></mu-date-input>
+                    <mu-date-input @change="setSearchTime(2)"  class="span-date-item" v-model="info.searchTime2" label="请选择结束日期" label-float></mu-date-input>
+                </div>
+                <!-- 按钮 -->
+                <div class="date-btn">
+                    <van-button  class="date-btn-item single-date-btn-item" icon="search" type="info" @click="search">搜索
+                    </van-button>
+                    <van-button
+                            class="date-btn-item single-date-btn-item"
+                            icon="exchange"
+                            type="warning" @click="sort(1)" >会员到期排序
+                    </van-button>
+                    <van-button
+                            class="date-btn-item single-date-btn-item"
+                            icon="exchange"
+                            type="warning" @click="sort(2)">发单时间排序
+                    </van-button>
+                </div>
+
+
+                <!-- 卡片 -->
+                <div class="TaskManagement">
+                    <div class="Task-management" v-for="(item,index) in list" :key="index">
+                        <div class="TaskTop">
+                            <div class="managementHeng">
+                                <p>日期：</p>
+                                <p>{{item.date}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>用户名QQ：</p>
+                                <p>{{item.qq}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>完成任务数量：</p>
+                                <p>{{item.taskcount}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>会员到期时间：</p>
+                                <p>{{item.enddate}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>{{str}}：</p>
+                                <p style="color: blue">{{item.prevdate}}</p>
+                            </div>
+                            <div class="managementHeng">
+                                <p>奖励银锭：</p>
+                                <p>{{item.yingding}}</p>
+                            </div>
+                        </div>
+                        <div class="TaskBottom">
+                            <img src="/static/mobile/img/bolang.png" alt="" />
+                            <div class="TaskBottomPosition"></div>
+                        </div>
+                    </div>
+                    <div class="Task-management" v-if="list.length===0">
+                        <div class="TaskTop" style="text-align: center">暂无内容</div>
+                        <div class="TaskBottom">
+                            <img src="/static/mobile/img/bolang.png" alt="" />
+                            <div class="TaskBottomPosition"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <div class="public-page">
+                    <span class="public-page-total">共 {{total}} 条</span>
+                    <van-pagination
+                            class="public-page-item"
+                            @change="pageChange"
+                            v-model="info.page"
+                            :items-per-page="10"
+                            :total-items="total"
+                            :show-page-size="2"
+                            force-ellipses></van-pagination>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- tabBar -->
+    {include file="public/footer" /}

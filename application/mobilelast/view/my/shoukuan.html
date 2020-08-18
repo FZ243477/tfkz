@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>待处理事项</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        /* 默认弹框不开启 */
+                        dialogVisible: false,
+                        /* 图片路径 */
+                        localFile: "",
+                        /* 数据1 */
+                        testData: [
+                            {volist name="product" id="vo"}
+                            {
+                                img2: "{$vo.pc_img}",//
+                                name2: "{$vo.name}",
+                                taskBianHao: "{$list.task_number}",
+                                time: "{$list.create_time}",
+                                type: "{$list.task_type}",
+                                maiHao: "{$list.wwid}",
+                                kuaiDi: "{$list.delivery}",
+                                danHao: "{$list.delivery_num}",
+                                price: "{$list.user_principal}"
+                            },
+                            {/volist}
+                        ],
+                        /*任务ID*/
+                        task_id:"{$list.id}",
+                        // 提示内容
+                        alertNum:{$list.seller_principal}
+                    };
+                },
+                    mixins:[singlePersonMixin],
+                filters: {
+                    setName: function (val) {
+                        if (val.length > 6) {
+                            return val.substr(0, 6) + "...";
+                        }
+                        return val;
+                    }
+                },
+                    methods:{
+                        slideBarClick:function(){
+                            var that = this;
+                            this.$dialog.confirm({
+                                title: "温馨提示",
+                                message: '商家确认返款金额为:' + this.alertNum
+                            }).then(function () {
+                                var id={$list.id};
+                                $.ajax({
+                                    type: "POST",
+                                    url: "{:url('mobile/task/confirm_refund')}",
+                                    async: true,
+                                    data: {
+                                        'id': id,
+                                    },
+                                    success: function (data) {
+                                        if (data.code == 1) {
+                                            alertSuccess(data.msg);
+                                            setTimeout(function () {
+                                                return location.href = data.url;
+                                            }, 3000);
+                                        } else {
+                                            return alertError(data.msg);
+                                        }
+                                    },
+                                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                        alert(XMLHttpRequest.status + "," + textStatus);
+                                    }
+                                });
+                            }).catch(function () {})
+                        }
+                    },
+                mounted: function () {
+                    publicFunction();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">待处理事项</div>
+        <div class="menu-box" >
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span class="active">待处理事项</span>
+        </div>
+        <div v-for="(item,index) in testData" :key="index">
+        <div class="processed">
+            <div class="processedList">
+                <div class="processedList-heng">
+                    <p>任务编号：{{item.taskBianHao}}</p>
+                </div>
+                <div class="processedList-tow">
+                    <p>任务类型：<b>{{item.type}}</b></p>
+                    <p>买号：<b>{{item.maiHao}}</b></p>
+                </div>
+                <div class="processedList-center">
+                    <img :src="item.img2" alt="">
+                    <div>
+                        <p>{{item.name2}}</p>
+                        <span>付款总金额：<b>{{item.price}}元</b></span>
+                    </div>
+                </div>
+                <div class="processedList-bottom">
+                    <p>接单时间：{{item.time}}</p>
+                </div>
+
+            </div>
+        </div>
+        <div class="processed">
+            <div class="processedList">
+                <div class="processedList-tow">
+                    <p>快递：<b> {{item.kuaiDi}}</b></p>
+                    <p>快递单号：<b>{{item.danHao}}</b></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+        <div class="processedButton">
+            <van-button @click="slideBarClick">确认返款</van-button>
+        </div>
+    </div>
+    {include file="public/footer" /}

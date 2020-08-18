@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css"/>
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/yaoQingRecord.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png" />
+    <script src="/static/buy/js/vue-2.6.10.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+    <link rel="stylesheet" type="text/css" href="/static/seller/css/InvitedRecord.css"/>
+    <style>
+        .user_content {
+            width: 940px!important;
+        }
+        .user_content {
+            -webkit-user-select: unset;
+            -moz-user-select: unset;
+            -ms-user-select: unset;
+            user-select: unset;
+        }
+    </style>
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;账号信息&nbsp;/&nbsp;<span class="msg_title_txt">邀请记录</span></p>
+            </div>
+            <div class="user_content">
+                <div class="web_gonggao">
+                    <div class="gonggao_row">
+                        <div class="gonggao_top" @click="changeTab(1)">
+                            <a href="javascript:" :class="info.state==1 ? 'select_on' : ''">买手记录</a>
+                        </div>
+                        <div class="gonggao_top" @click="changeTab(2)">
+                            <a href="javascript:" :class="info.state==2 ? 'select_on' : ''">商家记录</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="chongzhi_vip">
+
+                    <!-- 选择日期 -->
+                    <div class="selete_date">
+                        <el-date-picker v-model="info.searchTime" type="daterange" range-separator="至" start-placeholder="开始日期"
+                                        end-placeholder="结束日期" style="margin-right: 20px;width:380px;" value-format="yyyy-MM-dd">
+                        </el-date-picker>
+                        <el-button type="primary" @click="search()"><i class="el-icon-search"></i>搜索</el-button>
+                        <el-button type="warning"  @click="sort(1)"><i class="el-icon-sort"></i>会员到期排序</el-button>
+                        <el-button type="warning"  @click="sort(2)"><i class="el-icon-sort"></i>{{strs}}</el-button>
+                    </div>
+
+                    <!-- 数据列表 -->
+                    <div class="shuju_table">
+                        <template>
+                            <el-table :data="list" border style="width: 100%;" header-cell-style="background:#f5f7fa;"
+                                      :cell-style="cellStyle">
+                                <el-table-column prop="create_time" label="日期">
+                                </el-table-column>
+                                <el-table-column prop="qq" label="用户名QQ" >
+                                </el-table-column>
+                                <el-table-column prop="num" label="完成任务数量">
+                                </el-table-column>
+                                <el-table-column prop="vip_time" label="会员到期时间">
+                                </el-table-column>
+                                <el-table-column prop="last_time" :label="str">
+                                </el-table-column>
+                                <el-table-column prop="price" label="奖励银锭">
+                                </el-table-column>
+                                <el-table-column label="完成单数记录" v-if="info.state==1">
+                                    <template slot-scope="scope">
+                                        <el-button @click="view(scope.row.id)" type="text" size="small">查看完成记录</el-button>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </template>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="fenye">
+                        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                                       :current-page="info.page"
+                                       :page-sizes="sizes" :page-size="info.size"
+                                       layout="total, sizes, prev, pager, next, jumper" :total="total"
+                                       background>
+                        </el-pagination>
+                    </div>
+
+                </div>
+
+            </div>
+            <el-dialog title="完成记录" :visible.sync="c_task">
+                <div class="shuju_table">
+                    <template>
+                        <el-table :data="task_list" border style="width: 100%;" header-cell-style="background:#f5f7fa;">
+                            <el-table-column prop="id" label="序号">
+                            </el-table-column>
+                            <el-table-column prop="username" label="用户名">
+                            </el-table-column>
+                            <el-table-column prop="month" label="月份">
+                            </el-table-column>
+                            <el-table-column prop="task_number" label="完成单数">
+                            </el-table-column>
+                        </el-table>
+                    </template>
+                </div>
+
+                <!-- 分页 -->
+                <div class="fenye">
+                    <el-pagination @size-change="sizeChange" @current-change="pageChange"
+                                   :current-page="get_task.page"
+                                   :page-sizes="sizes" :page-size="get_task.size"
+                                   layout="total, sizes, prev, pager, next, jumper" :total="total_task"
+                                   background>
+                    </el-pagination>
+                </div>
+            </el-dialog>
+        </div>
+    </div>
+    <script type="text/javascript">
+
+        /* 初始化一个Vue */
+        var vm = new Vue({
+            el: ".center_box",
+            data: function () {
+                return {
+                    info:{
+                        state:1,
+                        searchTime: "",
+                        page:1,
+                        size:10,
+                        sortNum:1,
+                    },
+                    sizes:[10,20,30,40,50],
+                    total:0,
+                    list:[],
+                    /* 默认选中第一页 */
+                    str: '上次接单时间',
+                    strs:'接单时间倒序',
+                    total_task:0,
+                    c_task:false,
+                    task_list:[],
+                    get_task:{
+                        id:'',
+                        page:1,
+                        size:10,
+                    },
+                }
+            },
+            created:function(){
+                that = this;
+                this.getData();
+            },
+            methods: {
+                alertError: function (e) {
+                    this.$message({
+                        message: e,
+                        type: "error"
+                    });
+                },
+                /* 成功的弹框 */
+                alertSuccess: function (e) {
+                    this.$message({
+                        message: e,
+                        type: "success"
+                    });
+                },
+                getData:function() {
+                    var that = this;
+                    $.post("{:url('recommend/recordData')}", this.info, function (res) {
+                        if (res.code == 1) {
+                            that.list = res.data.list;
+                            that.total = res.data.total;
+                        } else {
+                            layer.close(loading);
+                            vm.alertError('网络错误！', {icon: 2});
+                        }
+                    })
+                },
+                getTaskData:function() {
+                    var that = this;
+                    $.post("{:url('recommend/getCTask')}", this.get_task, function (res) {
+                        console.log(res);
+                        if (res.code == 1) {
+                            that.task_list = res.data.list;
+                            that.total_task = res.data.total;
+                        } else {
+                            vm.alertError('网络错误！', {icon: 2});
+                        }
+                    })
+                },
+
+                view:function(id){
+                    this.get_task.id = id;
+                    this.getTaskData();
+                    this.c_task = true;
+                },
+                /* 分页事件 */
+                sizeChange: function (val) {
+                    this.get_task.size = val;
+                    this.get_task.page = 1;
+                    this.getTaskData();
+                },
+                pageChange: function (val) {
+                    this.get_task.page = val;
+                    this.getTaskData();
+                },
+                /* 给表格上色 */
+                cellStyle: function (e) {
+                    if (e.columnIndex === 4 && e.row.status==1) {
+                        return "color:red;"
+                    }
+                    if (e.columnIndex === 3 && e.row.state==1) {
+                        return "color:red;"
+                    }
+                },
+                /* 分页事件 */
+                handleSizeChange: function (val) {
+                    this.info.size = val;
+                    this.info.page = 1;
+                    this.getData();
+                },
+                handleCurrentChange: function (val) {
+                    this.info.page = val;
+                    this.getData();
+                },
+                changeTab:function(num){
+                    this.info.state = num;
+                    if(num==1){
+                        this.str = '上次接单时间';
+                        this.strs = '接单时间排序';
+                    }else{
+                        this.str = '上次发单时间';
+                        this.strs = '发单时间排序';
+                    }
+                    this.info.page = 1;
+                    this.info.size = 10;
+                    this.info.searchTime='';
+                    this.getData();
+                },
+                search:function(){
+                    this.info.page = 1;
+                    this.info.size = 10;
+                    this.getData();
+                },
+                sort:function(num){
+                    this.info.sortNum = num;
+                    this.info.page = 1;
+                    this.info.size = 10;
+                    this.info.searchTime='';
+                    this.getData();
+                },
+            }
+        });
+
+    </script>
+    <!-- 底部 -->
+    {include file="public/footer" /}

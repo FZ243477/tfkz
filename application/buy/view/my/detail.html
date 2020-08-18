@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css" />
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/taskDetail.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png" />
+    <script src="/static/buy/js/vue-2.6.10.min.js"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function() {
+            /* 初始化一个Vue */
+            var vm = new Vue({
+                el: ".center_box",
+                data: function () {
+                    return {
+                        /* 起止日期value值 */
+                        dateValue: "",
+                        /* 搜索框value值 */
+                        searchInput: "",
+                        /* 数据1 */
+                        taskData: {
+                            maiHao: "{$list.wwid}",
+                            type: "{$list.task_type}",
+                            zhongDuan: "{$list.terminal}",
+                            benJin: "{$list.seller_principal}",
+                            yongJin: "{$list.commission}",
+                            user_divided:"{$list.user_divided}",
+                            money: "{$list.seller_principal}",
+                            dianPu: "{$list.shop_name}",
+                            taskNum: "{$list.task_number}",
+                            time: "{$list.create_time}",
+                            taskType: "{$list.state}",
+                            delType:"{$list.deltask_type}",
+                            goods_price:"{$list.goods_price}",
+                            seller_name:"{$list.seller_name}"
+                        },
+                        /* 数据2 */
+                        taskData2: {
+                            img: "{$list.keywordimg}",
+                            img2: "{$list.chatimg}",
+                            zhiFu: "已上传订单",
+                            order:"{$list.table_order_id}",
+                            style: "{$list.delivery}",
+                            num: "{$list.delivery_num}",
+                            type1: "{$list.state}",
+                            time: "{$list.update_time}",
+                            step_two_complete:"{$list.step_two_complete}",
+                            upload_order_time:"{$list.upload_order_time}",
+                            delivery_time:"{$list.delivery_time}",
+                            platform_refund_time:"{$list.platform_refund_time}"
+                        },
+                        /* 默认弹框不开启 */
+                        dialogVisible: false,
+                        dialogVisible2: false,
+                    };
+                },
+                methods: {
+                    ayongjin:function(){
+                        location.href="{:url('money/withsilver',['editpass'=>1])}"
+                    },
+                    abenjin:function(){
+                        location.href="{:url('money/withdrawal',['editpass'=>1])}"
+                    },
+                }
+            });
+
+        });
+    </script>
+
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;任务情况&nbsp;/&nbsp;<span class="msg_title_txt">任务详情</span></p>
+            </div>
+            <div class="user_content">
+
+                <!-- 银锭充值 -->
+                <div class="web_gonggao">
+                    <div class="gonggao_row">
+                        <div class="gonggao_top">
+                            <a href="javascript:" class="select_on">任务详情</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 任务信息 -->
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span style="color: red;font-size: 20px;">任务信息</span>
+                        <el-button style="float: right;padding: 3px 0;" @click="abenjin" type="text">本金记录</el-button>
+                        <el-button style="float: right; padding: 3px 10px;" @click="ayongjin" type="text">银锭记录</el-button>
+                    </div>
+                    <div class="task_name">
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">买号：</h3>
+                            <p>{{taskData.maiHao}}</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">任务类型：</h3>
+                            <p>{{taskData.type}}</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">下单终端：</h3>
+                            <p>{{taskData.zhongDuan}}</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">佣金：</h3>
+                            <p>{{taskData.yongJin}}+{{taskData.user_divided}}银锭</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">任务金额：</h3>
+                            <p>{{taskData.goods_price}}</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">垫付本金：</h3>
+                            <p>{{taskData.benJin}}元</p>
+                        </el-card>
+
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">返款金额：</h3>
+                            <p>{{taskData.money}}元</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">任务编号：</h3>
+                            <p>{{taskData.taskNum}}</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">商家用户名：</h3>
+                            <p>{{taskData.seller_name}}</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">店铺：</h3>
+                            <p>{{taskData.dianPu.substr(0,3)+"..." }}</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">创建时间：</h3>
+                            <p>{{taskData.time}}</p>
+                        </el-card>
+                        <el-card class="task_card">
+                            <h3 style="color: #3f8edb;">任务状态：</h3>
+                            <p>{{taskData.taskType}}<span v-if="taskData.taskType =='已取消'" style="margin-left: 10px;">{{taskData.delType}}</span></p>
+                        </el-card>
+                    </div>
+                </el-card>
+
+                <!-- 任务进度 -->
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span style="color: red;font-size: 20px;">任务进度</span>
+                    </div>
+                    <div>
+                        <div class="task_row">
+                            <h4>服务项目</h4>
+                            <h4>完成状态</h4>
+                            <h4>完成时间</h4>
+                        </div>
+                        <div class="task_row">
+                            <span>浏览店铺及在线客服聊天</span>
+                            <span class="span">
+								<el-button type="text" @click="dialogVisible = true">点击查看</el-button>
+								<el-button type="text" @click="dialogVisible2 = true">点击查看</el-button>
+							</span>
+                            <span>{{taskData2.step_two_complete}}</span>
+                        </div>
+                        <div class="task_row">
+                            <span>下单/支付</span>
+                            <span>{{taskData2.zhiFu}}</span>
+                            <span>{{taskData2.upload_order_time}}</span>
+                        </div>
+                        <div class="task_row">
+                            <span>买手已完成订单号</span>
+                            <span>{{taskData2.order}}</span>
+                            <span>{{taskData2.upload_order_time}}</span>
+                        </div>
+                        <div class="task_row">
+                            <span>商家发货</span>
+                            <span style="display: flex;flex-direction: column;">
+								<span>快递方式：{{taskData2.style}}</span>
+								<span>快递单号：{{taskData2.num}}</span>
+							</span>
+                            <span>{{taskData2.delivery_time}}</span>
+                        </div>
+                        <div class="task_row">
+                            <span>平台返款</span>
+                            <span style="display: flex;flex-direction: column;">
+								<span v-if="taskData2.type1 =='待确认返款'">已返款</span>
+								<span v-if="taskData2.type1 =='已完成'">已返款</span>
+								<span v-else>待返款</span>
+							</span>
+                            <span>{{taskData2.platform_refund_time}}</span>
+                        </div>
+                        <div class="task_row">
+                            <span>任务状态</span>
+                            <span>{{taskData2.type1}}</span>
+                            <span>{{taskData2.time}}</span>
+                        </div>
+                        {volist name="product" id="vo"}
+                        <div class="task_row">
+                            <img src="{$vo.pc_img}" style="height:120px;margin-left: 50px;" alt="">
+                            <p style="width: 70%;margin-left: 40px;"><span style="color: red;">好评内容:</span>{$vo.text_praise}</p>
+                        </div>
+                        {/volist}
+                        <div class="task_row">
+                            <span >图片</span>
+                            {volist name="$list['img_praise']" id="vo"}
+                            <span>
+                            <a href="#"><img src="{$vo}" alt="" style="width: 70px;"></a>
+                        </span>
+                            {/volist}
+                        </div>
+
+                        <div class="task_row">
+                            <span >视频</span>
+                            <span>
+                            <video width="200" src="{$list['video_praise']}" controls="controls">您的浏览器不支持 video 标签。</video>
+                        </span>
+                        </div>
+<!--                        <div class="task_row">-->
+<!--                            <span>返款确定</span>-->
+<!--                            <span>{{taskData2.type2}}</span>-->
+<!--                            <span>{{taskData2.time}}</span>-->
+<!--                        </div>-->
+                    </div>
+                </el-card>
+                <!-- 图片弹框1 -->
+                <el-dialog :visible.sync="dialogVisible">
+                    <img :src="taskData2.img" alt="" />
+                    <span slot="footer" class="dialog-footer">
+					<el-button type="primary" @click="dialogVisible = false" size="small">确 定</el-button>
+				</span>
+                </el-dialog>
+                <!-- 图片弹框2 -->
+                <el-dialog :visible.sync="dialogVisible2">
+                    <img :src="taskData2.img2" alt="" />
+                    <span slot="footer" class="dialog-footer">
+					<el-button type="primary" @click="dialogVisible2 = false" size="small">确 定</el-button>
+				</span>
+                </el-dialog>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

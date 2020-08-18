@@ -1,0 +1,293 @@
+{include file="public/header" /}
+<link rel="stylesheet" type="text/css" href="/static/seller/css/status.css" />
+<style>
+	.box-card {
+		margin-bottom: 50px;
+	}
+
+	/* 数据展示1 */
+	.task_name {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+	}
+
+	.task_row {
+		display: flex;
+		flex-direction: row;
+		text-align: center;
+		align-items: center;
+		padding: 10px;
+		border-bottom: 1px solid #EEEEEE;
+		border-left: 1px solid #EEEEEE;
+		border-right: 1px solid #EEEEEE;
+	}
+
+	.task_row:nth-of-type(1) {
+		background: #f5f7fa;
+	}
+
+	.task_row:hover {
+		background: #f5f7fa;
+	}
+
+	.task_row h4 {
+		flex: 1;
+		color: #909399;
+	}
+
+	.task_row span {
+		flex: 1;
+	}
+
+	.task_row .span .el-button {
+		font-size: 16px;
+	}
+
+	.task_name .task_card {
+		width: 400px;
+		margin: 10px 0;
+	}
+
+	.task_name .task_card p {
+		margin: 10px 0;
+	}
+
+	.el-dialog {
+		width: 900px;
+	}
+
+	.el-dialog img {
+		width: 100%;
+	}
+	.return_btn{
+		flex-direction: row;
+		text-align: center;
+		align-items: center;
+	}
+	.return_btn button{
+		margin-top: 10px;
+	}
+</style>
+<!-- 右边盒子部分 -->
+<div class="right" v-cloak>
+<div class="task">
+	<div class="task_title"><b>任务详情</b></div>
+	<!-- 任务信息 -->
+	<el-card class="box-card">
+		<div slot="header" class="clearfix">
+			<span style="color: red;font-size: 20px;">任务信息</span>
+		</div>
+		<div class="task_name">
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">买号：</h3>
+				<p>{{info.user_buyno_wangwang}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">任务类型：</h3>
+				<p>{{info.task_type}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">下单终端：</h3>
+				<p>{{info.terminal}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">预付本金：</h3>
+				<p>{{info.principal}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">垫付本金：</h3>
+				<p>{{info.user_principal}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">返款金额：</h3>
+				<p>{{info.seller_principal}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">店铺：</h3>
+				<p>{{info.shop}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">任务编号：</h3>
+				<p>{{info.task_number}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">创建时间：</h3>
+				<p>{{info.create_time}}</p>
+			</el-card>
+			<el-card class="task_card">
+				<h3 style="color: #3f8edb;">任务状态：</h3>
+				<p>{{info.state}}</p>
+			</el-card>
+		</div>
+	</el-card>
+
+	<!-- 任务进度 -->
+	<el-card class="box-card">
+		<div slot="header" class="clearfix">
+			<span style="color: red;font-size: 20px;">任务进度</span>
+		</div>
+		<div>
+			<div class="task_row">
+				<h4>服务项目</h4>
+				<h4>完成状态</h4>
+				<h4>完成时间</h4>
+			</div>
+			<div class="task_row">
+				<span>浏览店铺及在线客服聊天</span>
+				<span class="span">
+								<el-button type="text" @click="imgShows(1)">点击查看</el-button>
+								<el-button type="text" @click="imgShows(2)">点击查看</el-button>
+							</span>
+				<span>{{info.step_two_complete}}</span>
+			</div>
+			<div class="task_row">
+				<span>下单/支付</span>
+				<span class="span">
+					<el-button type="text" @click="imgShows(3)">点击查看</el-button>
+				</span>
+				<span>{{info.upload_order_time}}</span>
+			</div>
+			<div class="task_row">
+				<span>淘宝订单号</span>
+				<span class="span">
+					{{info.table_order_id}}
+				</span>
+				<span>{{info.upload_order_time}}</span>
+			</div>
+			<div class="task_row">
+				<span>商家发货</span>
+				<span style="display: flex;flex-direction: column;">
+								<span>快递方式：{{info.delivery}}</span>
+								<span>快递单号：{{info.delivery_num}}</span>
+							</span>
+				<span>{{info.delivery_time}}</span>
+			</div>
+			<div class="task_row">
+				<span>好评图片</span>
+				<span style="display: flex;flex-direction: column;">
+								<span class="span">
+					<el-button type="text" @click="imgShows(4)">点击查看</el-button>
+				</span>
+							</span>
+				<span>{{info.high_praise_time}}</span>
+			</div>
+			<div class="task_row">
+				<span>任务状态</span>
+				<span>{{info.state}}</span>
+				<span>{{info.time}}</span>
+			</div>
+			<div class="return_btn" v-if="info.state=='待返款'">
+				<el-button type="primary" @click="returnPay(info.id,info.principal)">返款</el-button>
+			</div>
+		</div>
+	</el-card>
+	<!-- 图片弹框1 -->
+	<el-dialog :visible.sync="imgShow">
+		<div >
+			<img :src="img" alt="" style="width: 600px"/>
+		</div>
+		<span slot="footer" class="dialog-footer">
+					<el-button type="primary" @click="imgShow = false" size="small">确 定</el-button>
+				</span>
+	</el-dialog>
+	<el-dialog title="填写返款金额" :visible.sync="returnState" >
+		<el-form :model="form">
+			<el-form-item label="返款金额">
+				<el-input v-model="form.price" autocomplete="off"></el-input>
+			</el-form-item>
+		</el-form>
+		<div slot="footer" class="dialog-footer">
+			<el-button @click="returnState = false">取 消</el-button>
+			<el-button type="primary" @click="returnPayDo()">确 定</el-button>
+		</div>
+	</el-dialog>
+</div>
+</div>
+<script>
+var body = new Vue({
+	el: ".right",
+	data: function() {
+		return {
+			id:"{$id}",
+			info:{
+				user_buyno_wangwang:'',
+				task_type:'',
+				task_number:'',
+				create_time:'',
+				principal:0,
+				commission:0,
+				user_principal:0,
+				seller_principal:0,
+				terminal:"电脑端",
+				shop:'',
+				keywordimg:'',//查找截图
+				chatimg:'',//聊天截图
+				order_detail_img:'',//付款截图
+				high_praise_img:'',//好评截图
+				img2:'',
+				time:'',
+			},
+			img:'',
+			imgShow:false,
+			user_price:'',
+			returnState:false,
+			form:{
+				id:'',
+				price:'',
+			},
+
+		};
+	} ,
+	created:function(){
+		that = this;
+		this.getData();
+	},
+	methods: {
+		getData:function(){
+			var that = this;
+			$.post("{:url('task/getDetail')}",{id:this.id},function(res){
+					if(res.code==1){
+						that.info = res.data;
+					}else{
+						layer.msg(res.msg,{icon:2},function(){
+							window.history.go(-1);
+						});
+					}
+			})
+		},
+		imgShows:function(num){
+			if(num==1)this.img = this.info.keywordimg;
+			if(num==2)this.img = this.info.chatimg;
+			if(num==3)this.img = this.info.order_detail_img;
+			if(num==4)this.img = this.info.high_praise_img;
+			console.log(this.img);
+			this.imgShow = true;
+		},
+		returnPay: function(id,price){
+			this.form.id = id;
+			this.user_price = price;
+			this.form.price = '';
+			this.returnState=true;
+		},
+		returnPayDo: function(){
+			if(this.form.price < (this.user_price * 0.8))return layer.msg('返款金额向下只能在预付金额20%浮动！',{icon:2,time:2500});
+			$.post("{:url('task/returnPay')}",this.form,function(res){
+				if(res.code==1){
+					layer.msg(res.msg,{icon:1},function(){
+						this.returnState=false;
+						location.reload();
+					});
+				}else{
+					layer.msg(res.msg,{icon:2},function(){
+						location.reload();
+					});
+				}
+			})
+		}
+	}
+})
+</script>
+{include file="public/footer" /}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link href="/static/seller/node_modules/element-ui/lib/theme-chalk/index.css" rel="stylesheet" type="text/css" />
+  <script src="/static/seller/js/jquery.min.js"></script>
+  <script charset="utf-8" src="/static/seller/js/vue.js" type="text/javascript"></script>
+  <script src="/static/seller/node_modules/element-ui/lib/index.js"></script>
+  <link href="/static/seller/css/new_goods.css" rel="stylesheet" type="text/css" />
+  <script charset="utf-8" src="/static/seller/layer/layer.js" type="text/javascript"></script>
+  <script src="/static/seller/js/axios.min.js"></script>
+  <title></title>
+</head>
+<body>
+<div id="menu" v-cloak>
+  <el-form :model="goods" class="demo-ruleForm" inline-message='false' label-width="100px" ref="ruleForm">
+    <el-form-item label="宝贝链接:" prop="link" style='width:600px;'>
+      <el-input placeholder="请输入内容" v-model="goods.link"></el-input>
+    </el-form-item>
+    <el-form-item label="店铺名称:" prop="region">
+      <el-select placeholder="请选择" v-model="goods.shop_id">
+        <el-option :disabled='true' label="请选择" value="0"></el-option>
+        <el-option :label="item.shop_name" :value="item.id" v-for="(item,a) in shops" :key="a"></el-option>
+      </el-select>
+    </el-form-item>
+    <el-form-item label="宝贝名称:" prop="name" style='width:600px;'>
+      <el-input placeholder="请输入内容" v-model="goods.name"></el-input>
+    </el-form-item>
+    <el-form-item label="核对数字:" prop="pass" v-if="state">
+      <el-input placeholder="请输入6位纯数字" style='width: 216px;' v-model="goods.number"></el-input>
+    </el-form-item>
+    <el-form-item label="宝贝主图:" prop="img">
+      <div v-for="(item,index) in goods.pc_img" style="display: inline-block;position: relative;margin-right:4.5px;">
+        <img onerror="imgError(this)" :src="item" alt="" style="height: 80px;width: 80px">
+        <i class="el-icon-error" style="position: absolute;top:0px;right: 0px" @click="delImg(index)"></i>
+      </div>
+      <label style="display: inline-block">
+        <input style="position:absolute;opacity:0;" type="file" name="file" accept="image/gif,image/jpeg,image/x-png" @change="getImg($event)"/>
+        <img style="width: 80px;height: 80px;" src="/images/add.jpg">
+      </label>
+    </el-form-item>
+    <el-form-item class='show' label="搜索页面展示价格：" prop="show">
+      <el-input-number :min="0" v-model="goods.show_price"></el-input-number>&nbsp;&nbsp;元
+      <b>非必填，如该商品有满减、促销、多规格等情况，请填写此金额</b>
+    </el-form-item>
+  </el-form>
+  <div class="el">
+    <el-button @click='storage()' style='width: 198px;' type="danger">保存</el-button>
+  </div>
+  <div class="el" style="margin-bottom: 80px">
+    <el-row :gutter="20" style="margin-bottom: 20px">
+      <el-col :span="4"><div class="grid-content bg-purple">序号</div></el-col>
+      <el-col :span="12"><div class="grid-content bg-purple">关键词</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">是否使用</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">操作</div></el-col>
+    </el-row>
+    <el-row :gutter="20" v-for="(item,key) in task_word" :key="key">
+      <el-col :span="4"><div class="grid-content bg-purple">关键词{{key+1}}:</div></el-col>
+      <el-col :span="12"><div class="grid-content bg-purple"><el-input type="text" v-model="item.key_word"></el-input></div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple"><span v-if="item.ynum==0">已使用</span><span v-else>未使用</span></div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple"><el-button @click='edit_word(item.key_word,item.id)' type="danger" size="small">修改</el-button></div></el-col>
+    </el-row>
+  </div>
+
+  <div class="el" style="margin-bottom: 80px">
+    <el-row :gutter="24" style="margin-bottom: 20px">
+      <el-col :span="6"><div class="grid-content bg-purple">关键词</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">折扣服务</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">筛选分类</div></el-col>
+      <el-col :span="6"><div class="grid-content bg-purple">排序和价格</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">发货地</div></el-col>
+    </el-row>
+    <el-row :gutter="24" v-for="(item,key) in task_word" :key="key">
+      <el-col :span="6"><div class="grid-content bg-purple">{{item.key_word}}</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">{{item.discount}}</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">{{item.filter}}</div></el-col>
+      <el-col :span="6"><div class="grid-content bg-purple">{{item.sort}}:{{item.max_price}}-{{item.min_price}}</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">{{item.province}}</div></el-col>
+    </el-row>
+  </div>
+</div>
+</body>
+<script>
+  var name = new Vue({
+    el: "#menu",
+    data: function() {
+      return {
+        state:"{$state}",
+        goods:{
+          link:'',
+          shop_id:'',
+          name:'',
+          number:'',
+          num:'',
+          show_price:'',
+          pc_img:[],
+        },
+          task_word:[],
+      }
+    },
+    mounted:function(){
+      that=this;
+      this.getData();
+    },
+    methods: {
+      /* 获取图片的base64路径 */
+      getImg: function (e) {
+        var reader = new FileReader();
+        reader.readAsDataURL(e.target.files[0]);
+        reader.onload=function () {
+          if(that.goods.pc_img.length >= 3)return layer.msg('最多上传3张图片',{icon:2});
+          that.goods.pc_img.push(reader.result);
+        }
+      },
+      /* 删除图片 */
+      delImg: function (index) {
+        that.goods.pc_img.splice(index,1);
+      },
+      getData:function(){
+        var that = this;
+        $.post("{:url('task/edit')}",{id:"{$id}",task_id:"{$task_id}"},function(res){
+            console.log(res);
+            if(res.code==1){
+            that.goods = res.data.list;
+            that.shops = res.data.shop;
+            that.task_word = res.data.list_word;
+          }else{
+            layer.msg('网络错误',{icon:2});
+          }
+        })
+      },
+      // 整个保存判断
+      storage(){
+        if(this.state==1){
+          if(!this.goods.number)return layer.msg('请填写核对数字',{icon:2,time:2000});
+        }
+        $.post("{:url('task/goodsEditDo')}",this.goods,function(res){
+          if(res.code==1){
+            layer.msg(res.msg,{icon:1,time:2000},function(){
+              window.parent.location.reload();
+            });
+          }else{
+            return layer.msg(res.msg,{icon:2,time:2000});
+          }
+        })
+      },
+        edit_word:function(key_word,id){
+            if(!key_word)return layer.msg('关键词不能为空',{icon:2,time:2000});
+            $.post("{:url('task/keyWordEdit')}",{id:id,key_word:key_word},function(res){
+                if(res.code==1){
+                    layer.msg(res.msg,{icon:1,time:2000});
+                }else{
+                    layer.msg(res.msg,{icon:2,time:2000});
+                }
+            })
+        },
+    },
+    //默认显示买家下单添加小数两位
+    created: function() {
+    }
+  });
+</script>
+</html>

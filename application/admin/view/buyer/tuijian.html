@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>押金</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+</head>
+
+<body class="childrenBody">
+    <form class="layui-form">
+        <blockquote class="layui-elem-quote quoteBox">
+            <form class="layui-form">
+                <div class="layui-inline">
+					<label class="layui-form-label">时间：</label>
+					<div class="layui-input-inline">
+						<input type="text" name="time" lay-verify="time" class="layui-input time" id="application-Time"
+							placeholder="请选择申请日期时间段">
+					</div>
+				</div>
+            </form>
+        </blockquote>
+        <table id="userList" lay-filter="userList"></table>
+    </form>
+    <script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+    <script>
+        layui.use(['form', 'layer', 'table', 'laytpl', 'laydate'], function () {
+            var form = layui.form,
+                layer = parent.layer === undefined ? layui.layer : top.layer,
+                $ = layui.jquery,
+                laytpl = layui.laytpl,
+                table = layui.table;
+            laydate = layui.laydate;
+            //用户列表
+            var tableIns = table.render({
+                elem: '#userList',
+                url: '../../../json/newsList.json',
+                cellMinWidth: 95,
+                page: true,
+                height: "full-125",
+                limits: [10, 15, 20, 25],
+                limit: 10,
+                id: "userListTable",
+                cols: [[
+                    { field: 'newsId', title: '时间', width: 60, align: "center" },
+                    { field: 'userType', title: '用户名', minWidth: 55, width: 200, align: "center" },
+                    { field: 'phone', title: '账户类型', minWidth: 50, width: 200, align: "center" },
+                    { field: 'oneyInformation', title: '完成任务量', minWidth: 200, width: 200, align: "center" },
+                    { field: 'collection', title: '奖励银锭', minWidth: 100, width: 280, align: "center" }
+                ]]
+            });
+            //申请时间
+            var date2 = laydate.render({
+                elem: '#application-Time'
+                , type: 'datetime'
+                , range: true
+                , format: 'yyyyMMdd'
+                , done: function(value, date, endDate){
+                    table.reload("userListTable", {//搜索【此功能需要后台配合，所以暂时没有动态效果演示】
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        },
+                        where: {
+                            date: value //时间
+                        }
+                    })
+                }
+            })
+            
+
+        })
+
+    </script>
+</body>
+
+</html>

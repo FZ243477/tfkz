@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css"/>
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/benJinTiXian.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png" />
+    <script src="/static/buy/js/vue-2.6.10.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            /* 初始化一个Vue */
+            var vm = new Vue({
+               el: ".center_box",
+                data: function () {
+                    return {
+                        list:[],
+                        radio: "1",
+                        /* 输入框数量默认值5 */
+                        tiXianNum: {$admin_limit.user_min_money},
+                        /* 提现密码的值 */
+                        tiXianPassWordValue: "",
+                        /* 到账金额 */
+                        daoZhangPrice: {$admin_limit.user_min_money}-{$admin_limit.user_cash_free},
+                        /* 提现最低金额 */
+                        tiXianPrice: {$admin_limit.user_min_money},
+                        /* 提现手续费内容 */
+                        tiXianContent: "本金提现{$admin_limit.user_fee_max_price}元及以下操作平台将收取 {$admin_limit.user_cash_free}元 的手续费",
+                        /* 起止日期value值 */
+                        dateValue: "",
+                        /* 搜索框value值 */
+                        searchInput: "",
+                        /* 默认选中第一页 */
+                        currentPage: 1,
+                        total:0,
+                        size:10,
+                        sizes:[10,20,30,40,50],
+                    }
+                },
+                created: function () {
+                    this.getData();
+                },
+                mounted:function(){
+                   // 本金提现和本金记录的显示和隐藏
+                    $(".shuju_table").hide();
+                    {notempty name="editpass"}
+                    {if condition="$editpass ==1"}
+                    $(".user_content .web_gonggao .gonggao_row .gonggao_top").eq(1).children().addClass("select_on").end().siblings().children().removeClass("select_on");
+                    $(".shuju_table").show();
+                    $(".benjin_tixian").hide();
+                    {else}
+                    {/if}
+                        {/notempty}
+                            // 本金提现和银锭提现的显示和隐藏
+                            {notempty name="ydtx"}
+                            {if condition="$ydtx ==1"}
+                            this.radio="2";
+                            this.tiXianNum={$admin_limit.user_min_reward};
+                            this.daoZhangPrice = {$admin_limit.user_min_reward}*{$admin_limit.reward_price};
+                            this.tiXianPrice = {$admin_limit.user_min_reward};
+                            this.tiXianContent = "银锭提现按当前单价{$admin_limit.reward_price}自动取整";
+                            {else}
+                            {/if}
+                                {/notempty}
+                },
+                methods: {
+                    /* 下拉菜单事件 */
+                    handleOpen: function (key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    handleClose: function (key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    /* 消息弹框事件 */
+                    openMsg: function () {
+                        this.$alert("暂无消息通知", "个人通知", {});
+                    },
+                    /* 数字框事件 */
+                    handleChange: function (value) {
+                        if(this.radio==="1"){
+                            if(value<={$admin_limit.user_fee_max_price}){
+                                this.daoZhangPrice=parseFloat(value-1).toFixed(2);
+                            }else{
+                                this.daoZhangPrice=parseFloat(value).toFixed(2);
+                            }
+                        }else if(this.radio==="2"){
+                            this.daoZhangPrice=parseFloat(value*{$admin_limit.reward_price}).toFixed(2)
+
+                        }
+                    },
+                    /* 单选框事件 */
+                    labelChange: function (e) {
+                        var num = parseInt(e);
+                        // console.log(num);
+                        if (num === 1) {
+                            this.tiXianNum={$admin_limit.user_min_money};
+                            this.daoZhangPrice = {$admin_limit.user_min_money}-{$admin_limit.user_cash_free};
+                            this.tiXianPrice = {$admin_limit.user_min_money};
+                            this.tiXianContent = "提现本金大于{$admin_limit.user_fee_max_price}元免{$admin_limit.user_cash_free}元手续费.";
+                        } else if (num === 2) {
+                            this.tiXianNum={$admin_limit.user_min_reward};
+                            this.daoZhangPrice = {$admin_limit.user_min_reward}*{$admin_limit.reward_price};
+                            this.tiXianPrice = {$admin_limit.user_min_reward};
+                            this.tiXianContent = "银锭提现按当前单价{$admin_limit.reward_price}自动取整";
+                        }
+                    },
+                    /* 失败的弹框 */
+                    alertError: function(e) {
+                        this.$message.error(e);
+                    },
+                    /* 成功的弹框 */
+                    alertSuccess: function(e) {
+                        this.$message({
+                            message: e,
+                            type: "success"
+                        });
+                    },
+                    /* 点击提现 */
+                    tiXianBtnActive: function () {
+                        var that = this;
+                        this.$confirm("您确定要提现吗?", "温馨提示", {
+                            confirmButtonText: "确定",
+                            cancelButtonText: "取消",
+                            type: "warning"
+                        }).then(function () {
+                            if(!that.tiXianPassWordValue) return vm.alertError("请输入支付密码");
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('buy/money/creat_withdrawal')}",
+                                async : true,
+                                data : {
+                                    "price":that.tiXianNum,
+                                    "password":that.tiXianPassWordValue,
+                                    "radio":that.radio
+                                },
+                                success : function(data){
+                                    if(data.code==1){
+                                        that.alertSuccess(data.msg);
+                                        setTimeout(function(){
+                                            return location.href=data.url;
+                                        },3000)
+
+                                    }else{
+                                        that.alertError(data.msg);
+                                        setTimeout(function(){
+                                            return location.href=data.url;
+                                        },3000)
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                        }).catch(function () {
+                            that.$message({
+                                type: "info",
+                                message: "您取消了操作"
+                            });
+                        });
+                    },
+                    /* 给表格上色 */
+                    cellStyle: function (e) {
+                        var price = this.list[e.rowIndex].price;
+                        price = Number(price);
+
+                        if (e.columnIndex === 0) {
+                            if (price >= 1) {
+                                return "color: rgb(103, 194, 58);";
+                            } else if (price <= 0) {
+                                return "color:red;";
+                            }
+                        }
+
+                    },
+                    getData:function(){
+                        var that = this;
+                        $.post("{:url('money/withdrawal')}",{page:this.currentPage,inputcontent:this.searchInput,datetime:this.dateValue,size:this.size},function (res) {
+                            console.log(res);
+                            if(res.code==1){
+                                that.list = res.data.list;
+                                that.total = res.data.total;
+                            }else{
+                                vm.alertError(res.msg);
+                            }
+                        })
+                    },
+                    search:function(){
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    handleSizeChange(val) {
+                        this.size = val;
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    handleCurrentChange(val) {
+                        this.currentPage = val;
+                        this.getData();
+                    },
+
+                    excelDeposit:function () {
+                        var start = "";
+                        var end = "";
+                        if(this.dateValue){
+                            start = this.dateValue[0];
+                            end = this.dateValue[1];
+                        }
+                        window.open("{:url('Money/excelDeposit','','',false)}/start/"+start+"/end/"+end);
+                    },
+                }
+
+            });
+
+            /* 初始化jQuery */
+            $(function () {
+
+                /* 调用jQuery实现选择导航栏效果 */
+                $(".title a").click(function () {
+                    $(this).addClass("add_color").siblings().removeClass("add_color");
+                });
+
+                /* 点击切换显示和隐藏 */
+                $(".user_content .web_gonggao .gonggao_row .gonggao_top").click(function () {
+                    $(this).children().addClass("select_on").end().siblings().children().removeClass("select_on");
+                    var index = $(this).index();
+                    if (index === 0) {
+                        $(".shuju_table").hide().siblings(".benjin_tixian").show();
+                        $(".msg_title_txt").text("本金提现");
+                    } else {
+                        $(".shuju_table").show().siblings(".benjin_tixian").hide();
+                        $(".msg_title_txt").text("本金记录");
+                    }
+                });
+
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;账号信息&nbsp;/&nbsp;<span class="msg_title_txt">提现</span></p>
+            </div>
+            <div class="user_content">
+
+                <!-- 本金提现 -->
+                <div class="web_gonggao">
+                    <div class="gonggao_row">
+                        <div class="gonggao_top">
+                            <a href="javascript:" class="select_on">提现</a>
+                        </div>
+                        <div class="gonggao_top">
+                            <a href="javascript:">本金记录</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 本金提现部分 -->
+                <div class="benjin_tixian">
+                    <!-- 选择提现 -->
+                    <div class="select_tixian">
+                        <p>选择提现:</p>
+                        <div class="radio">
+                            <el-radio-group v-model="radio" @change="labelChange">
+                                <el-radio label="1">本金提现</el-radio>
+                                <el-radio label="2">银锭提现</el-radio>
+                            </el-radio-group>
+                        </div>
+                    </div>
+                    <!-- 余额 -->
+                    <div class="rest_price">
+                        <p>本金余额:</p>
+                        <span>{$users.balance}</span>
+                        <span>元</span>
+                    </div>
+                    <div class="rest_price">
+                        <p>银锭余额:</p>
+                        <span>{$users.reward}</span>
+                        <span>银锭</span>
+                    </div>
+                    <!-- 打款方式 -->
+                    <div class="dakuan">
+                        <p class="dakuan_title" style="align-self: flex-start;margin-top: 2px;">打款方式:</p>
+                        <div class="dakuan_col">
+                            <div class="dakuan_box1">
+                                <span>银行卡转账</span>
+                                <a href="{:url('my/withdrawal')}" class="dakuan_view">查看提现账户</a>
+                            </div>
+                            <div class="dakuan_box2">
+                                <p>提示: <span>提现账户只能绑定一张银行卡</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 提现金额 -->
+                    <div class="dakuan">
+                        <p class="dakuan_title" style="align-self: flex-start;margin-top: 9px;">提现金额:</p>
+                        <div class="dakuan_col">
+                            <div class="dakuan_box1">
+                                <el-input-number v-model="tiXianNum" @change="handleChange"  :min="tiXianPrice"></el-input-number>
+                                <span class="tixian_view">单笔提现最低 <span style="color: red;" v-html="tiXianPrice"></span>
+                                    <span v-if="radio==1">元</span>
+                                    <span v-if="radio==2">银锭</span>
+                                </span>
+                            </div>
+                            <div class="tixian_box">
+                                <p v-html="tiXianContent"></p>
+                                <p>预计2个工作日内（国家法定假日和双休日顺延）平台完成提现操作 到账时间以各大银行为准,预计3-5工作日左右
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 到账金额 -->
+                    <div class="rest_price">
+                        <p>到账金额:</p>
+                        <span v-html="daoZhangPrice"></span>
+                        <span v-if="radio==1">元</span>
+                        <span v-if="radio==2">元</span>
+                    </div>
+                    <!-- 提现密码 -->
+                    <div class="tixian_password">
+                        <p>提现密码:</p>
+                        <el-input type="password" v-model="tiXianPassWordValue" placeholder="请输入6位提现密码" show-password
+                                  style="width: 180px;" maxlength="6"></el-input>
+                        <a href="{:url('my/information',['editpass'=>1])}">重置提现密码</a>
+                    </div>
+                    <!-- 申请提现按钮 -->
+                    <div class="tixian_btn">
+                        <el-button type="danger" icon="el-icon-circle-check" @click="tiXianBtnActive">申请提现</el-button>
+                    </div>
+                </div>
+
+                <!-- 本金记录部分 -->
+                <div class="shuju_table">
+                    <!-- 搜索区域 -->
+                    <div class="benjin_search">
+
+                        <el-date-picker class="el_date" v-model="dateValue" type="daterange" range-separator="至"
+                                        start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
+                        </el-date-picker>
+                        <el-button type="primary" icon="el-icon-search" @click="search">搜索</el-button>
+                        <el-button type="primary" icon="el-icon-download" @click="excelDeposit()">导出</el-button>
+                    </div>
+                    <!-- 数据列表 -->
+                    <el-table :data="list" border header-cell-style="background:#f5f7fa;" :cell-style="cellStyle">
+
+                        <el-table-column prop="price" label="收支明细" align="center">
+                        </el-table-column>
+                        <el-table-column prop="yprice" label="结余" align="center">
+                        </el-table-column>
+                        <el-table-column prop="create_time" label="日期" align="center">
+                        </el-table-column>
+                        <el-table-column prop="memo" label="备注" align="center">
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页 -->
+                    <div class="fenye">
+                        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes=sizes :page-size=size
+                                       layout="total, sizes, prev, pager, next, jumper" :total=total
+                                       background>
+                        </el-pagination>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

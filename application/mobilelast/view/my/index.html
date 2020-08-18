@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>首页</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {};
+                },
+                methods:{
+                    tixiana:function () {
+                        location.href="{:url('money/withdrawal')}"
+                    },
+                    gochongzhi:function () {
+                        location.href="{:url('money/withsilver')}"
+                    },
+                    tixianb:function () {
+                        location.href="{:url('money/withdrawal',['ydtx'=>1])}"
+                    },
+                    goyaoqing:function () {
+                        location.href="{:url('recommend/index')}"
+                    },
+                    maketask:function () {
+                        location.href="{:url('task/maketask')}"
+                    },
+                    personmessage:function(){
+                        location.href="{:url('helpcenter/msg')}"
+                    },
+                },
+                // 调用混入
+                mixins: [singlePersonMixin],
+                mounted: function () {
+                    publicFunction();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 头部 -->
+    <div class="public-header">
+        <div class="renwu-btn">
+            <van-button  class="renwu-btn-item" icon="passed" @click="maketask" type="warning">做任务</van-button>
+            <van-button class="renwu-btn-item" icon="passed" @click="personmessage" type="warning">
+                <b>个人通知</b>
+                <div class="renwu-btn-item-tag" v-if="tagShow">
+                    <van-tag class="slide-van-tag" round type="danger">{{tagNum}}</van-tag>
+                </div>
+            </van-button>
+        </div>
+        <div class="logo-box"><img src="/static/mobile/img/logo.png" alt=""></div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉列表 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+        <!-- 首页内容 -->
+        <div class="index-box">
+            <div class="touxiang-box"><img src="/static/mobile/img/imgheade.png" alt=""></div>
+            <div class="content-one">
+                <p class="text">用户名/<span>{$users.username}</span></p>
+                <div class="text2">
+                    <p>绑定手机号：<span>{$users.mobile}</span></p>
+                    <p>经验值：<span>{$all_num_task}</span> <span>银锭</span></p>
+                </div>
+                <p class="text3">累积赚取银锭：<span>{$all_obtain_reward}</span> <span>银锭</span></p>
+            </div>
+            <div class="content-two">
+                <p class="text">会员状态<span>
+                    /{if condition="$users.vip ==1"}VIP会员
+                                    {else /} 不是会员
+                                    {/if}
+                </span></p>
+                <div class="text2">
+                    <p>到期时间：<span>{$users.vip_time|date="Y-m-d",###}</span></p>
+                    <a href="{:url('my/vip_recharge')}">点击延时VIP</a>
+                </div>
+                <div class="text3">
+                    <p>本月可做：<span>{$residue_task}</span> <span>单任务</span></p>
+                    <p>待商家发放银锭：<span>{$wait_shop_issue}</span> <span>银锭</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分割线 -->
+        <div class="index-line"></div>
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span class="active">充值入口</span>
+        </div>
+
+        <!-- 充值入口 -->
+        <div class="index-chongzhi">
+            <!-- 我的本金 -->
+            <div class="my-benjin">
+                <p>我的本金</p>
+                <div class="my-benjin-item">
+                    <img src="/static/mobile/img/yuanbao1.png" alt="">
+                    <span>{$users.balance}元</span>
+                    <span>(可提现本金)</span>
+                </div>
+                <div class="my-benjin-item">
+                    <img src="/static/mobile/img/yuanbao1.png" alt="">
+                    <span>{$all_user_principal}元</span>
+                    <span>(总计垫付本金)</span>
+                </div>
+                <div class="index-chongzhi-btn-box">
+                    <van-button class="index-chongzhi-btn" @click="tixiana" type="info">提现</van-button>
+                </div>
+            </div>
+            <!-- 我的银锭 -->
+            <div class="my-yinding">
+                <p>我的银锭</p>
+                <div class="my-yinding-item">
+                    <img src="/static/mobile/img/yuanbao2.png" alt="">
+                    <span>{$myself.reward}银锭 = {$discounting}元</span>
+                    <span>(总银锭)</span>
+                </div>
+                <div class="my-yinding-item">
+                    <img src="/static/mobile/img/yuanbao2.png" alt="">
+                    <span>{$freeze_reward}银锭</span>
+                    <span>(冻结银锭)</span>
+                </div>
+                <div class="index-yinding-btn-box">
+                    <van-button class="index-yinding-btn" @click="gochongzhi" type="primary">充值</van-button>
+                    <van-button class="index-yinding-btn" @click="tixianb" type="primary">提现</van-button>
+                </div>
+            </div>
+            <!-- 我的邀请 -->
+            <div class="my-invite">
+                <p>我的邀请</p>
+                <div class="my-invite-item">
+                    <img src="/static/mobile/img/jinpai.png" alt="">
+                    <span>总计获得奖励:{$myself.tj_award}银锭</span>
+                </div>
+                <div class="my-invite-item">
+                    <img src="/static/mobile/img/user_lan.png" alt="">
+                    <span>总计邀请人数: {$all_invite}人</span>
+                </div>
+                <p>今日获得奖励: {$myself.tj_award_day}银锭</p>
+                <p>今日邀请人数: {$day_invite}人</p>
+                <div class="my-invite-item-btn-box">
+                    <van-button class="my-invite-item-btn" @click="goyaoqing" type="info">邀请</van-button>
+                </div>
+            </div>
+            <!-- 历史记录 -->
+            <div class="history">
+                <span>历史记录：</span>
+                <a href="{:url('money/withdrawal',['editpass'=>1])}">本金记录</a>
+                <a href="{:url('money/withsilver',['editpass'=>1])}">银锭记录</a>
+                <a href="{:url('money/drawal_record')}">提现记录</a>
+                <a href="{:url('my/vip_record')}">会员记录</a>
+            </div>
+        </div>
+
+    </div>
+
+    {include file="public/footer" /}
+

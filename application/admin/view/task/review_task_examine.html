@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>编辑资料</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+
+    <link href="/admin_style/assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/plugins/summernote/summernote.css" rel="stylesheet">
+
+    <link href="/admin_style/assets/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Template Styles -->
+    <link href="/admin_style/assets/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/plugins.min.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/pages/formlayout.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/responsive.css" rel="stylesheet" type="text/css" />
+    <link href="/admin_style/assets/css/theme-color.css" rel="stylesheet" type="text/css" />
+    <!-- 提示 -->
+    <link rel="stylesheet" href="/admin_style/assets/plugins/jquery-toast/dist/jquery.toast.min.css">
+</head>
+
+<body class="childrenBody">
+<input  type="hidden" name="dataid" lay-verify="beizhu" autocomplete="off" class="layui-input dataid">
+<form class="layui-form">
+    <div class="table-wrap">
+        <div class="table-responsive text-center" style="height: 300px!important;">
+            <table class="table display product-overview mb-30 table-bordered" id="support_table5">
+                <thead>
+                <h3>审核</h3>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>备注</td>
+                    <td colspan="1">
+                                <textarea class="form-control remarks" rows="3" name="remarks"
+                                          lay-verify="remarks"  > {$task_info['remarks']}</textarea></td>
+                    <td>审核状态</td>
+                    <input type="hidden" name="id" lay-verify="id" value="{$task_info['id']}">
+                    <td>
+                        <!--                                <select class="state" id="state" name="state" lay-verify="state">-->
+                        <!--                                </select>-->
+                        <select class="state" name="state"  lay-verify="state" >
+                            <!--                                        <option value="1">是</option>-->
+                            <!--                                        <option value="0" >不是</option>-->
+                        </select>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="modal-footer">
+                <!--                    <button type="button" class="btn btn-default">关闭</button>-->
+                <button type="button" class="btn btn-primary" data-type="reload" lay-filter="reload"
+                        lay-submit>保存</button>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+<!-- start js include path -->
+<script src="/admin_style/assets/plugins/jquery/jquery.min.js"></script>
+<!-- 提示 -->
+<script src="/admin_style/assets/plugins/jquery-toast/dist/jquery.toast.min.js"></script>
+<script src="/admin_style/assets/plugins/jquery-toast/dist/toast.js"></script>
+<script>
+    layui.use(['form', 'layer', 'table', 'laytpl', 'laydate'], function () {
+        var form = layui.form,
+            layer = parent.layer === undefined ? layui.layer : top.layer,
+            $ = layui.jquery,
+            laytpl = layui.laytpl,
+            table = layui.table;
+        laydate = layui.laydate;
+        var dataid = $(".dataid").val(); //id
+        state="{$task_info['state']}";
+        var selected1="";
+        var selected2="";
+        var selected3="";
+        var selected4="";
+        var selected5="";
+        var selected6="";
+        var selected7="";
+        if(state==1){
+            selected1='selected'
+        }else if(state==2){
+            selected2='selected'
+        }else if(state==3){
+            selected3='selected'
+        }else if(state==4){
+            selected4='selected'
+        }else if(state==5){
+            selected5='selected'
+        }else if(state==6){
+            selected6='selected'
+        }else if(state==7){
+            selected7='selected'
+        }else {
+        }
+        var optionStr = '<option></option><option value="2" '+selected2+'>已审核</option><option value="7" '+selected7+'>已拒绝</option>';
+        $('.state').append(optionStr);
+        //赋予完成 重新渲染select
+        form.render('select');
+        //验证数据
+        form.verify({
+        });
+        //申请时间
+        var date2 = laydate.render({
+            elem: '#application-Time'
+            , type: 'datetime'
+            , format: 'yyyyMMdd'
+        })
+        //表单提交
+        form.on("submit(reload)", function (data) {
+            var field = data.field;
+            console.log(field);
+            var curr=$(".layui-laypage-em").next().html(); //当前页码值
+            //弹出loading 加载
+            var index = top.layer.msg('数据提交中，请稍候', { icon: 16, time: false, shade: 0.8 });
+            var id = field.id;  //id
+            var remarks = field.remarks;  //审核备注
+            var state = field.state;  //审核状态
+            var user_type = field.user_type;  //用户身份
+
+            $.ajax({
+                type: "post",
+                url: '/index.php/admin/task/reviewtaskToExamine/',
+                data: {
+                    'id':id,
+                    'remarks':remarks,
+                    'state':state,
+                    'user_type':user_type,
+                },
+                dataType: "json",
+                async:true,
+                success:function(data) {
+                    if(data.code == 0){
+                        layer.msg(data.msg, {icon: 2});
+                        parent.layer.closeAll("iframe");
+                        //刷新父页面
+                        //parent.location.reload();
+                    }else{
+                        layer.msg(data.msg, {icon: 1},function () {
+                            // 搜索条件
+                            var task_number = $("input[name=task_number]").val(); //任务编号
+                            var wangwang = $("input[name=wangwang]").val(); //买家旺旺ID
+                            var shopname = $("input[name=shopname]").val(); //卖家店铺名
+                            var state = $('#state1 option:selected').val(); //状态
+                            var time = $("input[name=time]").val(); //接单时间
+                            var delivery_state = $("input[name=delivery_state]").val(); //发货状态
+
+                            parent.layui.table.reload('userListTable', {
+                                method: 'post'
+                                , where: {
+                                    'task_number': task_number, //任务编号
+                                    'wangwang': wangwang,    //买家旺旺ID
+                                    'state': state, //状态
+                                    'shopname': shopname, //卖家店铺名
+                                    'time': time, //接单时间
+                                    'delivery_state': delivery_state, //发货状态
+                                }
+                                , page: {
+                                    curr: curr
+                                }
+                            });
+                            setTimeout(function () {
+                                parent.layui.layer.closeAll();
+                                top.layer.msg("操作成功！");
+
+                            }, 500);
+                            return false;
+                        });
+
+                    }
+                }
+            });
+        });
+    })
+</script>
+</body>
+
+</html>

@@ -1,0 +1,116 @@
+<style>
+    [v-cloak]{
+        display: none!important;
+    }
+</style>
+<div class="a_path" v-cloak>
+    <el-col class="select_box">
+        <el-menu default-active="{notempty name="hnav"}{$hnav}-{$nav}{/notempty}" class="el-menu-vertical-demo" unique-opened>
+            <el-submenu default-openeds index="1">
+                <template slot="title">
+                    <img alt="" src="/static/buy/img/zhanghaoxinxi.png" style="width: 20px;margin-right: 5px;" />
+                    <span>账号信息</span>
+                </template>
+                <el-menu-item-group class="el_menu1">
+                    <el-menu-item class="el_item" index="1-1">基本信息</el-menu-item>
+                    <el-menu-item  class="el_item" index="1-2">账号提现</el-menu-item>
+                    <el-menu-item  class="el_item" index="1-3">买号添加</el-menu-item>
+                    <el-menu-item  class="el_item" index="1-4">会员VIP</el-menu-item>
+                </el-menu-item-group>
+            </el-submenu>
+            <el-submenu index="2">
+                <template slot="title">
+                    <img alt="" src="/static/buy/img/renwuqingkuang.png" style="width: 20px;margin-right: 5px;" />
+                    <span>任务情况</span>
+                </template>
+                <el-menu-item-group class="el_menu2">
+                    <el-menu-item  class="el_item" index="2-1">任务领取</el-menu-item>
+                </el-menu-item-group>
+            </el-submenu>
+            <el-submenu index="3">
+                <template slot="title">
+                    <img alt="" src="/static/buy/img/zijinguanli.png" style="width: 20px;margin-right: 5px;" />
+                    <span>资金管理</span>
+                </template>
+                <el-menu-item-group class="el_menu3">
+                    <el-menu-item  class="el_item" index="3-1">提现</el-menu-item>
+                    <el-menu-item  class="el_item" index="3-2">银锭充值</el-menu-item>
+                    <el-menu-item  class="el_item" index="3-3">提现记录</el-menu-item>
+                    <!--<el-menu-item  class="el_item" index="3-4">佣金记录</el-menu-item>-->
+                </el-menu-item-group>
+            </el-submenu>
+            <el-submenu index="4">
+                <template slot="title">
+                    <img alt="" src="/static/buy/img/haoyouyaoqing.png" style="width: 20px;margin-right: 5px;" />
+                    <span>好友邀请</span>
+                </template>
+                <el-menu-item-group class="el_menu4">
+                    <el-menu-item  class="el_item" index="4-1">邀请好友</el-menu-item>
+                    <el-menu-item  class="el_item" index="4-2">邀请记录</el-menu-item>
+                </el-menu-item-group>
+            </el-submenu>
+        </el-menu>
+    </el-col>
+</div>
+
+<script>
+    $(function () {
+        $(".select_box .el_menu1 .el_item").click(function () {
+            var index=$(this).index();
+            //console.log($(this).attr("index"));
+            if(index===0){
+                location.href="{:url('my/information',['hnav'=>'1','nav'=>'1'])}"
+            }
+            else if(index===1){
+                location.href="{:url('my/withdrawal',['hnav'=>'1','nav'=>'2'])}"
+            }
+            else if(index===2){
+                location.href="{:url('my/add_buyno',['hnav'=>'1','nav'=>'3'])}"
+            }else if(index===3){
+                location.href="{:url('my/vip_record',['hnav'=>'1','nav'=>'4'])}"
+            }
+
+        });
+        $(".select_box .el_menu2 .el_item").click(function () {
+            var index=$(this).index();
+            console.log($(this).attr("index"));
+            if(index===0){
+                location.href="{:url('task/index',['hnav'=>'2','nav'=>'1'])}"
+            }
+
+        });
+        $(".select_box .el_menu3 .el_item").click(function () {
+            var index=$(this).index();
+            console.log($(this).attr("index"));
+            if(index===0){
+                location.href="{:url('money/withdrawal',['hnav'=>'3','nav'=>'1'])}"
+            }
+            else if(index===1){
+                location.href="{:url('money/withsilver',['hnav'=>'3','nav'=>'2'])}"
+            }
+            else if(index===2){
+                location.href="{:url('money/drawal_record',['hnav'=>'3','nav'=>'3'])}"
+            }
+            else if(index===3){
+                location.href="{:url('money/commission',['hnav'=>'3','nav'=>'4'])}"
+            }
+        });
+        $(".select_box .el_menu4 .el_item").click(function () {
+            var index=$(this).index();
+            console.log($(this).attr("index"));
+            if(index===0){
+                location.href="{:url('recommend/index',['hnav'=>'4','nav'=>'1'])}"
+            }
+            else if(index===1){
+                location.href="{:url('recommend/record',['hnav'=>'4','nav'=>'2'])}"
+            }
+            else if(index===2){
+                location.href="{:url('money/drawal_record',['hnav'=>'3','nav'=>'3'])}"
+            }
+            else if(index===3){
+                location.href="{:url('money/commission',['hnav'=>'3','nav'=>'4'])}"
+            }
+        });
+    });
+</script>
+

@@ -1,0 +1,151 @@
+{include file="public/header" /}
+<link rel="stylesheet" type="text/css" href="/static/seller/css/yaoQingFriends.css" />
+<!-- 右边盒子部分 -->
+<div class="right">
+	<!-- 基本信息标题 -->
+	<div class="right-top">
+		<b>个人中心 / 好友邀请 /<strong> 邀请好友 </strong></b>
+	</div>
+	<div class="user_content">
+
+		<!-- 邀请好友 -->
+		<div class="web_gonggao">
+			<div class="gonggao_row">
+				<div class="gonggao_top">
+					<a href="javascript:" class="select_on">邀请链接</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- 邀请好友部分 -->
+		<div class="yaoqing_friend">
+			<p class="yaoqing_txt">复制您的 <span>同福客栈</span> 邀请链接，邀请好友成功注册 <span>同福客栈</span> 账号之后，好友做任务您可以获得邀请奖励</p>
+			<!-- 复制链接 -->
+			<div v-show="state==1">
+				<div class="yaoqing_link">
+					<p><span>商家</span>邀请链接:</p>
+					<el-input v-model="linkValue" :title="linkValue" readonly class="yaoqing_link_input"></el-input>
+					<el-button type="primary" class="copy_link_btn" v-clipboard:copy="linkValue"
+										 v-clipboard:success="copySuccess" v-clipboard:error="copyError">复制链接
+					</el-button>
+				</div>
+				<div class="yaoqing_link">
+					<p><span>买手</span>邀请链接:</p>
+					<el-input v-model="linkValue2" :title="linkValue2" readonly class="yaoqing_link_input"></el-input>
+					<el-button type="primary" class="copy_link_btn" v-clipboard:copy="linkValue2"
+										 v-clipboard:success="copySuccess2" v-clipboard:error="copyError2">复制链接
+					</el-button>
+				</div>
+			</div>
+			<!-- 请注意 -->
+			<div class="alert">
+				<div class="alert_title">
+					<i class="el-icon-warning" style="font-size: 26px;margin-right: 10px"></i>
+					<p>请注意:</p>
+				</div>
+				<div class="alert_txt">
+					<p>1、您必须要发布任务之后才能邀请好友！</p>
+					<p>2、邀请链接只能发布于聊天工具中，如微信，QQ，等等，禁止推广于外部网站，如微博，博客，贴吧等等 的各大网站，平台会定期核实，如有发现一律邀请链接作废！</p>
+					<p>3、邀请好友只能是朋友，亲戚，同事，熟人等等，一律不可向陌生人发送邀请链接，邀请进同福客栈注册做任务。</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- 邀请奖励 -->
+		<div class="web_gonggao">
+			<div class="gonggao_row">
+				<div class="gonggao_top">
+					<a href="javascript:" class="select_on">邀请奖励</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- 邀请奖励部分 -->
+		<div class="yaoqing_jiangli">
+
+			<!-- 商家奖励 -->
+			<p class="yaoqing_jiangli_txt">邀请商家成功，商家发布任务每单任务可获得 <span>1</span> 银锭作为奖励&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注:
+				<span>商家发布任务的奖金由同福客栈平台承担，不会扣除商家发布任务的金额</span>
+			</p>
+			<div class="yaoqing_table">
+				<div class="yaoqing_table_left">商家发布任务奖励</div>
+				<div class="yaoqing_table_right">
+					<p>邀请好友每发布一单任务完结后，邀请人均可获得奖励 <span>1</span> 银锭；</p>
+					<p>每邀请一个好友可获得奖励上限 <span>500</span> 银锭</p>
+				</div>
+			</div>
+
+			<!-- 买手奖励 -->
+			<p class="yaoqing_jiangli_txt">邀请买手完成任务后，可获得奖励&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;注: <span>买手完成任务的奖金由同福客栈平台承担，不会扣除买手完成任务获得的佣金
+</span>
+			</p>
+			<div class="yaoqing_table">
+				<div class="yaoqing_table_left">买家完成任务奖励</div>
+				<div class="yaoqing_table_right">
+					<p>邀请好友每完成一单任务（完结后），邀请人均可获得奖励 <span>0.5</span> 银锭；</p>
+					<p>每邀请一个好友可获得奖励上限 <span>1000</span> 银锭</p>
+				</div>
+			</div>
+			<!-- 请注意 -->
+			<div class="alert">
+				<div class="alert_title">
+					<i class="el-icon-warning" style="font-size: 26px;margin-right: 10px"></i>
+					<p>请注意:</p>
+				</div>
+				<div class="alert_txt">
+					<p>任何用户不得利用此活动，自己邀请自己获得返利；一旦平台排查出这种情况，违规将给予罚金并没收奖励。</p>
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+</div>
+<script src="/static/buy/js/vue-clipboard.js"></script>
+<script type="text/javascript">
+$(function () {
+
+	/* 初始化一个Vue */
+	var vm = new Vue({
+		el: ".right",
+		data: function () {
+			return {
+				state:"{$state}",
+				linkValue:"{$url.seller}",
+				linkValue2:"{$url.user}",
+			}
+		},
+		methods: {
+			copyLink: function () {
+
+			},
+			/* 引入vue-clipboard实现复制链接1 */
+			copySuccess: function (e) {
+				this.$message({
+					message: "商家邀请链接复制成功",
+					type: "success"
+				});
+				console.log(e.text);
+			},
+			copyError: function () {
+				this.$message.error("商家邀请链接复制失败,请稍后重试");
+			},
+			/* 引入vue-clipboard实现复制链接2*/
+			copySuccess2: function (e) {
+				this.$message({
+					message: "买手邀请链接复制成功",
+					type: "success"
+				});
+				console.log(e.text);
+			},
+			copyError2: function () {
+				this.$message.error("买手邀请链接复制失败,请稍后重试");
+			}
+
+		}
+	});
+
+
+});
+</script>
+{include file="public/footer" /}

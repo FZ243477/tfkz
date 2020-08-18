@@ -1,0 +1,377 @@
+{include file="public/header" /}
+	<link rel="stylesheet" type="text/css" href="/static/seller/css/zhangHaoTiXian.css"/>
+		<!-- 右边盒子部分 -->
+		<div class="right">
+			<!-- 基本信息标题 -->
+			<div class="right-top">
+				<b>个人中心 / 账号信息 /<strong> 账号提现 </strong></b>
+			</div>
+			<div class="user_content">
+
+				<!-- 提现账户管理 -->
+				<div class="web_gonggao">
+					<div class="gonggao_row">
+						<div class="gonggao_top">
+							<a href="javascript:" class="select_on">提现账户管理</a>
+						</div>
+					</div>
+				</div>
+
+					<!-- 暂无银行卡 -->
+					<div class="yinhangka" v-if="is_true==0">
+						<img src="/static/seller/img/yinhangka.png" alt=""/>
+						<p>暂未绑定银行卡</p>
+						<el-button type="success" size="small" @click="openDialogForm"><i class="el-icon-plus"></i> 绑定银行卡</el-button>
+					</div>
+					<!--银行卡信息-->
+					<div v-else>
+						<el-table :data="seller_bank" border header-cell-style="background:#f5f7fa;" style="width: 100%;margin: 20px 0;">
+							<el-table-column prop="bank_seller" label="开户名" align="center">
+							</el-table-column>
+							<el-table-column prop="mobile" label="预留手机号码" align="center">
+							</el-table-column>
+							<el-table-column label="银行" align="center">
+								<template slot-scope="scope">
+									<img onerror="imgError(this)" :src="seller_bank[scope.$index].img" alt="" style="float: left;width: 20px"><span style="float: left;margin-left: 10px">{{seller_bank[scope.$index].name}}</span>
+								</template>
+							</el-table-column>
+							<el-table-column prop="bank_number" label="卡号" align="center">
+							</el-table-column>
+							<el-table-column label="状态" align="center">
+								<template slot-scope="scope" >
+									<span v-if="seller_bank[scope.$index].state==0" >待审核</span>
+									<span style="color: green" v-if="seller_bank[scope.$index].state==1">已通过</span>
+									<span style="color: red" v-if="seller_bank[scope.$index].state==2">已拒绝</span>
+								</template>
+							</el-table-column>
+							<el-table-column label="操作" align="center">
+								<template slot-scope="scope">
+									<el-button type="warning" size="small" :disabled="seller_bank[scope.$index].state==0" @click="editBank()">更换银行卡</el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</div>
+					<!-- 嵌套表单内容 -->
+					<el-dialog title="银行卡信息" :visible.sync="dialogFormVisible">
+						<div class="form_box">
+							<el-form ref="form" :model="form" class="el_form">
+								<div class="el_form_item">
+									<p>开户名:</p>
+									<el-input v-model="form.bank_seller" placeholder="请输入开户名" class="el_form_width"></el-input>
+								</div>
+								<div class="el_form_item">
+									<p>银行:</p>
+									<el-select v-model="form.bank_id" placeholder="请选择银行" class="el_form_width">
+										<el-option v-for="item in bank" :value="item.id" :label="item.name" style="display: flex;align-items: center;">
+											<img onerror="imgError(this)" :src=item.img alt="" style="float: left; height: 70%;"><span style="margin-left: 10px; ">{{item.name}}</span>
+										</el-option>
+									</el-select>
+								</div>
+								<div class="el_form_item">
+									<p>开户行城市:</p>
+									<div class="el_form_width">
+										<el-select class="el_select" v-model="provinceValue2" @change="chooseProvince2"
+															 placeholder="请选择省份">
+											<el-option v-for="item in provinceList2" :key="item.id" :label="item.value" :value="item.id">
+											</el-option>
+										</el-select>
+										<el-select class="el_select" v-model="cityValue2" @change="chooseCity2" placeholder="请选择城市">
+											<el-option v-for="item in cityList2" :key="item.id" :label="item.value" :value="item.id">
+											</el-option>
+										</el-select>
+									</div>
+								</div>
+								<div class="el_form_item">
+									<p>开户行支行名称:</p>
+									<el-input v-model="form.branch_name" placeholder="请输入内容" class="el_form_width"></el-input>
+								</div>
+								<div class="el_form_item">
+									<p>银行卡号:</p>
+									<el-input v-model="form.bank_number" placeholder="请输入银行卡号" class="el_form_width"></el-input>
+								</div>
+								<div class="el_form_item">
+									<p>身份证号码:</p>
+									<el-input v-model="form.idcard" placeholder="请输入身份证号" class="el_form_width"></el-input>
+								</div>
+								<div class="el_form_item">
+									<p>手机号码:</p>
+									<el-input v-model="form.mobile" placeholder="请输入手机号" class="el_form_width" maxlength="11" @change="getMobile()"></el-input>
+								</div>
+
+								<!-- 头像上传 -->
+								<div class="upload_pic">
+									<p>身份证上传(正面):</p>
+									<div class="el_pic_upload">
+										<el-upload ref="unload" action="string" list-type="picture-card" :on-remove="handleRemove"
+															 :before-upload="beforeUpload" :on-change="handleChange" :limit="1" :auto-upload="false" :file-list="img">
+											<i viif class="el-icon-plus"></i>
+										</el-upload>
+									</div>
+								</div>
+							</el-form>
+						</div>
+						<!-- 确定取消按钮 -->
+						<div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+							<el-button @click="dialogFormVisible = false" size="small">取 消</el-button>
+							<el-button type="primary" @click="queDingBtnActive" size="small" v-if="is_edit==0">确定添加</el-button>
+							<el-button type="primary" @click="editDo()" size="small" v-else>确定修改</el-button>
+						</div>
+					</el-dialog>
+
+			</div>
+		</div>
+	<script type="text/javascript">
+		$(function () {
+
+			/* 为element-ui组件提供数据绑定和事件 */
+			var vm = new Vue({
+				el: ".right",
+				data: function () {
+					return {
+						seller_bank:[],
+						bank:{},
+						is_true:1,
+						dialogFormVisible: false,
+						img:[],
+						is_edit:0,
+						form: {
+							bank_seller: "",
+							bank_id: "",
+							branch_name: "",
+							bank_number: "",
+							province: "",
+							city:"",
+							mobile: "",
+							idcard:"",
+							idcard_img:"",
+						},
+						/* 省市常用登陆地 */
+						mapJson: "/static/seller/json/map.json",
+						provinceValue2: "",
+						cityValue2: "",
+						blockValue2: "",
+						provinceList2: [],
+						cityList2: [],
+						blockList2: [],
+						newCity2: [],
+						newBlock2: [],
+						/* 默认只能选择一张图片 */
+						picNum: 1,
+						/* 变量保存图片 */
+						localFile: "",
+						localFile2: ""
+					}
+				},
+				methods: {
+					getData:function(){
+						var loadingFlag;
+						loadingFlag= layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:6000 });
+						$.post("{:url('index/bank')}",{},function(res){
+							if(res.code==1){
+									if(res.data.seller_bank.length > 0){
+										vm.seller_bank = res.data.seller_bank;
+									}else{
+										vm.is_true = 0;
+									}
+									vm.bank = res.data.bank;
+								layer.close(loadingFlag);
+							}
+						})
+					},
+					getMobile:function(){
+						var setData = {
+							'mobile' : this.form.mobile,
+							'is_edit' : this.is_edit,
+							'id': this.is_edit==1 ? this.form.id : '',
+						};
+						console.log(setData);
+						$.post("{:url('index/bankMobile')}",setData,function(res){
+							if(res.code!=1){
+								return layer.msg(res.msg,{icon:2},function(){
+									vm.form.mobile='';
+								});
+							}
+						})
+					},
+					/* 打开弹框的时候让表单初始化 */
+					openDialogForm: function () {
+						/* 让弹框显示 */
+						this.dialogFormVisible = true;
+						/* 清空表单数据 */
+						this.provinceValue2 = "";
+						this.cityValue2 = "";
+						this.form.bank_seller= "";
+						this.form.bank_id= "";
+						this.form.branch_name= "";
+						this.form.bank_number= "";
+						this.form.province= "";
+						this.form.city="";
+						this.form.mobile= "";
+						this.form.idcard="";
+						this.form.idcard_img="";
+						this.is_edit=0;
+					},
+					editBank:function(){
+						/* 让弹框显示 */
+						this.dialogFormVisible = true;
+						this.form = this.seller_bank[0];
+						this.provinceValue2 = this.form.province;
+						this.cityValue2 = this.form.city;
+						this.img = [
+							{'url':this.form.idcard_img}
+										];
+						this.is_edit=1;
+					},
+					/* 获取图片的base64路径 */
+					handleChange: function (e) {
+						var that = this;
+						var reader = new FileReader();
+						reader.readAsDataURL(e.raw);
+						reader.onload = function () {
+							// console.log(reader.result);
+							that.localFile = reader.result;
+							that.form.idcard_img = reader.result;
+						}
+					},
+					/* 判断上传文件类型和大小 */
+					beforeUpload: function (file) {
+						var isJPG = file.type === "image/jpeg";
+						var isPng = file.type === "image/png";
+						var picSize = file.size / 1024 / 1024 < 20;
+
+						if (!(isJPG || isPng)) {
+							this.$message.error("上传头像图片只能是 JPG和PNG 格式");
+						}
+						if (!picSize) {
+							this.$message.error("上传图片大小不能超过 20MB");
+						}
+						return (isJPG && picSize) || (isPng && picSize);
+					},
+					/* 删除图片 */
+					handleRemove: function (file) {
+						// console.log(file);
+					},
+					/* 省市区二级联动方法 */
+					// 获取json数据,二级联动
+					getCityData2: function () {
+						var that = this;
+						axios.get(this.mapJson).then(function (response) {
+							if (response.status === 200) {
+								var data = response.data;
+								// 省市区数据分类
+								for (var item in data) {
+									if (item.match(/0000$/)) {
+										that.provinceList2.push({
+											id: item,
+											value: data[item],
+											children: []
+										});
+									} else if (item.match(/00$/)) {
+										that.newCity2.push({
+											id: item,
+											value: data[item],
+											children: []
+										});
+									} else {
+										that.newBlock2.push({
+											id: item,
+											value: data[item]
+										});
+									}
+								}
+								// 分类市级
+								for (var index in that.provinceList2) {
+									for (var index1 in that.newCity2) {
+										if (that.provinceList2[index].id.slice(0, 2) === that.newCity2[index1].id.slice(0,2)) {
+											that.provinceList2[index].children.push(that.newCity2[index1]);
+										}
+									}
+								}
+								// 分类区级
+								for (var item1 in that.newCity2) {
+									for (var item2 in that.newBlock2) {
+										if (that.newBlock2[item2].id.slice(0, 4) === that.newCity2[item1].id.slice(0, 4)) {
+											that.newCity2[item1].children.push(that.newBlock2[item2]);
+										}
+									}
+								}
+							} else {
+								// console.log(response.status);
+							}
+						}).catch(function (error) {
+							// console.log(typeof + error);
+						})
+					},
+					// 选省
+					chooseProvince2: function (e) {
+						for (var index2 in this.provinceList2) {
+							if (e === this.provinceList2[index2].id) {
+								this.provinceValue2 = this.provinceList2[index2].value;
+								this.cityList2 = this.provinceList2[index2].children;
+								this.cityValue2 = this.provinceList2[index2].children[0].value;
+								this.blockList2 = this.provinceList2[index2].children[0].children;
+							}
+						}
+						this.form.province = this.provinceValue2;
+						this.form.city = this.cityValue2;
+						console.log(this.provinceValue2, this.cityValue2);
+					},
+					// 选市
+					chooseCity2: function (e) {
+						for (var index3 in this.newCity2) {
+							if (e === this.newCity2[index3].id) {
+								this.cityValue2 = this.newCity2[index3].value;
+								this.blockList2 = this.newCity2[index3].children;
+							}
+						}
+						this.form.city = this.cityValue2;
+						console.log(this.cityValue2);
+					},
+
+					/* 失败的弹框 */
+					alertError: function (e) {
+						this.$message.error(e);
+					},
+					/* 成功的弹框 */
+					alertSuccess: function (e) {
+						this.$message({
+							message: e,
+							type: "success"
+						});
+					},
+
+					/* 确定按钮进行表单验证 */
+					queDingBtnActive: function () {
+						/* 查看图片的base64路径 */
+						$.post("{:url('index/bankAdd')}",this.form,function(res){
+								if(res.code==1){
+									layer.msg(res.msg,{icon:1,time:2000},function(){
+										location.reload();
+									})
+								}else{
+									layer.msg(res.msg,{icon:2,time:2000})
+								}
+						});
+					},
+					editDo: function () {
+						/* 查看图片的base64路径 */
+						$.post("{:url('index/bankEdit')}",this.form,function(res){
+								if(res.code==1){
+									layer.msg(res.msg,{icon:1,time:2000},function(){
+										location.reload();
+									})
+								}else{
+									layer.msg(res.msg,{icon:2,time:2000})
+								}
+						});
+					}
+				},
+				created: function () {
+					this.getCityData2();
+					this.getData();
+				}
+			});
+		});
+
+	</script>
+	{include file="public/footer" /}

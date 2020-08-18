@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css"/>
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/tiXianRecord.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png" />
+    <script src="/static/buy/js/vue-2.6.10.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            /* 初始化一个Vue */
+            var vm = new Vue({
+               el: ".center_box",
+                data: function () {
+                    return {
+                        /* 起止日期value值 */
+                        dateValue: "",
+                        dateValue2: "",
+                        /* 搜索框value值 */
+                        searchInput: "",
+                        searchInput2: "",
+                        /* 表格数据 */
+                        tableData: [{
+                            liuShuiNum: "91229948114632704",
+                            jinE: "100.00",
+                            zhuangTai: "未购买",
+                            date: "2019-06-26 17:55:13",
+                            beiZhu: "管理员admin操作,本金充值100.00"
+                        }, {
+                            liuShuiNum: "91229948114632704",
+                            jinE: "100.00",
+                            zhuangTai: "未购买",
+                            date: "2019-06-26 17:55:13",
+                            beiZhu: "管理员admin操作,本金充值100.00"
+                        }, {
+                            liuShuiNum: "91229948114632704",
+                            jinE: "-50.00",
+                            zhuangTai: "未购买",
+                            date: "2019-06-26 17:55:13",
+                            beiZhu: "管理员admin操作,本金充值100.00"
+                        }, {
+                            liuShuiNum: "91229948114632704",
+                            jinE: "-20.00",
+                            zhuangTai: "未购买",
+                            date: "2019-06-26 17:55:13",
+                            beiZhu: "管理员admin操作,本金充值100.00"
+                        }],
+                        /* 表格数据2 */
+                        tableData2: [{
+                            liuShuiNum: "91229948114632704",
+                            jinE: "70.00",
+                            zhuangTai: "未购买",
+                            date: "2019-06-26 17:55:13",
+                            beiZhu: "管理员admin操作,本金充值100.00"
+                        }, {
+                            liuShuiNum: "91229948114632704",
+                            jinE: "-60.00",
+                            zhuangTai: "未购买",
+                            date: "2019-06-26 17:55:13",
+                            beiZhu: "管理员admin操作,本金充值100.00"
+                        }, {
+                            liuShuiNum: "91229948114632704",
+                            jinE: "-40.00",
+                            zhuangTai: "未购买",
+                            date: "2019-06-26 17:55:13",
+                            beiZhu: "管理员admin操作,本金充值100.00"
+                        }],
+                        /* 默认选中第一页 */
+                        currentPage: 1,
+                        currentPage2: 1
+                    }
+                },
+                methods: {
+                    /* 下拉菜单事件 */
+                    handleOpen: function (key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    handleClose: function (key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    /* 消息弹框事件 */
+                    openMsg: function () {
+                        this.$alert("暂无消息通知", "个人通知", {});
+                    },
+                    /* 给表格1上色 */
+                    cellStyle: function (e) {
+                        var jinE = this.tableData[e.rowIndex].jinE;
+                        jinE = Number(jinE);
+
+                        if (e.columnIndex === 1) {
+                            if (jinE >= 1) {
+                                return "color: rgb(103, 194, 58);";
+                            } else if (jinE === 0) {
+                                return "color:red;";
+                            } else if (jinE < 0) {
+                                jinE = "-" + jinE;
+                                return "color:red;";
+                            }
+                        }
+
+                    },
+                    /* 给表格2上色 */
+                    cellStyle2: function (e) {
+                        var jinE = this.tableData2[e.rowIndex].jinE;
+                        jinE = Number(jinE);
+
+                        if (e.columnIndex === 1) {
+                            if (jinE >= 1) {
+                                return "color: rgb(103, 194, 58);";
+                            } else if (jinE === 0) {
+                                return "color:red;";
+                            } else if (jinE < 0) {
+                                jinE = "-" + jinE;
+                                return "color:red;";
+                            }
+                        }
+
+                    },
+                    /* 分页事件1 */
+                    handleSizeChange: function (val) {
+                        console.log("每页" + val + "条");
+                    },
+                    handleCurrentChange: function (val) {
+                        console.log("当前页" + val);
+                    },
+                    /* 分页事件2 */
+                    handleSizeChange2: function (val) {
+                        console.log("每页" + val + "条");
+                    },
+                    handleCurrentChange2: function (val) {
+                        console.log("当前页" + val);
+                    }
+
+                }
+            });
+
+            /* 初始化jQuery */
+            $(function () {
+
+                /* 调用jQuery实现选择导航栏效果 */
+                $(".title a").click(function () {
+                    $(this).addClass("add_color").siblings().removeClass("add_color");
+                });
+
+
+                /* 默认银锭记录这栏不显示 */
+                $(".shuju_table2").hide();
+
+                /* 点击切换显示和隐藏 */
+                $(".user_content .web_gonggao .gonggao_row .gonggao_top").click(function () {
+                    $(this).children().addClass("select_on").end().siblings().children().removeClass("select_on");
+                    var index = $(this).index();
+                    if (index === 0) {
+                        $(".shuju_table2").hide().siblings(".shuju_table").show();
+                        $(".msg_title_txt").text("本金提现");
+                    } else {
+                        $(".shuju_table2").show().siblings(".shuju_table").hide();
+                        $(".msg_title_txt").text("银锭提现");
+                    }
+                });
+
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;账号信息&nbsp;/&nbsp;<span class="msg_title_txt">本金提现</span></p>
+            </div>
+            <div class="user_content">
+
+                <!-- 本金提现 -->
+                <div class="web_gonggao">
+                    <div class="gonggao_row">
+                        <div class="gonggao_top">
+                            <a href="javascript:" class="select_on">本金提现</a>
+                        </div>
+                        <div class="gonggao_top">
+                            <a href="javascript:">银锭提现</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 本金提现部分 -->
+                <div class="shuju_table">
+                    <!-- 搜索区域 -->
+                    <div class="benjin_search">
+                        <el-input placeholder="请输入提现流水号" v-model="searchInput"  clearable style="width: 200px;margin-right: 20px;"
+                                  clearable>
+                        </el-input>
+                        <el-date-picker class="el_date" v-model="dateValue" type="daterange" range-separator="至"
+                                        start-placeholder="开始日期" end-placeholder="结束日期">
+                        </el-date-picker>
+                        <el-button type="primary" icon="el-icon-search">搜索</el-button>
+                    </div>
+                    <!-- 数据列表 -->
+                    <el-table :data="tableData" border header-cell-style="background:#f5f7fa;" :cell-style="cellStyle">
+                        <el-table-column prop="liuShuiNum" label="流水号" align="center">
+                        </el-table-column>
+                        <el-table-column prop="jinE" label="金额" align="center">
+                        </el-table-column>
+                        <el-table-column prop="zhuangTai" label="状态" align="center">
+                        </el-table-column>
+                        <el-table-column prop="date" label="日期" align="center">
+                        </el-table-column>
+                        <el-table-column prop="beiZhu" label="备注" align="center">
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页 -->
+                    <div class="fenye">
+                        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                                       :current-page="currentPage"
+                                       :page-sizes="[10,20,30,40,50]" :page-size="1"
+                                       layout="total, sizes, prev, pager, next, jumper"
+                                       :total="tableData.length"
+                                       background>
+                        </el-pagination>
+                    </div>
+                </div>
+
+                <!-- 银锭提现部分 -->
+                <div class="shuju_table2">
+                    <!-- 搜索区域 -->
+                    <div class="benjin_search">
+                        <el-input placeholder="请输入提现流水号" v-model="searchInput2" clearable style="width: 200px;margin-right: 20px;"
+                                  clearable>
+                        </el-input>
+                        <el-date-picker class="el_date" v-model="dateValue2" type="daterange" range-separator="至"
+                                        start-placeholder="开始日期" end-placeholder="结束日期">
+                        </el-date-picker>
+                        <el-button type="primary" icon="el-icon-search">搜索</el-button>
+                    </div>
+                    <!-- 数据列表 -->
+                    <el-table :data="tableData2" border header-cell-style="background:#f5f7fa;" :cell-style="cellStyle2">
+                        <el-table-column prop="liuShuiNum" label="流水号" align="center">
+                        </el-table-column>
+                        <el-table-column prop="jinE" label="金额" align="center">
+                        </el-table-column>
+                        <el-table-column prop="zhuangTai" label="状态" align="center">
+                        </el-table-column>
+                        <el-table-column prop="date" label="日期" align="center">
+                        </el-table-column>
+                        <el-table-column prop="beiZhu" label="备注" align="center">
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页 -->
+                    <div class="fenye2">
+                        <el-pagination @size-change="handleSizeChange2" @current-change="handleCurrentChange2"
+                                       :current-page="currentPage2"
+                                       :page-sizes="[10,20,30,40,50]" :page-size="1"
+                                       layout="total, sizes, prev, pager, next, jumper"
+                                       :total="tableData2.length"
+                                       background>
+                        </el-pagination>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

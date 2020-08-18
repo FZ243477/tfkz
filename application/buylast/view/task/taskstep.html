@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css"/>
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/taskStep.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png"/>
+    <script src="/static/buy/js/vue-2.6.10.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/axios.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <style>
+        .el-image-viewer__close {
+            top: 15%!important;
+            right: 25%!important;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+            // 手机号正则表达式
+            var phoneReg = /^1[3-9]\d{9}$/;
+            //正则验证数字
+            var numreg = /^[\w\?%&=\-_]+$/;
+
+            /* 初始化一个Vue */
+            var vm = new Vue({
+                el: ".center_box",
+                /* 注册页面自定义组件 */
+                data: function () {
+                    return {
+                        /*任务类型*/
+                        task_time_type:"{$user_task.task_type}",
+                        /* 起止日期value值 */
+                        dateValue: "",
+                        /* 表格数据1 */
+                        tableData: [],
+                        /*买手任务ID*/
+                        user_task_id:"",
+                        /* 表格数据2 */
+                        tableData2: [],
+                        /* 表格数据3 */
+                        tableData3: [],
+                        /* 默认显示第一步 */
+                        active: 1,
+                        /* 分类筛选列表 */
+                        fenLeiList: ["全部", "电脑", "手机", "筛选"],
+                        /* 默认弹框不开启 */
+                        dialogVisible: false,
+                        /* 查看大图的图片 */
+                        url: "",
+                        urlorderdetail: "/static/buy/img/orderdetail.png",
+                        urlsteptwo:"/static/buy/img/steptwoex.png",
+                        /* 图片初始列表 */
+                        fileList: [],
+                        fileList2: [],
+                        /* 图片临时路径 */
+                        localFile: "",
+                        localFile2: "",
+                        localFile3: "",
+                        /* 输入框value值 */
+                        inputValue1: "",
+                        inputValue2: "",
+                        inputValue3: "",
+                        inputValue4: "",
+                        /* 第三步Input框的值 */
+                        inputValue7: "",
+                        inputNumber: '{$principal}',
+                        inputValue9: "",
+                        /* 第三步后面的input */
+                        inputStreet:"",
+                        inputPerson:"",
+                        inputMobile:"",
+                        /* 默认第一步显示 */
+                        isShow: true,
+                        isShow2: false,
+                        isShow3: false,
+                        stepTask:"下一步",
+                        // 默认展开
+                        expends:[],
+                        threeRadio:"1",
+                        /* 省市区地址 */
+                        mapJson: "/static/buy/json/map.json",
+                        provinceValue: "",
+                        cityValue: "",
+                        blockValue: "",
+                        provinceList: [],
+                        cityList: [],
+                        blockList: [],
+                        newCity: [],
+                        newBlock: [],
+                        // 倒计时
+                        seconds:{$end_time},
+                        imgs:[],
+                        srcStep2:[],
+                        str:'00:00',
+                        timeShow:true,
+                        zhongDuanmessage:"",
+                        //任务类型
+                        tasktype:"",
+                        qrcode:"",
+                        channelname:"",
+                        taoword:""
+                    }
+                },
+                computed: {
+                    // 大图预览
+                    srcList: function () {
+                        return this.imgs;
+                    },
+                    srcSteptwo:function(){
+                        return this.srcStep2;
+                    },
+                    srcOrderdetail: function () {
+                        return ["/static/buy/img/orderdetail.png"]
+                    }
+                },
+                filters:{
+                    filterTime(time) {
+                        var curTime = 0; // 分
+                        var times = 0;
+                        curTime = parseInt(time / 60);
+                        times = parseInt(time % 60);
+                        if(curTime < 10) return '0' + curTime;
+                        if(times < 10) return '0' + times;
+                        console.log(times);
+                        return curTime + ":" + times;
+                    }
+                },
+                methods: {
+                     getData:function(){
+                        $.post("{:url('task/taskstep')}",{id:{$id}},function(res){
+                            if(res.code==1){
+                               that.user_task_id = res.data.user_task_id;
+                               var list1 = {
+                                   maiHao: res.data.user_task.user_buyno_wangwang,
+                                   taskTime: "{$user_task.ending_time|date='m-d H:i:s',###}",
+                                   principal: "{$user_task.principal}",
+                                   yongJin: "{$user_task.commission}",
+                                   user_divided:"{$user_task.user_divided}",
+                                   taskNum: "{$user_task.task_number}",
+                                   tasktype:"{$type_array[$sell_task['task_type']]}",
+                               }
+                               if(res.data.sell_task.terminal==1){
+                                   list1.zhongDuan='电脑';
+                                   that.zhongDuanmessage="请使用电脑下单";
+                                   that.tasktype="{$sell_task['task_type']}";
+                                   that.qrcode="{$sell_task['qr_code']}";
+                                   that.channelname="{$sell_task['channel_name']}";
+                                   that.taoword="{$sell_task['tao_word']}";
+                                   that.is_video_praise="{$sell_task['is_video_praise']}";
+                                }else{
+                                   list1.zhongDuan='手机端';
+                                   that.zhongDuanmessage="请使用手机下单";
+                                   that.tasktype="{$sell_task['task_type']}";
+                                   that.qrcode="{$sell_task['qr_code']}";
+                                   that.channelname="{$sell_task['channel_name']}";
+                                   that.taoword="{$sell_task['tao_word']}";
+                                   that.is_video_praise="{$sell_task['is_video_praise']}";
+                               }
+                               that.tableData.push(list1);
+                                console.log(res.data.goods_info);
+                                for (var i=0;i < res.data.goods_info.length;i++) {
+                                   var list2 = {
+                                       productName: res.data.goods_info[i].name,
+                                       dianpuName: res.data.shop.shop_name,
+                                       type: res.data.goods_info[i].leixing,
+                                       specname:res.data.goods_info[i].spec_name,
+                                       specifications:res.data.goods_info[i].spec_value,
+                                       buy_num:res.data.goods_info[i].buy_num,
+                                       buy_price:res.data.goods_info[i].buy_price,
+                                       input:"",
+                                       inputnum:"",
+                                       id:res.data.goods_info[i].id,
+                                       img:res.data.goods_info[i].pc_img[0],
+                                       imgdata:res.data.goods_info[i].pc_img,
+                                       key:res.data.goods_info[i].key,
+                                       goods_spec:res.data.goods_info[i].goods_spec,
+                                   };
+                                   that.tableData2.push(list2);
+                               }
+                               for (var i=0;i<res.data.goods_info.length;i++) {
+                                   var list3 = {
+                                       id:res.data.goods_info[i].id,
+                                       dianpuName: res.data.goods_info[i].shop_name,
+                                       productName: res.data.goods_info[i].name,
+                                       price: res.data.goods_info[i].buy_price,
+                                       count: res.data.goods_info[i].buy_num,
+                                   };
+                                   that.tableData3.push(list3);
+                               }
+                               that.url = res.data.main_product.pc_img[0];
+                               that.imgs = res.data.main_product.pc_img;
+                               if(res.data.admin_limit_switch==1){
+                                    that.srcStep2 = ["/static/buy/img/steptwoex.png"];
+                               }else{
+                                   that.srcStep2 = ["/static/buy/img/steptwoex.png","/static/buy/img/numberex.png"];
+
+                               }
+                                // 默认展开
+                                that.getExpends();
+                                // 倒计时
+                                that.daoJiShi();
+                            }
+                        })
+
+                    },
+                        // 倒计时
+                    daoJiShi:function(){
+                        this.seconds--;
+                        var that = this;
+                        var curTime = 0; // 分
+                        var time = 0;
+                        curTime = parseInt(this.seconds / 60);
+                        time = parseInt(this.seconds % 60);
+                        if(curTime < 10) curTime = '0' + curTime;
+                        if(time < 10) time = '0' + time;
+                        this.str = curTime + ":" + time;
+                        if (that.seconds == 0) {
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('buy/task/automatic_del_task')}",
+                                async : true,
+                                data : {
+                                    'id':that.user_task_id,
+                                },
+                                success : function(data){
+                                    if(data.code==1){
+                                        that.alertSuccess(data.msg);
+                                        // setTimeout(function(){
+                                        //     return location.href=data.url;
+                                        // },3000)
+                                    }else{
+                                         that.alertError(data.msg);
+                                         setTimeout(function(){
+                                             return location.href=data.url;
+                                         },3000)
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                        }
+                        var timer = setTimeout(function() {
+                            that.daoJiShi();
+                        }, 1000);
+                        if(this.seconds < 0){
+                            clearTimeout(timer);
+                            this.timeShow= false;
+                        }
+                    },
+                    // 获取json数据,三级联动
+                    getCityData: function() {
+                        var that = this;
+                        axios.get(this.mapJson).then(function(response) {
+                            if (response.status === 200) {
+                                var data = response.data;
+                                // 省市区数据分类
+                                for (var item in data) {
+                                    if (item.match(/0000$/)) {
+                                        that.provinceList.push({
+                                            id: item,
+                                            value: data[item],
+                                            children: []
+                                        });
+                                    } else if (item.match(/00$/)) {
+                                        that.newCity.push({
+                                            id: item,
+                                            value: data[item],
+                                            children: []
+                                        });
+                                    } else {
+                                        that.newBlock.push({
+                                            id: item,
+                                            value: data[item]
+                                        });
+                                    }
+                                }
+                                // 分类市级
+                                for (var index in that.provinceList) {
+                                    for (var index1 in that.newCity) {
+                                        if (that.provinceList[index].id.slice(0, 2) === that.newCity[index1].id.slice(0, 2)) {
+                                            that.provinceList[index].children.push(that.newCity[index1]);
+                                        }
+                                    }
+                                }
+                                // 分类区级
+                                for (var item1 in that.newCity) {
+                                    for (var item2 in that.newBlock) {
+                                        if (that.newBlock[item2].id.slice(0, 4) === that.newCity[item1].id.slice(0, 4)) {
+                                            that.newCity[item1].children.push(that.newBlock[item2]);
+                                        }
+                                    }
+                                }
+                            } else {
+                                // console.log(response.status);
+                            }
+                        }).catch(function(error) {
+                            // console.log(typeof + error);
+                        })
+                    },
+                    // 选省
+                    chooseProvince: function(e) {
+                        for (var index2 in this.provinceList) {
+                            if (e === this.provinceList[index2].id) {
+                                this.provinceValue=this.provinceList[index2].value;
+                                this.cityList = this.provinceList[index2].children;
+                                this.cityValue = this.provinceList[index2].children[0].value;
+                                this.blockList = this.provinceList[index2].children[0].children;
+                                this.blockValue = this.provinceList[index2].children[0].children[0].value;
+                                this.newId = this.blockList[0].id;
+                            }
+                        }
+                        console.log(this.provinceValue);
+                    },
+                    // 选市
+                    chooseCity: function(e) {
+                        for (var index3 in this.newCity) {
+                            if (e === this.newCity[index3].id) {
+                                this.cityValue =this.newCity[index3].value;
+                                this.blockList = this.newCity[index3].children;
+                                this.blockValue = this.newCity[index3].children[0].value;
+                                this.newId = this.blockList[0].id;
+                            }
+                        }
+                        console.log(this.cityValue);
+                    },
+                    // 选区
+                    chooseBlock: function(e) {
+                        for(var index4 in this.newBlock){
+                            if (e === this.newBlock[index4].id) {
+                                this.blockValue = this.newBlock[index4].value;
+                                this.newId = e;
+                            }
+                        }
+                        console.log(this.blockValue);
+                    },
+                     // radioChange
+                    radioChange:function(val){
+                        console.log(val);
+                    },
+                    //设置table中的扩展项，展开的id，此处我需要全部展开
+                    getExpends:function(){
+                        var Id = this.tableData2.map(item => item.id);
+                        this.expends = Id;
+                    },
+                    getRowKeys:function(row){
+                        return row.id;
+                    },
+                    /* 失败的弹框 */
+                    alertError: function (e) {
+                        this.$message({
+                            message: e,
+                            type: "error"
+                        });
+                    },
+                    /* 成功的弹框 */
+                    alertSuccess: function (e) {
+                        this.$message({
+                            message: e,
+                            type: "success"
+                        });
+                    },
+                    //核对
+                    hedui: function (input,id) {
+                        var that=this;
+                        if (!input) {
+                            this.alertError("商品地址不能为空");
+                        }
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('buy/task/task_hedui')}",
+                            async : true,
+                            data : {
+                                'input':input,
+                                'id':id,
+                            },
+                            success : function(data){
+                                if(data.code==1){
+                                    that.alertSuccess(data.msg);
+                                    // setTimeout(function(){
+                                    //     return location.href=data.url;
+                                    // },3000)
+                                }else{
+                                    return that.alertError(data.msg);
+                                }
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                    },
+                    heduinum: function (inputnum,id) {
+                        var that=this;
+                        if (!inputnum) {
+                            this.alertError("数字核对不能为空");
+                        }
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('buy/task/task_heduinum')}",
+                            async : true,
+                            data : {
+                                'inputnum':inputnum,
+                                'id':id,
+                            },
+                            success : function(data){
+                                if(data.code==1){
+                                    that.alertSuccess(data.msg);
+                                    // setTimeout(function(){
+                                    //     return location.href=data.url;
+                                    // },3000)
+                                }else{
+                                    return that.alertError(data.msg);
+                                }
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                    },
+                    /* 删除图片 */
+                    handleRemove: function (file) {
+                        this.localFile="";
+                    },
+                    handleRemove2: function (file) {
+                        this.localFile2="";
+                    },
+                    handleRemove3: function (file) {
+                        this.localFile3="";
+                    },
+                    /* 获取图片的base64路径 */
+                    handleChange: function (e) {
+                        var that = this;
+                        var reader = new FileReader();
+                        reader.readAsDataURL(e.raw);
+                        reader.onload = function () {
+                            // console.log(reader.result);
+                            that.localFile = reader.result;
+                        }
+                    },
+                    handleChange2: function (e) {
+                        var that = this;
+                        var reader = new FileReader();
+                        reader.readAsDataURL(e.raw);
+                        reader.onload = function () {
+                            // console.log(reader.result);
+                            that.localFile2 = reader.result;
+                        }
+                    },
+                    // 第三步截图上传
+                    handleChange3: function (e) {
+                        var that = this;
+                        var reader = new FileReader();
+                        reader.readAsDataURL(e.raw);
+                        reader.onload = function () {
+                            // console.log(reader.result);
+                            that.localFile3 = reader.result;
+                        }
+                    },
+                    /* 给表格上色 */
+                    cellStyle: function (e) {
+                        if (e.columnIndex === 4) {
+                            return "color:red;";
+                        }
+                    },
+                    /* 点击取消的时候 */
+                    handleQuXiao: function (index) {
+                        console.log(index);
+                        var that = this;
+                        location.href = '/index.php/buy/task/maketask';
+                    },
+                    /* 步骤事件 */
+                    next: function () {
+                        //$("html,body").animate({scrollTop: 500}, 0);
+                        if (this.active === 1) {
+                            this.isShow = false;
+                            this.isShow2 = true;
+                            this.isShow3 = false;
+                            this.active=2;
+                        } else if (this.active === 2) {
+                            var that=this;
+                            if(!that.localFile) return vm.alertError("搜索关键词截图不能为空");
+                            if(!that.inputValue3) return vm.alertError("商品地址不能为空");
+                            if(!that.inputValue4) return vm.alertError("商品地址不能为空");
+                            if(!that.localFile2) return vm.alertError("聊天截图不能为空");
+                            var arr=[];
+                            for (var i = 0; i <that.tableData2.length ; i++) {
+                                arr.push({
+                                    input:that.tableData2[i].input, id:that.tableData2[i].id
+                                })
+                            }
+                            var arrnum=[];
+                            for (var i = 0; i <that.tableData2.length ; i++) {
+                                arrnum.push({
+                                    inputnum:that.tableData2[i].inputnum, id:that.tableData2[i].id
+                                })
+                            }
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('buy/task/task_two')}",
+                                async : true,
+                                data : {
+                                    'user_task_id':that.user_task_id,
+                                    'keywordimg':that.localFile,
+                                    "inputall":arr,
+                                    "inputallnum":arrnum,
+                                    'dizhi1':that.inputValue3,
+                                    'dizhi2':that.inputValue4,
+                                    'chatimg':that.localFile2,
+                                },
+                                success : function(data){
+                                    if(data.code==1){
+                                        that.alertSuccess(data.msg);
+                                        that.isShow = false;
+                                        that.isShow2 = false;
+                                        that.isShow3 = true;
+                                        that.active=3;
+                                        that.stepTask="下一步"
+                                    }else{
+                                        return that.alertError(data.msg);
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                        } else if (this.active === 3){
+                            var that=this;
+                            // if(!that.inputValue7) return vm.alertError("订单号不能为空");
+                             if(!that.inputNumber) return vm.alertError("付款金额不能为空");
+                            // if(!that.localFile3) return vm.alertError("订单详情截图不能为空");
+                            if (!numreg.test(that.inputValue7)) {
+                                return that.alertError("订单号格式不规范,请检查后重新输入");}
+                            if(that.inputMobile){
+                                if (!phoneReg.test(that.inputMobile)) {
+                                    return that.alertError("手机号码格式不规范,请检查后重新输入");}
+                            }
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('buy/task/task_three')}",
+                                async : true,
+                                data : {
+                                    'user_task_id':that.user_task_id,
+                                    'table_order_id':that.inputValue7,
+                                    'user_principal':that.inputNumber,
+                                    'consignee':that.inputValue9,
+                                    'order_detail_img':that.localFile3,
+                                    'threeradio':that.threeRadio,
+                                    'province':that.provinceValue,
+                                    'city':that.cityValue,
+                                    'block':that.blockValue,
+                                    'inputstreet':that.inputStreet,
+                                    'adressperson':that.inputPerson,
+                                    'addressphone':that.inputMobile,
+                                },
+                                success : function(data){
+                                    if(data.code==1){
+                                        that.alertSuccess(data.msg);
+                                        var active=sessionStorage.getItem("active");
+                                        if(active){
+                                            sessionStorage.setItem("active",1);
+                                        }
+                                        setTimeout(function(){
+                                            return location.href=data.url;
+                                        },3000)
+                                    }else{
+                                        return that.alertError(data.msg);
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                        }
+                    },
+                    prev: function () {
+                        //$("html,body").animate({scrollTop: 500}, 0);
+                        this.active--;
+                        if (this.active <= 1) {
+                            this.active = 1;
+                        }
+                        if (this.active === 1) {
+                            this.isShow = true;
+                            this.isShow2 = false;
+                            this.isShow3 = false;
+                        } else if (this.active === 2) {
+                            this.isShow = false;
+                            this.isShow2 = true;
+                            this.isShow3 = false;
+                        } else {
+                            this.isShow = false;
+                            this.isShow2 = false;
+                            this.isShow3 = true;
+                        }
+                    },
+                    /* 计算商品总价 */
+                    totalPrice: function (index) {
+                        return this.tableData3[index].count * this.tableData3[index].price;
+                    }
+
+                },
+                // 页面刷新之前将当前第几步缓存
+                beforeUpdate: function () {
+                    sessionStorage.setItem("active", this.active);
+                },
+                // 页面初始化的时候就调用缓存显示当前第几步的内容
+                created: function () {
+                    this.getData();
+                    that = this;
+                    // 当缓存存在的时候才会保存,缓存清空会恢复默认值
+                    if (sessionStorage.getItem("active")) {
+                        this.active = sessionStorage.getItem("active");
+                        this.active = Number(this.active);
+                        if (this.active === 1) {
+                            this.isShow = true;
+                            this.isShow2 = false;
+                            this.isShow3 = false;
+                        } else if (this.active === 2) {
+                            this.isShow = false;
+                            this.isShow2 = true;
+                            this.isShow3 = false;
+                        } else {
+                            this.isShow = false;
+                            this.isShow2 = false;
+                            this.isShow3 = true;
+                        }
+                    }
+                    // 省市区三级联动
+                    this.getCityData();
+                }
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box" v-cloak>
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p><span class="msg_title_txt">任务步骤>>></span></p>
+            </div>
+            <div class="user_content">
+
+                <!-- 做任务 -->
+                <div class="web_gonggao">
+                    <div class="gonggao_row">
+                        <div class="gonggao_top">
+                            <a href="javascript:" class="select_on">做任务</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- 倒计时 -->
+                <div class="xuanfu-box" v-show="timeShow">
+                    <span>{{str}}</span>
+                </div>
+                <div v-if="task_time_type ==2" style="width: 349px;
+                text-align: center;
+                height: 100px;
+                background-color: rgba(255, 0, 0, 0.7);
+                position: fixed;
+                left: 20px;
+                top: 370px;
+                z-index: 100;
+                line-height: 100px;">
+                <span style="color:#fff;">今天浏览加购，明天16点前付款提交任务</span>
+                </div>
+                <div v-if="task_time_type ==3" style="width: 349px;
+                text-align: center;
+                height: 100px;
+                background-color: rgba(255, 0, 0, 0.7);
+                position: fixed;
+                left: 20px;
+                top: 370px;
+                z-index: 100;
+                line-height: 100px;">
+                    <span style="color:#fff;">定时任务，先浏览加购，截止时间前2小时内付款</span>
+                </div>
+                <!-- 做任务部分 -->
+                <div class="shuju_table">
+                    <!-- 数据列表 -->
+                    <el-table
+                            :data="tableData"
+                            border
+                            :header-cell-style="{background:'#f5f7fa'}"
+                            :cell-style="cellStyle"
+                            style="width: 100%;">
+                        <el-table-column prop="zhongDuan" label="终端" align="center">
+                        </el-table-column>
+                        <el-table-column prop="maiHao" label="接手买号" align="center">
+                        </el-table-column>
+                        <el-table-column prop="tasktype" label="任务类型" align="center">
+                        </el-table-column>
+                        <el-table-column prop="taskTime" label="任务截至时间" align="center">
+                        </el-table-column>
+                        <el-table-column prop="principal" label="垫付本金(元)" align="center">
+                        </el-table-column>
+                        <el-table-column  label="佣金" align="center">
+                            <template slot-scope="scope">
+                                <div>{{tableData[scope.$index].yongJin}}<span> + {{tableData[scope.$index].user_divided }}</span></div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="taskNum" label="任务编号" align="center">
+                        </el-table-column>
+                        <el-table-column label="操作" align="center">
+                            <template slot-scope="scope">
+                                <el-button type="text" @click="handleQuXiao(scope.$index)">取消</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+
+                </div>
+                <p v-if="tasktype ==5" style="padding: 0 20px 20px;font-size: 15px;font-family: 微软雅黑;line-height: 30px;">
+                    <span >此任务为通道任务 通道名称是：{{channelname}}</span>
+                </p>
+                <p v-if="is_video_praise ==1">
+                    <span >此任务是视频任务，苹果手机请勿接单。</span>
+                </p>
+                <div style="clear: both;"></div>
+                <p style="padding: 0 20px 20px;font-size: 15px;font-family: 微软雅黑;line-height: 30px;">
+                    商家订单要求:
+                    <span style="color:red;">{{zhongDuanmessage}}</span>
+                </p>
+                <p style="padding: 0 20px 20px;font-size: 15px;font-family: 微软雅黑;line-height: 30px;">
+                   商家订单要求:
+                    <span style="color:red;">{$sell_task.memo}</span>
+                </p>
+
+            </div>
+
+            <!-- 任务详情 -->
+            <div class="task_detail">
+
+                <!-- 详情步骤 -->
+                <div class="step_detail">
+                    <el-steps :active="active" finish-status="success" style="width: 100%;">
+                        <el-step title="第一步"></el-step>
+                        <el-step title="第二步"></el-step>
+                        <el-step title="第三步"></el-step>
+                    </el-steps>
+                </div>
+
+                <!-- 第一步 -->
+                <div class="step1" v-show="isShow">
+                    <el-card class="box-card" style="width: 100%;">
+                        <div slot="header" class="clearfix">
+                            <span style="font-size: 18px;color: #ff8080;">在淘宝中查找商品</span>
+                        </div>
+                        <div class="card_content">
+                            <template v-if="tasktype ==3">
+                                <p>1.
+                                    {if condition="$sell_task['terminal'] == 1"}
+                                    电脑
+                                    {else /}
+                                    手机
+                                    {/if}
+                                    ,您当前接受任务的淘宝买号为 <span style="color: red;">“{$user_task.user_buyno_wangwang}”</span>，请访问淘宝并
+                                    <span style="color: red;">刷新页面</span>后，确认登录的买号是否为 <span style="color: red;">“{$user_task.user_buyno_wangwang}”！</span>
+                                </p>
+                                <p> <span style="line-height: 100px;margin-right: 30px;float: left;">2.二维码图片：</span><img v-bind:src="qrcode" style="float: left;width: 100px;height: 100px;" alt=""></p>
+                                <div style="clear: both;"></div>
+                                <p>3.下单提示：<span style="color: red;">{$sell_task.memo}</span></p>
+                                <p>4.处罚细则&nbsp;&nbsp;&nbsp;<el-button type="text" @click="dialogVisible = true">查看图片
+                                </el-button>&nbsp;&nbsp;&nbsp;
+                                </p>
+                            </template>
+                            <template v-else-if="tasktype ==2">
+                                <p>1.{if condition="$sell_task['terminal'] == 1"}
+                                    电脑
+                                    {else /}
+                                    手机
+                                    {/if}，您当前接受任务的淘宝买号为 <span style="color: red;">“{$user_task.user_buyno_wangwang}”</span>，请访问淘宝并
+                                    <span style="color: red;">刷新页面</span>后，确认登录的买号是否为 <span style="color: red;">“{$user_task.user_buyno_wangwang}”！</span>
+                                </p>
+                                <p><span>2.打开淘宝，输入淘口令:<span style="color: red;">{{taoword}}</span></p>
+                                <p>3.下单提示：<span style="color: red;">{$sell_task.memo}</span></p>
+                                <p>4.处罚细则&nbsp;&nbsp;&nbsp;<el-button type="text" @click="dialogVisible = true">查看图片
+                                </el-button>&nbsp;&nbsp;&nbsp;
+                                </p>
+                            </template>
+                            <template v-else>
+                            <p>1.{if condition="$sell_task['terminal'] == 1"}
+                                电脑
+                                {else /}
+                                手机
+                                {/if}，您当前接受任务的淘宝买号为 <span style="color: red;">“{$user_task.user_buyno_wangwang}”</span>，请访问淘宝并
+                                <span style="color: red;">刷新页面</span>后，确认登录的买号是否为 <span style="color: red;">“{$user_task.user_buyno_wangwang}”！</span>
+                            </p>
+                                <p> <span>2.在淘宝网站顶部，手动输入搜索关键词： <span onselectstart="return false" style="color: red;">{$key_word}</span> </p>
+                            <p>3.搜索关键词后再打开的页面中点击对应的提示排序搜索</p>
+                            <p>筛选价格区间为:<span style="color: red;">{$main_product_message.min_price}-{$main_product_message.max_price}</span></p>
+                            <p>筛选商品所在地为:<span style="color: red;">{$main_product_message.province}</span></p>
+                            <p>筛选商品分类:
+                                 <span style="color: red;">{$main_product_message_filter1}</span>
+                                 <span style="color: red;">{$main_product_message_filter2}</span>
+                                 <span style="color: red;">{$main_product_message_filter3}</span>
+                                 <span style="color: red;">{$main_product_message_filter4}</span>
+                            </p>
+                            <p>折扣服务:
+                                 <span style="color: red;">{$discount}</span>
+                            </p>
+                            <p>4.下单提示：<span style="color: red;">{$sell_task.memo}</span></p>
+                            <p>5.处罚细则&nbsp;&nbsp;&nbsp;<el-button type="text" @click="dialogVisible = true">查看图片
+                            </el-button>&nbsp;&nbsp;&nbsp;
+                            </p>
+                            </template>
+                        </div>
+                    </el-card>
+                </div>
+
+                <!-- 第二步 -->
+                <div class="step2" v-show="isShow2">
+
+                    <!-- 温馨提示 -->
+                    <div class="alert">
+                        <div class="alert_title">
+                            <i class="el-icon-warning" style="font-size: 26px;margin-right: 10px"></i>
+                            <span>温馨提示:</span>
+                        </div>
+                        <div class="alert_txt">
+                            <span>1. 清除淘宝缓存。</span>
+                            <span>2. 必须按照商家给的关键词手动输入搜索宝贝，其他途径搜索都将受到相应处罚。</span>
+                            <span>3. 按照商家名称前三个字符搜索店铺直接访问的，接到商家投诉将会直接受到相应处罚。</span>
+                            <span>4. 浏览主任务商品4分钟以上，然后随机浏览店铺其他2个商品,各2分钟以上,总浏览时间不低于8分钟。</span>
+                            <span>5. 若找到商品，商品链接不对，商品价格不符，则找到的商品不正确，请重新找。</span>
+                            <span>6. 买手领取任务时，在未到最后一步(去支付)之前，不要着急将购物车的商品下单付款，
+                                以免发生拍错、漏拍等情况，若商家投诉第一次扣除10个银锭或是冻结账号7天，第二次扣除10个银锭冻结账号15天，第三次扣除10个银锭冻结账号30天。</span>
+                        </div>
+                    </div>
+
+                    <!-- 第三步卡片 -->
+                    <div class="card3">
+                        <el-card class="box-card" style="width: 100%;margin-bottom: 30px;">
+                            <div slot="header" class="clearfix">
+                                <span style="font-size: 18px;color: #ff8080;">第一步</span>
+                            </div>
+                            <div class="card_content">
+                                <p>1.在筛选出的商品中,根据以下提示找到商品</p>
+                                <p>2.<span style="color: red;">若任务商品有不同规格,请拍商家要求的规格；若商家未指明具体规格，请拍下与垫付金额相同或相近的商品规格。</span></p>
+                            </div>
+
+                            <!-- 数据列表 -->
+                            <el-table
+                                    :data="tableData2"
+                                    border
+                                    :expand-row-keys="expends"
+                                    :row-key="getRowKeys"
+                                    header-cell-style="background:#f5f7fa;"
+                                    :cell-style="cellStyle"
+                                    style="width: 100%;margin: 80px 0 30px 0;">
+                                <!-- 展开内容 -->
+                                <el-table-column type="expand">
+                                    <template slot-scope="props">
+                                        <el-form label-position="center" inline class="demo-table-expand">
+                                            <el-form-item label="商品名称:" style="width: 350px;">
+                                                <span>{{ props.row.productName.substr(0,3)+"..." }}</span>
+                                            </el-form-item>
+                                            <el-form-item label="店铺名称:" style="width: 350px;">
+                                                <span>{{ props.row.dianpuName.substr(0,3)+"..." }}</span>
+                                            </el-form-item>
+                                            <el-form-item label="商品图片:" style="width: 350px;">
+                                                <el-image
+                                                        style="width:50px;height:50px;"
+                                                        :src="props.row.img"
+                                                        :preview-src-list="props.row.imgdata">
+                                                    <p>12333</p>
+                                                </el-image>
+                                            </el-form-item>
+                                            <el-form-item label="规格型号:" style="width: 350px;">
+                                                <span>{{ props.row.goods_spec }}</span>
+                                            </el-form-item>
+                                            <el-form-item label="" style="width: 350px;">
+                                                <span v-if="tasktype ==3">{{ props.row.key }}</span>
+                                                <span v-if="tasktype ==2"{{ props.row.key }}</span>
+                                                <span v-else>{{ props.row.key }}</span>
+                                            </el-form-item>
+                                            <el-form-item label="购买件数:" style="width: 350px;">
+                                                <span>{{ props.row.buy_num }}</span>
+                                            </el-form-item>
+                                            <el-form-item label="商品价格:" style="width: 350px;">
+                                                <span>{{ props.row.buy_price }}</span>
+                                            </el-form-item>
+                                            <div style="display: flex;flex-direction: row;">
+                                                <el-form-item label="商品地址核对:" style="width: 350px;">
+                                                    <el-input
+                                                            style="width: 240px;"
+                                                            placeholder="请输入内容"
+                                                            v-model="props.row.input"
+                                                            clearable>
+                                                        <el-button slot="append" @click="hedui(props.row.input,props.row.id)"
+                                                                   icon="el-icon-search"></el-button>
+                                                    </el-input>
+                                                </el-form-item>
+                                                {if condition="$admin_limit_switch ==1 "}
+                                                <el-form-item label="商品数字核对:" style="width: 350px;margin-left: 4px;">
+                                                    <el-input
+                                                            style="width: 240px;"
+                                                            placeholder="请输入内容"
+                                                            v-model="props.row.inputnum"
+                                                            clearable>
+
+                                                        <el-button slot="append" @click="heduinum(props.row.inputnum,props.row.id)"
+                                                                   icon="el-icon-search"></el-button> </el-input>
+                                                </el-form-item>
+                                                {/if}
+                                            </div>
+                                        </el-form>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="商品名称"  align="center">
+                                    <template slot-scope="scope">
+                                        <div>{{tableData2[scope.$index].productName.substr(0,3)+"..." }}</div>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="店铺名称"  align="center">
+                                    <template slot-scope="scope">
+                                        <div>{{tableData2[scope.$index].dianpuName.substr(0,3)+"..." }}</div>
+                                    </template>
+                                </el-table-column>
+                                <el-table-column label="商品类型" prop="type" align="center">
+                                </el-table-column>
+                            </el-table>
+
+                            <p>
+                                {if condition="$admin_limit_switch  eq 1"}
+                                <span style="font-size: 12px;color: red;">注：商品地址核对是找到宝贝进店浏览后，长按商品名称-复制链接，粘贴到平台核对。商品数字统一逻辑是宝贝详情页最下方开始，按照从下往上，从左至右的逻辑依次取6位数字进行核对，连接数字核对正确即可继续做任务。</span>
+                                {else/}
+                                <span style="font-size: 12px;color: red;">注: 根据关键词找到任务图，请上传通过关键词找到宝贝截图, 图里必须看的到关键词和对应任务主图。垫付金额与实际金额浮动在10元内可正常下单，超过联系平台客服。</span>
+                                {/if}
+                            </p>
+                        </el-card>
+                    </div>
+
+                    <!-- 第二步卡片 -->
+                    <div class="card2">
+                        <el-card class="box-card" style="width: 100%;margin-bottom: 30px;">
+                            <div slot="header" class="clearfix">
+                                <span style="font-size: 18px;color: #ff8080;">第二步</span>
+                            </div>
+                            <div class="card_content">
+                                <p>1.找到商品后,点击进入商品详情,向下滑动屏幕至至店铺信息位置,和以下信息核对</p>
+                                <p>2.店铺名称: <a href="javascript:">{$shop.shop_name|mb_substr=0,3,'utf-8'}...</a></p>
+                                <p>3.商品金额：<a href="javascript:">{$main_product_price}元</a></p>
+                                <p>4.商品型号：<a href="javascript:">{$goods_spec}</a> <span style="position: absolute;right: 215px;">请确认下单规格、颜色、价格是否与商家要求一致</span></p>
+                                <p>5.件数：<a href="javascript:">{$main_product_num}</a></p>
+                                <p>6.上传搜索关键词截图：</p>
+                                <div class="el_pic_upload">
+                                    <el-upload ref="unload" action="string" list-type="picture-card"
+                                               :on-remove="handleRemove"
+                                               :on-change="handleChange"
+                                               :limit="1"
+                                               :file-list="fileList"
+                                               :auto-upload="false">
+                                        <i class="el-icon-plus"></i>
+                                    </el-upload>
+                                </div>
+                                <p><span style="font-size: 12px;color: red;">注: 核对无误后请将该商品加入购物车,上传通过关键词找到的宝贝截图,图里需要看到关键词和宝贝图片，垫付金额与实际金额浮动在10元内可正常下单,超过联系平台客服。</span>
+                                </p>
+                            </div>
+
+                            <!-- 大图预览 -->
+                            <div class="pic_view">
+                                <div class="demo-image__preview">
+                                    <el-image
+                                            style="width: 100px; height: 100px"
+                                            :src="urlsteptwo"
+                                            :preview-src-list="srcSteptwo">
+                                    </el-image>
+                                </div>
+                                <p>示例图</p>
+                            </div>
+
+                        </el-card>
+
+                    </div>
+
+
+
+                    <!-- 第四步卡片 -->
+                    <div class="card4">
+                        <el-card class="box-card" style="width: 100%;margin: 30px 0;">
+                            <div slot="header" class="clearfix">
+                                <span style="font-size: 18px;color: #ff8080;">第三步</span>
+                            </div>
+                            <div class="card_content">
+                                <p>1.进入店铺首页</p>
+                                <p>2.在店铺内随机点2-3个商品，每款浏览2分钟放入下面输入框</p>
+                                <p>
+                                    <span>地址1：</span>
+                                    <el-input
+                                            style="width: 240px;"
+                                            placeholder="请输入内容"
+                                            v-model="inputValue3"
+                                            clearable>
+                                    </el-input>
+                                </p>
+                                <p>
+                                    <span>地址2：</span>
+                                    <el-input
+                                            style="width: 240px;"
+                                            placeholder="请输入内容"
+                                            v-model="inputValue4"
+                                            clearable>
+                                    </el-input>
+                                </p>
+
+                            </div>
+                        </el-card>
+                    </div>
+
+                    <!-- 聊天截图 -->
+                    <div class="card1">
+                        <el-card class="box-card" style="width: 100%;margin: 30px 0;">
+                            <div slot="header" class="clearfix">
+                                <span style="font-size: 18px;color: #ff8080;">第四步</span>
+                            </div>
+                            <div class="card_content">
+                                <p>1.在找到商品后，请使用旺旺联系卖家，在线客服至少问5个问题可参考商品特性、材料、商品质量效果商品参数详情、优惠价格、是否赠送小礼品等方面</p>
+                                <p>2.聊天时，不得提及刷单、信誉同福客栈等关键字</p>
+                                <p>3.上传聊天截图，商家也会自己检查买手的聊天内容，如果被商家投诉没聊天或不足5句，聊天内容于产品无关，平台将扣除此任务佣金，累计三次冻结账户</p>
+                                <p>4.上传与商家聊天截图:</p>
+                                <div class="el_pic_upload">
+                                    <el-upload ref="unload" action="string" list-type="picture-card"
+                                               :on-remove="handleRemove2"
+                                               :on-change="handleChange2"
+                                               :limit="1"
+                                               :file-list="fileList2"
+                                               :auto-upload="false">
+                                        <i class="el-icon-plus"></i>
+                                    </el-upload>
+                                </div>
+                                <p><span style="font-size: 12px;color: red;">注: 只能使用银行卡借记卡或支付宝付款，不得使用花呗或信用卡付款,也不得使用淘宝客和返利网站下单</span>
+                                </p>
+                            </div>
+                        </el-card>
+                    </div>
+
+                </div>
+
+                <!-- 第三步 -->
+                <div class="step3" v-show="isShow3">
+                    <el-card class="box-card" style="width: 100%;">
+                        <div slot="header" class="clearfix">
+                            <span style="font-size: 18px;color: #ff8080;">核对订单商品</span>
+                        </div>
+                        <div class="card_content">
+
+                            <!-- 第三步数据列表 -->
+                            <div class="shuju_table">
+                                <el-table
+                                        :data="tableData3"
+                                        border
+                                        header-cell-style="background:#f5f7fa;"
+                                        style="width: 100%;">
+                                    <el-table-column prop="id" label="#" align="center">
+                                    </el-table-column>
+                                    <el-table-column prop="dianpuName" label="商家店铺名" align="center">
+                                    </el-table-column>
+                                    <el-table-column prop="productName" label="商品名" align="center">
+                                    </el-table-column>
+                                    <el-table-column prop="price" label="单价" align="center">
+                                    </el-table-column>
+                                    <el-table-column prop="count" label="购买数量" align="center">
+                                    </el-table-column>
+
+                                </el-table>
+                            </div>
+
+                            <!-- 填写订单 -->
+                            <div class="card1">
+                                <el-card class="box-card" style="width: 100%;margin: 30px 0;">
+                                    <div slot="header" class="clearfix">
+                                        <span style="font-size: 18px;color: #ff8080;">填写订单并提交</span>
+                                    </div>
+                                    <div class="card_content2">
+
+                                        <!-- 温馨提示 -->
+                                        <div class="alert">
+                                            <div class="alert_title">
+                                                <i class="el-icon-warning"
+                                                   style="font-size: 26px;margin-right: 10px"></i>
+                                                <span>温馨提示:</span>
+                                            </div>
+                                            <div class="alert_txt">
+                                                <p style="margin-left: 15px;color: #000;">1.请使用<span style="color:red">{$user_task.user_buyno_wangwang}</span>下单和付款，付款完毕后请填写您的订单号。</p>
+                                                <p style="margin-left: 15px;color: #000;">2.只能使用银行借记卡或支付宝付款，<span style="color:red">不得使用信用卡、花呗付款，也不得使用村淘、淘宝客和返利网站下单。</span></p>
+                                            </div>
+                                        </div>
+                                        <div class="shilitu">
+                                        <div class="demo-image__preview">
+                                        <el-image
+                                        style="width: 100px; height: 100px"
+                                        :src="urlorderdetail"
+                                        :preview-src-list="srcOrderdetail">
+                                        </el-image>
+                                        </div>
+                                        <p>示例图</p>
+                                        </div>
+                                        <p>1.填写当前订单信息</p>
+
+                                        <p>
+                                            <span style="color:red;display: block;margin: 10px 0 15px 0;"> *如任务商品拍下后产生2个订单号，请将2个订单号同时填写到下方，两个订单号中间用减号'-'隔开。</span>
+                                            <span>订单号：</span>
+                                            <el-input
+                                                    style="width: 240px;"
+                                                    placeholder="请输入内容"
+                                                    v-model="inputValue7"
+                                                    clearable>
+                                            </el-input>
+                                        </p>
+
+                                        <p>2.填写实际付款金额</p>
+                                        <p>
+                                            <span>付款金额：</span>
+                                            <el-input-number
+                                                    style="width: 180px;"
+                                                    v-model="inputNumber"
+                                                    :min="{$user_principal_limit_min}"
+                                                    :max="{$user_principal_limit}">
+                                            </el-input-number>
+                                            <span style="color:red;margin-left: 10px;">*实际付款金额不得超过或者小于订单金额100元</span>
+                                        </p>
+                                        <p>3.订单详情截图上传:</p>
+                                        <div class="el_pic_upload">
+                                            <el-upload ref="unload" action="string" list-type="picture-card"
+                                                       :on-remove="handleRemove3"
+                                                       :on-change="handleChange3"
+                                                       :limit="1"
+                                                       :auto-upload="false">
+                                                <i class="el-icon-plus"></i>
+                                            </el-upload>
+                                        </div>
+                                        <p>4.收货人信息：<span style="color:red;">{$user_task.address} {$user_task.addressname} {$user_task.addressphone}</span></p>
+                                        <template>
+                                            <el-radio @change="radioChange" v-model="threeRadio" label="1">确认下单时是以上收货人信息</el-radio>
+                                            <el-radio @change="radioChange" v-model="threeRadio" label="2">不是以上内容，我要修改成实际下单人的收货信息</el-radio>
+                                        </template>
+
+
+
+                                        <div v-show="threeRadio==2">
+                                        <!-- 收货人地址 -->
+                                        <div class="card_item">
+                                            <p class="card_item_p">所在地区:</p>
+                                            <div class="card_col">
+                                                <div class="card_region">
+                                                    <el-select class="card_select" v-model="provinceValue" @change="chooseProvince" placeholder="请选择省份">
+                                                        <el-option v-for="item in provinceList" :key="item.id" :label="item.value" :value="item.id">
+                                                        </el-option>
+                                                    </el-select>
+                                                    <el-select class="card_select" v-model="cityValue" @change="chooseCity" placeholder="请选择城市">
+                                                        <el-option v-for="item in cityList" :key="item.id" :label="item.value" :value="item.id">
+                                                        </el-option>
+                                                    </el-select>
+                                                    <el-select class="card_select" v-model="blockValue" @change="chooseBlock" placeholder="请选择地区">
+                                                        <el-option v-for="item in blockList" :key="item.id" :label="item.value" :value="item.id">
+                                                        </el-option>
+                                                    </el-select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p><span style="display:inline-block;width: 85px;">详细地址：</span><el-input
+                                                    style="width: 240px;"
+                                                    placeholder="请输入内容"
+                                                    v-model="inputStreet"
+                                                    clearable></el-input>
+                                        </p>
+
+                                        <p><span style="display:inline-block;width: 85px;">收货人姓名：</span><el-input
+                                                style="width: 240px;"
+                                                placeholder="请输入内容"
+                                                v-model="inputPerson"
+                                                clearable></el-input>
+                                        </p>
+
+                                        <p><span style="display:inline-block;width: 85px;">手机号：</span><el-input
+                                                style="width: 240px;"
+                                                placeholder="请输入内容"
+                                                v-model="inputMobile"
+                                                clearable></el-input>
+                                        </p>
+                                        </div>
+
+                                    </div>
+                                </el-card>
+                            </div>
+                        </div>
+
+                    </el-card>
+                </div>
+
+                <div class="step_btn">
+                    <el-button @click="prev">上一步</el-button>
+                    <el-button @click="next">{{stepTask}}</el-button>
+                </div>
+            </div>
+
+            <!-- 图片对话框 -->
+            <el-dialog :visible.sync="dialogVisible">
+                <img src="/static/buy/img/tonggao.png" alt=""/>
+                <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="dialogVisible = false" size="small">确 定</el-button>
+  </span>
+            </el-dialog>
+
+        </div>
+
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

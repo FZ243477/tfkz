@@ -1,0 +1,135 @@
+{include file="public/header" /}
+<!-- 右边盒子部分 -->
+<link rel="stylesheet" type="text/css" href="/static/seller/css/My_goods.css" />
+<link rel="stylesheet" type="text/css" href="/static/seller/css/status.css" />
+<div class="right" v-cloak>
+  <div class="right-top">
+    <b>任务情况 / <strong>追评支付 </strong></b>
+  </div>
+  <!-- 账单信息 -->
+  <div class="status">
+    <h3>账单信息</h3>
+    <div style="margin-top:30px ;">
+      <div>
+        <table border="1" cellpadding="0" bordercolor="#eee" cellspacing="0" class="informa">
+          <tr>
+            <th>分类</th>
+            <th>费用明细</th>
+            <th>好评数</th>
+            <th>合计</th>
+          </tr>
+          <tr>
+            <td>文字好评</td>
+            <td><span><b>2</b> 元/组</span> </td>
+            <td><b>{{info.praise}}</b> 组 </td>
+            <td><b>{{(info.praise*2).toFixed(2)}}</b> 元 </td>
+          </tr>
+          <tr>
+            <td>图片好评</td>
+            <td><span><b>3.00</b> 元/组</span> </td>
+            <td><b>{{info.img}}</b> 组 </td>
+            <td><b>{{(info.img*3).toFixed(2)}}</b> 元 </td>
+          </tr>
+          <tr>
+            <td>视频好评</td>
+            <td><span><b>10.00</b> 元/组</span> </td>
+            <td><b>{{info.video}}</b> 组 </td>
+            <td><b>{{(info.video*10).toFixed(2)}}</b> 元 </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="th">
+              <p>总计 = 银锭： <b>{{info.money}}</b> 银锭</p>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="status">
+    <h3>选择支付方式</h3>
+    <p style="color: red">（押金可当银锭使用，银锭不可当押金使用，银锭余额不足系统自动将押金转为不足的银锭金额）</p>
+    <div class="way">
+      <div class="way_top">
+        <label role="checkbox" aria-checked="true" class="el-checkbox is-checked">
+								<span aria-checked="mixed" class="el-checkbox__input is-checked">
+									<span class="el-checkbox__inner"></span>
+									<input type="checkbox" aria-hidden="true" class="el-checkbox__original" value="">
+								</span>
+          <span class="el-checkbox__label">
+									<span class="tipsText">押金支付</span>
+									<span class="vertcalSmall">&nbsp;（剩余押金：<b>{{balance}}</b> 元）</span>
+								</span>
+        </label>
+        <span>
+								<b v-if="is_reward_pay">- 0 元</b>
+								<b v-else>- {{info.money}} 银锭</b>
+							</span>
+      </div>
+      <div class="hr"></div>
+      <div class="way_top">
+							<span>
+								<el-checkbox v-model="is_reward_pay">&nbsp;银锭支付</el-checkbox>
+								<span class="el-checkbox__label">
+									<span class="vertcalSmall">（剩余银锭：<b>{{reward}}</b> 银锭）</span>
+								</span>
+							</span>
+        <span v-if="is_reward_pay">
+								<b>- {{info.money}} 银锭</b>
+							</span>
+      </div>
+    </div>
+    <div class="foots">
+      <el-button :plain="true" @click="confirm()" class='open2'>确认付款 <i class="el-icon-d-arrow-right"></i>
+      </el-button>
+    </div>
+  </div>
+</div>
+<script>
+    var name = new Vue({
+      el: ".right",
+      data: function () {
+          return {
+              id:"{$id}",
+              info:{
+                  praise:0,
+                  img:0,
+                  video:0,
+                  money:0,
+              },
+              is_reward_pay:true,
+              balance:"{$seller.balance}",
+              reward:"{$seller.reward}",
+          }
+      },
+        created:function(){
+          that = this;
+          this.getData();
+      },
+      methods: {
+        getData:function(){
+            $.post("{:url('review/payData')}",{id:this.id},function(res){
+                if(res.code==1){
+                    that.info = res.data;
+                }else{
+                    return layer.msg(res.msg,{icon:2},function(){
+                        location.href=res.url;
+                    });
+                }
+            })
+        },
+          confirm:function(){
+              $.post("{:url('review/payDo')}",{id:this.id,is_reward:this.is_reward_pay},function(res){
+                  if(res.code==1){
+                      layer.msg(res.msg,{icon:1},function(){
+                          location.href=res.url;
+                      });
+                  }else{
+                      layer.msg(res.msg,{icon:2});
+                  }
+              })
+          },
+      }
+    })
+</script>
+
+{include file="public/footer" /}

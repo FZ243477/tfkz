@@ -1,0 +1,480 @@
+{include file="public/header" /}
+<link rel="stylesheet" type="text/css" href="/static/seller/css/management.css" />
+<style>
+	table{
+		border-collapse: collapse;
+		border: none;
+	}
+	table td{
+		border: solid #eeeeee 1px;
+	}
+	.el-message-box{
+		min-width: 350px!important;
+	}
+</style>
+			<div class="right">
+				<div class="right-top">
+					<b>个人中心 / 店铺管理 /<strong> {{taoBaoDianPu}} </strong></b>
+				</div>
+				<div class="slider" v-cloak>
+					<el-tabs v-model="activeName" @tab-click="handleClick">
+						<el-tab-pane label="淘宝店铺" name="taobao" >
+							<!--<el-button type="primary"><i class="el-icon-plus"></i> 添加淘宝店铺</el-button>-->
+							<div class="list-shop" v-for="(item,key) in list" v-if="item.type==1">
+								<div class="list-left">
+									<p><b>店铺名称：</b><strong>{{item.shop_name}}</strong></p>
+									<p><b>店铺链接：</b><a :href=item.link target="_blank">查看店铺</a></p>
+									<p><b>店铺旺旺ID：</b><strong>{{item.wangwang}}</strong></p>
+								</div>
+								<div class="list-right">
+									<p><b>发件人信息：</b><strong>{{item.name}} : {{item.mobile}}</strong></p>
+									<p><b>发件地址：</b><strong>{{item.province}} {{item.city}} {{item.area}} {{item.address}}</strong></p>
+									<p>
+										<b>审核状态：</b>
+										<i v-if="item.state==0">待审核</i>
+										<i class="green" v-if="item.state==1">审核通过</i>
+										<i class="red" v-if="item.state==2">审核拒绝</i>
+										<a href="javascript:void(0)" class="why" v-if="item.state==2" @click="viewCause(item.cause)">查看原因</a>
+									</p>
+								</div>
+								<div>
+									<el-button type="primary"  @click="edit(item)" size="small"><i class="el-icon-edit"></i> 修改</el-button>
+								</div>
+							</div>
+						</el-tab-pane>
+						<el-tab-pane label="天猫店铺" name="tianmao" >
+							<!--<el-button type="primary" @click = 'tiaozhuan'><i class="el-icon-plus"></i> 添加淘宝店铺</el-button>-->
+							<div class="list-shop" v-for="(item,key) in list" v-if="item.type==2">
+								<div class="list-left">
+									<p><b>店铺名称：</b><strong>{{item.shop_name}}</strong></p>
+									<p><b>店铺链接：</b><a :href=item.link target="_blank">查看店铺</a></p>
+									<p><b>店铺旺旺ID：</b><strong>{{item.wangwang}}</strong></p>
+								</div>
+								<div class="list-right">
+									<p><b>发件人信息：</b><strong>{{item.name}} : {{item.mobile}}</strong></p>
+									<p><b>发件地址：</b><strong>{{item.province}} {{item.city}} {{item.area}} {{item.address}}</strong></p>
+									<p>
+										<b>审核状态：</b>
+										<i v-if="item.state==0">待审核</i>
+										<i class="green" v-if="item.state==1">审核通过</i>
+										<i class="red" v-if="item.state==2">审核拒绝</i>
+										<a href="javascript:void(0)" class="why" v-if="item.state==2" @click="viewCause(item.cause)">查看原因</a>
+									</p>
+								</div>
+								<div>
+									<el-button type="primary"  @click="edit(item)" size="small"><i class="el-icon-edit"></i> 修改</el-button>
+								</div>
+							</div>
+						</el-tab-pane>
+						<el-tab-pane label="飞猪店铺" name="feizhu" >
+							<!--<el-button type="primary" @click = 'tiaozhuan()'><i class="el-icon-plus"></i> 添加淘宝店铺</el-button>-->
+							<div class="list-shop" v-for="(item,key) in list" v-if="item.type==3">
+								<div class="list-left">
+									<p><b>店铺名称：</b><strong>{{item.shop_name}}</strong></p>
+									<p><b>店铺链接：</b><a :href=item.link target="_blank">查看店铺</a></p>
+									<p><b>店铺旺旺ID：</b><strong>{{item.wangwang}}</strong></p>
+								</div>
+								<div class="list-right">
+									<p><b>发件人信息：</b><strong>{{item.name}} : {{item.mobile}}</strong></p>
+									<p><b>发件地址：</b><strong>{{item.province}} {{item.city}} {{item.area}} {{item.address}}</strong></p>
+									<p>
+										<b>审核状态：</b>
+										<i v-if="item.state==0">待审核</i>
+										<i class="green" v-if="item.state==1">审核通过</i>
+										<i class="red" v-if="item.state==2">审核拒绝</i>
+										<a href="javascript:void(0)" class="why" v-if="item.state==2" @click="viewCause(item.cause)">查看原因</a>
+									</p>
+								</div>
+								<div>
+									<el-button type="primary"  @click="edit(item)" size="small"><i class="el-icon-edit"></i> 修改</el-button>
+								</div>
+							</div>
+						</el-tab-pane>
+						<el-tab-pane label="绑定店铺" name="bangding">
+							<table border="0" cellpadding="0" cellspacing="0" class="indorms">
+								<tr>
+									<td style="width:13%;">店铺链接：</td>
+									<td colspan="3">
+										<el-input v-model="form.link" placeholder="请输入内容" style='width: 496px;' size="small"></el-input>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">店铺类型：</td>
+									<td colspan="3">
+										<div class="radio">
+											<el-radio v-model="form.type" label="1" size="medium"><img src="/static/seller/img/taobao.png" class="taobao"> 淘宝</el-radio>
+											<el-radio v-model="form.type" label="2" size="medium"><img src="/static/seller/img/tianmao.png" class="taobao"> 天猫</el-radio>
+											<el-radio v-model="form.type" label="3" size="medium"><img src="/static/seller/img/feizhu.png" class="taobao"> 飞猪</el-radio>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">店铺名称：</td>
+									<td>
+										<el-input v-model="form.shop_name" placeholder="请输入内容" style='width: 298px;' size="small"></el-input>
+									</td>
+									<td style="width:13%;">店主旺旺号：</td>
+									<td>
+										<el-input v-model=form.wangwang placeholder="请输入内容" style='width: 298px;' size="small"></el-input>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">发件人姓名：</td>
+									<td>
+										<el-input v-model=form.name placeholder="请输入内容" style='width: 298px;' size="small"></el-input>
+									</td>
+									<td style="width:13%;">发件人手机：</td>
+									<td>
+										<el-input v-model=form.mobile placeholder="请输入内容" style='width: 298px;' size="small"></el-input>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">发件地址：</td>
+									<td colspan="3">
+										<el-select v-model="form.province" @change="chooseProvince" placeholder="请选择省份" size="small" style='width: 180px;'>
+											<el-option v-for="item in provinceList" :key="item.id" :label="item.value" :value="item.id">
+											</el-option>
+										</el-select>
+										<el-select v-model="form.city" @change="chooseCity" placeholder="请选择城市" size="small" style='width: 180px;'>
+											<el-option v-for="item in cityList" :key="item.id" :label="item.value" :value="item.id">
+											</el-option>
+										</el-select>
+										<el-select v-model="form.area" @change="chooseBlock" placeholder="请选择地区" size="small" style='width: 180px;'>
+											<el-option v-for="item in blockList" :key="item.id" :label="item.value" :value="item.id">
+											</el-option>
+										</el-select>
+									</td>
+
+
+								</tr>
+								<tr>
+									<td style="width:13%;">详细地址：</td>
+									<td colspan="3">
+										<el-input v-model=form.address placeholder="请输入内容" size="small"></el-input>
+									</td>
+								</tr>
+							</table>
+							<div class="save">
+								<el-button type="danger" style='width: 200px;' @click="submit()">保存</el-button>
+							</div>
+							<div class="attention">
+								<h4><i class="el-icon-info"></i>请注意：</h4>
+								<p>1、每个账号可绑定淘宝、天猫、飞猪三大平台，总共最多可绑定8个店铺（绑定的店铺永久有效）</p>
+								<p>2、邀请好友只能是朋友，亲戚，同事，熟人等等，一律不可向陌生人发送邀请链接，邀请进同福客栈注册做任务</p>
+							</div>
+						</el-tab-pane>
+						<el-dialog title="编辑店铺信息" :visible.sync="dialogTableVisible">
+							<table border="1" cellpadding="0" bordercolor="#eee" cellspacing="0" class="indorms">
+								<tr>
+									<td style="width:13%;">店铺链接：</td>
+									<td colspan="3">
+										<el-input v-model=formEdit.link placeholder="请输入内容" style='width: 496px;' size="small"></el-input>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">店铺类型：</td>
+									<td colspan="3">
+										<div class="radio">
+											<el-radio v-model="formEdit.type" label="1" size="medium"><img src="/static/seller/img/taobao.png" class="taobao"> 淘宝</el-radio>
+											<el-radio v-model="formEdit.type" label="2" size="medium"><img src="/static/seller/img/tianmao.png" class="taobao"> 天猫</el-radio>
+											<el-radio v-model="formEdit.type" label="3" size="medium"><img src="/static/seller/img/tianmao.png" class="taobao"> 飞猪</el-radio>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">店铺名称：</td>
+									<td>
+										<el-input v-model="formEdit.shop_name" placeholder="请输入内容" style='width: 298px;' size="small"></el-input>
+									</td>
+									<td style="width:13%;">店主旺旺号：</td>
+									<td>
+										<el-input v-model="formEdit.wangwang" placeholder="请输入内容" style='width: 298px;' size="small" readonly></el-input>
+										<p style="font-size: 12px;color: red">*店铺旺旺号不能修改</p>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">发件人姓名：</td>
+									<td>
+										<el-input v-model="formEdit.name" placeholder="请输入内容" style='width: 298px;' size="small"></el-input>
+									</td>
+									<td style="width:13%;">发件人手机：</td>
+									<td>
+										<el-input v-model="formEdit.mobile" placeholder="请输入内容" style='width: 298px;' size="small"></el-input>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">发件地址：</td>
+									<td colspan="3">
+										<el-select v-model="formEdit.province" @change="chooseProvince2" placeholder="请选择省份" size="small" style='width: 180px;'>
+											<el-option v-for="item in provinceList" :key="item.id" :label="item.value" :value="item.id">
+											</el-option>
+										</el-select>
+										<el-select v-model="formEdit.city" @change="chooseCity2" placeholder="请选择城市" size="small" style='width: 180px;'>
+											<el-option v-for="item in cityList" :key="item.id" :label="item.value" :value="item.id">
+											</el-option>
+										</el-select>
+										<el-select v-model="formEdit.area" @change="chooseBlock2" placeholder="请选择地区" size="small" style='width: 180px;'>
+											<el-option v-for="item in blockList" :key="item.id" :label="item.value" :value="item.id">
+											</el-option>
+										</el-select>
+									</td>
+								</tr>
+								<tr>
+									<td style="width:13%;">详细地址：</td>
+									<td colspan="3">
+										<el-input v-model="formEdit.address" placeholder="请输入内容" size="small"></el-input>
+									</td>
+								</tr>
+							</table>
+							<div class="save">
+								<el-button type="danger" style='width: 200px;' @click='editDo()'>保存</el-button>
+							</div>
+						</el-dialog>
+					</el-tabs>
+				</div>
+			</div>
+<script>
+	$(function(){
+		var vm = new Vue({
+			el: ".right",
+			data: function() {
+				return {
+					activeName: '{$str}', //默认淘宝
+					radio2: '',
+					/* 省市区地址 */
+					mapJson: "/static/seller/json/map.json",
+					provinceList: [],
+					cityList: [],
+					blockList: [],
+					newCity: [],
+					newBlock: [],
+					taoBaoDianPu: "淘宝店铺", //淘宝店铺名称
+					list:[],
+					form:{
+						wangwang:'',
+						province:'',
+						city:'',
+						area:'',
+						shop_name:'',
+						link:'',
+						name:'',
+						type:'',
+						mobile:'',
+						address:'',
+					},
+					formEdit:{
+						wangwang:'',
+						province:'',
+						city:'',
+						area:'',
+						shop_name:'',
+						link:'',
+						name:'',
+						type:'',
+						mobile:'',
+						address:'',
+					},
+					dialogTableVisible:false,
+				}
+			},
+			created:function(){
+				this.getData();
+			},
+			methods: {
+				getData:function(){
+					var that=this;
+					var loadingFlag;
+					loadingFlag= layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:6000 });
+					$.post("{:url('shop/shop')}",{},function(res){
+						if(res.code==1){
+							that.list=res.data;
+							layer.close(loadingFlag);
+						}else{
+							layer.close(loadingFlag);
+							layer.msg(res.msg,{icon:1,time:2000});
+						}
+					})
+				},
+				tiaozhuan(e){
+					// console.log(e)
+				},
+				//变换label
+				handleClick(tab, event) {
+					// console.log(tab.index);
+            if(tab.index==3){
+                this.cityList = [];
+                this.blockList = [];
+            }
+					this.taoBaoDianPu = tab.label;
+				},
+				/* 省市区三级联动方法 */
+				// 获取json数据,三级联动
+				getCityData: function() {
+					var that = this;
+					axios.get(this.mapJson).then(function(response) {
+						if (response.status === 200) {
+							var data = response.data;
+							// 省市区数据分类
+							for (var item in data) {
+								if (item.match(/0000$/)) {
+									that.provinceList.push({
+										id: item,
+										value: data[item],
+										children: []
+									});
+								} else if (item.match(/00$/)) {
+									that.newCity.push({
+										id: item,
+										value: data[item],
+										children: []
+									});
+								} else {
+									that.newBlock.push({
+										id: item,
+										value: data[item]
+									});
+								}
+							}
+							// 分类市级
+							for (var index in that.provinceList) {
+								for (var index1 in that.newCity) {
+									if (that.provinceList[index].id.slice(0, 2) === that.newCity[index1].id.slice(0, 2)) {
+										that.provinceList[index].children.push(that.newCity[index1]);
+									}
+								}
+							}
+							// 分类区级
+							for (var item1 in that.newCity) {
+								for (var item2 in that.newBlock) {
+									if (that.newBlock[item2].id.slice(0, 4) === that.newCity[item1].id.slice(0, 4)) {
+										that.newCity[item1].children.push(that.newBlock[item2]);
+									}
+								}
+							}
+						} else {
+							// console.log(response.status);
+						}
+					}).catch(function(error) {
+						// console.log(typeof + error);
+					})
+				},
+				// 选省
+				chooseProvince: function(e) {
+					for (var index2 in this.provinceList) {
+						if (e === this.provinceList[index2].id) {
+							this.form.province = this.provinceList[index2].value;
+							this.cityList = this.provinceList[index2].children;
+							this.form.city = this.provinceList[index2].children[0].value;
+							this.blockList = this.provinceList[index2].children[0].children;
+							this.form.area = this.provinceList[index2].children[0].children[0].value;
+						}
+					}
+					console.log(this.form.province);
+				},
+				// 选市
+				chooseCity: function(e) {
+					for (var index3 in this.newCity) {
+						if (e === this.newCity[index3].id) {
+							this.form.city = this.newCity[index3].value;
+							this.blockList = this.newCity[index3].children;
+							this.form.area = this.newCity[index3].children[0].value;
+						}
+					}
+					console.log(this.form.city);
+				},
+				// 选区
+				chooseBlock: function(e) {
+					for (var index4 in this.newBlock) {
+						if (e === this.newBlock[index4].id) {
+							this.form.area = this.newBlock[index4].value;
+						}
+					}
+					console.log(this.form.area);
+				},
+				// 选省
+				chooseProvince2: function(e) {
+					for (var index2 in this.provinceList) {
+						if (e === this.provinceList[index2].id) {
+							this.formEdit.province = this.provinceList[index2].value;
+							this.cityList = this.provinceList[index2].children;
+							this.formEdit.city = this.provinceList[index2].children[0].value;
+							this.blockList = this.provinceList[index2].children[0].children;
+							this.formEdit.area = this.provinceList[index2].children[0].children[0].value;
+						}
+					}
+					console.log(this.cityList);
+				},
+				// 选市
+				chooseCity2: function(e) {
+					for (var index3 in this.newCity) {
+						if (e === this.newCity[index3].id) {
+							this.formEdit.city = this.newCity[index3].value;
+							this.blockList = this.newCity[index3].children;
+							this.formEdit.area = this.newCity[index3].children[0].value;
+						}
+					}
+					console.log(this.form.city);
+				},
+				// 选区
+				chooseBlock2: function(e) {
+					for (var index4 in this.newBlock) {
+						if (e === this.newBlock[index4].id) {
+							this.formEdit.area = this.newBlock[index4].value;
+						}
+					}
+					console.log(this.form.area);
+				},
+				submit:function () {
+					if(!this.form.link)return layer.msg("请填写店铺链接",{icon:2});
+					if(!this.form.type)return layer.msg("请选择店铺类型",{icon:2});
+					if(!this.form.shop_name)return layer.msg("请填写店铺名称",{icon:2});
+					if(!this.form.name)return layer.msg("请填写发货人",{icon:2});
+					if(!this.form.mobile)return layer.msg("请填写发货手机号",{icon:2});
+					if(!this.form.wangwang)return layer.msg("请填写旺旺号",{icon:2});
+					if(!this.form.province || !this.form.city || !this.form.area)return layer.msg("请选择发货地址",{icon:2});
+					if(!this.form.address)return layer.msg("请填写发货详细地址",{icon:2});
+					$.post("{:url('shop/shopAdd')}",this.form,function(res){
+							if(res.code==1){
+								return layer.msg(res.msg,{icon:1},function () {
+									location.reload();
+								});
+							}else{
+								return layer.msg(res.msg,{icon:2});
+							}
+					})
+				},
+				edit:function (item) {
+					this.dialogTableVisible = true;
+					this.formEdit = item;
+					this.formEdit.type=String(this.formEdit.type);
+					console.log(this.formEdit.type);
+				},
+				editDo:function () {
+            if(!this.formEdit.link)return layer.msg("请填写店铺链接",{icon:2});
+            if(!this.formEdit.type)return layer.msg("请选择店铺类型",{icon:2});
+            if(!this.formEdit.shop_name)return layer.msg("请填写店铺名称",{icon:2});
+            if(!this.formEdit.name)return layer.msg("请填写发货人",{icon:2});
+            if(!this.formEdit.mobile)return layer.msg("请填写发货手机号",{icon:2});
+            if(!this.formEdit.wangwang)return layer.msg("请填写旺旺号",{icon:2});
+            if(!this.formEdit.province || !this.formEdit.city || !this.formEdit.area)return layer.msg("请选择发货地址",{icon:2});
+            if(!this.formEdit.address)return layer.msg("请填写发货详细地址",{icon:2});
+            $.post("{:url('shop/shopEdit')}",this.formEdit,function(res){
+                if(res.code==1){
+                    return layer.msg(res.msg,{icon:1},function () {
+                        location.reload();
+                    });
+                }else{
+                    return layer.msg(res.msg,{icon:2});
+                }
+            })
+				},
+				viewCause:function(cause){
+						this.$alert(cause, '原因');
+				},
+			}
+		});
+
+		vm.getCityData();
+	})
+</script>
+{include file="public/footer" /}

@@ -1,0 +1,293 @@
+{include file="public/header" /}
+<link href="/static/seller/css/editor.css" rel="stylesheet" type="text/css"/>
+<link href="/static/seller/css/My_goods.css" rel="stylesheet" type="text/css"/>
+<style>
+  /* 上传图片 */
+  .upload_pic {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+
+  .upload_pic:last-child {
+    border-bottom: none;
+  }
+
+  .upload_pic p {
+    width: 130px;
+  }
+
+  .el_pic_upload {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .layui-layer {
+    top: 0px!important;
+  }
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+  .singular tr:last-child td {
+    width: auto!important;
+    text-align: center;
+  }
+  .video-right {
+    width: 78%;
+    height: 100%;
+    padding: 15px 14px 15px 10px;
+    box-sizing: border-box;
+    border-left: 1px solid #eee;
+  }
+  .video-right .video_div{
+    width: 100%;
+    display: block;
+    display: flex;
+    align-items: center;
+  }
+  .service-p {
+    border-bottom: 1px solid #eee;
+  }
+  img {
+    display: inline!important;
+    margin-right: 10px;
+  }
+</style>
+<div id="content" v-cloak>
+  <div class="right" id="second">
+    <div class="right-top">
+      <b>发布追评任务 / <strong>设置追评内容 </strong></b>
+    </div>
+    <div class="bottm">
+      <!-- 时间轴 -->
+      <table border="1" bordercolor="#eee" cellpadding="0" cellspacing="0" class="singular">
+        <tr style="background: #f5f7fa;">
+          <td>任务编号</td>
+          <td>店铺名</td>
+          <td>买手付款金额</td>
+          <td>买号</td>
+          <td>淘宝订单号</td>
+        </tr>
+        <tr>
+          <td>{{info.task_number}}</td>
+          <td>{{info.shop_id.shop_name}}</td>
+          <td>{{info.pay_price}}</td>
+          <td>{{info.buy_id}}</td>
+          <td>{{info.taobao_number}}</td>
+        </tr>
+        <tr style="background: #f5f7fa;">
+          <td>追评单号</td>
+          <td>商家支付</td>
+          <td>创建时间</td>
+          <td>状态</td>
+          <td>完成时间</td>
+        </tr>
+        <tr>
+          <td>{{info.user_task_id}}</td>
+          <td>{{info.money}}</td>
+          <td>{{info.create_time}}</td>
+          <td style="color: red">{{info.state}}</td>
+          <td>{{info.confirm_time}}</td>
+        </tr>
+        <tr style="background: #f5f7fa;">
+          <td colspan="4">好评截图</td>
+          <td>上传时间</td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <img :src="url+item" alt="好评截图" v-for="item in info.img" style="height: 100px" @click="viewImg(item)">
+          </td>
+          <td>{{info.upload_time}}</td>
+        </tr>
+        <tr style="background: #f5f7fa;">
+          <td colspan="5">备注</td>
+        </tr>
+        <tr>
+          <td colspan="5">{{info.remarks}}</td>
+        </tr>
+      </table>
+      <div class="service" v-for="(item,key) in info.goods">
+        <table border="1" bordercolor="#eee" cellpadding="0" cellspacing="0" class="singular" style="margin-bottom: 0!important;">
+          <tr style="background: #f5f7fa;">
+            <td>商品名</td>
+            <td>图片</td>
+            <td>价格</td>
+            <td>数量</td>
+            <td>规格</td>
+          </tr>
+          <tr>
+            <td>{{item.name}}</td>
+            <td><img :src="url+item.pc_img" alt="商品图" height="50px"></td>
+            <td>{{item.price}}</td>
+            <td>{{item.num}}</td>
+            <td>{{item.goods_spec}}</td>
+          </tr>
+        </table>
+        <div class="service-p" v-if="item.is_praise==1">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            文字好评
+          </div>
+          <div class="service-right">
+            <div class="between-comments">
+              {{item.praise}}
+            </div>
+          </div>
+        </div>
+        <div class="service-p" v-if="item.is_img==1">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            图片好评
+          </div>
+          <div class="service-right">
+            <div class="between-comments">
+              <div class="comments">
+                <div style="flex-wrap: wrap;">
+                  <div style="display: inline-block;position: relative;margin-right:4.5px;padding: 0;" v-for="(row,index) in item.img">
+                    <img :src="url+row" alt="" onerror="imgError(this)" style="height: 80px;width: 80px">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="service-p  cover" v-if="item.is_video==1">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            视频好评
+          </div>
+          <div class="video-right" >
+            <div class="video_div">
+              <div class="td-left">主商品视频：</div>
+              <div class="td-right">
+                  <video :src="url+item.video" controls class="avatar"></video>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="foots">
+        <el-button @click="quxiao()" class='open3' type="text" v-if="info.state=='未支付' || info.state=='已支付'"> 取消</el-button>
+        <el-button @click="goToPay()" class='open2' v-if="info.state=='未支付'">去支付</el-button>
+        <el-button @click="confirm()" class='open2' v-if="info.state=='已上传好评截图'">完成</el-button>
+      </div>
+    </div>
+  </div>
+  <el-dialog
+          title="图片"
+          :visible.sync="imgView"
+          width="30%"
+  >
+    <img :src="haop_img" alt="">
+    <span slot="footer" class="dialog-footer">
+    <el-button @click="imgView = false">取 消</el-button>
+    <el-button type="primary" @click="imgView = false">确 定</el-button>
+  </span>
+  </el-dialog>
+</div>
+<style>
+  .el-dialog {
+    width: 950px !important;
+  }
+
+  .goodTable {
+    margin-bottom: 10px !important;
+    background: #f9f9f9 !important;
+  }
+</style>
+<link href="/static/seller/css/main.css" rel="stylesheet">
+<script src="/static/seller/js/app.js"></script>
+<script>
+    var name = new Vue({
+        el: "#content",
+        data: function () {
+            return {
+                url:'http://tfkzpic.oss-cn-hangzhou.aliyuncs.com',
+                id:"{$id}",
+                info:{
+                    user_task_id:'',
+                    task_number:'',
+                    buy_id:'',
+                    pay_price:'',
+                    taobao_number:'',
+                    shop_id:{
+                        shop_name:'',
+                    },
+                    money:'',
+                    create_time:'',
+                    img:[],
+                    upload_time:'',
+                    remarks:'',
+                    state:"",
+                    confirm_time:'',
+                    goods:{},
+                },
+                haop_img:'',
+                imgView:false,
+            }
+        },
+        created: function () {
+            that = this;
+            this.getData();
+        },
+        methods: {
+            viewImg:function(img){
+                this.haop_img = img;
+                this.imgView = true;
+            },
+            getData: function () {
+                $.post("{:url('review/viewData')}", {id:this.id}, function (res) {
+                    console.log(res);
+                    if (res.code == 1) {
+                        that.info = res.data;
+                    } else {
+                        layer.msg(res.msg, {icon: 2,time:1500}, function () {
+                            window.history.go(-1);
+                        });
+                    }
+                })
+            },
+            quxiao:function(){
+                $.post("{:url('review/quxiao')}", {id:this.id}, function (res) {
+                    if (res.code == 1) {
+                        location.reload();
+                    } else {
+                        layer.msg(res.msg, {icon: 2,time:1500});
+                    }
+                })
+            },
+            goToPay:function(){
+                location.href = "{:url('review/pay',['id'=>$id])}";
+            },
+            confirm:function(){
+                $.post("{:url('review/confirm')}", {id:this.id}, function (res) {
+                    if (res.code == 1) {
+                        location.reload();
+                    } else {
+                        layer.msg(res.msg, {icon: 2,time:1500});
+                    }
+                })
+            }
+        },
+    });
+</script>
+{include file="public/footer" /}

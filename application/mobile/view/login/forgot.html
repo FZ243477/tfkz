@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>忘记密码</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            // 用户密码正则,6到16位,(字母,数字,下划线,减号)
+            var passWordReg = /^[a-zA-Z0-9_-]{6,16}$/;
+            // 手机号正则表达式
+            var phoneReg = /^1[3-9]\d{9}$/;
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        yzmMsg: "发送验证码",
+                        mobile:'',
+                        newpassword:'',
+                        newpassword2:'',
+                        dxyzm:'',
+                        isDisabled: false
+                    };
+                },
+                methods: {
+                    click:function(){
+                        if(!this.mobile) {return alertError("手机号不能为空");}
+                        if (!phoneReg.test(this.mobile)) {
+                            return alertError("手机号码格式不规范,请检查后重新输入");}
+                        if(!this.dxyzm) {return alertError("短信验证码不能为空");}
+                        if (!passWordReg.test(this.newpassword)) {
+                            return alertError("密码格式不规范,6到16位,(字母,数字,下划线,减号)");}
+                        if(!this.newpassword) {return alertError("请输入新密码");}
+                        if(!this.newpassword) {return alertError("确认密码不能为空");}
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('mobile/login/forget_edit')}",
+                            async : true,
+                            data : {
+                                "mobile":vm.mobile,
+                                "dxyzm":vm.dxyzm,
+                                "newpassword":vm.newpassword,
+                                "newpassword2":vm.newpassword2,
+                            },
+                            success : function(data){
+                                if(data.code==1){
+                                   alertSuccess(data.msg);
+                                    setTimeout(function(){
+                                        return location.href=data.url;
+                                    },3000)
+
+                                }else{
+                                    return alertError(data.msg);
+                                }
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                    },
+                    sendYzm: function () {
+                        if(!vm.mobile) {return alertError("手机号不能为空");}
+                        if (!phoneReg.test(vm.mobile)) {
+                            return alertError("手机号码格式不规范,请检查后重新输入");}
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('mobile/way/send_code')}",
+                            async : true,
+                            data : {
+                                "mobile":vm.mobile,
+                                "dxyzm":vm.dxyzm
+                            },
+                            success : function(data){
+                                // vm.alertError(data.msg);
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                        var num = 60;
+                        var that = this;
+                        this.isDisabled = true;
+                        var timer = setInterval(function () {
+                            num--;
+                            that.yzmMsg = "还剩 " + num + " 秒";
+                            if (num <= 0) {
+                                that.isDisabled = false;
+                                that.yzmMsg = "重新发送";
+                                clearInterval(timer);
+                            }
+                            if (num === 59) {
+                                alertSuccess("验证码发送成功");
+                            }
+                        }, 1000);
+                    }
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+    <div class="forget-box">
+        <!-- 登录框 -->
+        <div class="login-wrap">
+            <h1>忘记密码</h1>
+            <a href="{:url('login/index')}">返回登录</a>
+            <div class="input-box">
+                <input type="text" maxlength="11" placeholder="请输入手机号" v-model="mobile" />
+            </div>
+            <div class="input-box">
+                <input type="text" maxlength="6" placeholder="短信验证码" v-model="dxyzm" />
+                <van-button :disabled="isDisabled" class="send-yzm" type="info" @click="sendYzm">{{yzmMsg}}</van-button>
+            </div>
+            <div class="input-box">
+                <input type="text" placeholder="请输入新密码" v-model="newpassword" />
+            </div>
+            <div class="input-box">
+                <input type="text" placeholder="请确认新密码" v-model="newpassword2" />
+            </div>
+            <div class="login-btn">
+                <van-button class="login-btn-item" @click="click" type="info">修改密码</van-button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+

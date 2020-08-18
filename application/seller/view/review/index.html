@@ -1,0 +1,296 @@
+{include file="public/header" /}
+<link href="/static/seller/css/editor.css" rel="stylesheet" type="text/css"/>
+<link href="/static/seller/css/My_goods.css" rel="stylesheet" type="text/css"/>
+<style>
+  /* 上传图片 */
+  .upload_pic {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+
+  .upload_pic:last-child {
+    border-bottom: none;
+  }
+
+  .upload_pic p {
+    width: 130px;
+  }
+
+  .el_pic_upload {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .layui-layer {
+    top: 0px!important;
+  }
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+  .singular tr:last-child td {
+     width: auto!important;
+    text-align: center;
+  }
+  .video-right {
+    width: 78%;
+    height: 100%;
+    padding: 15px 14px 15px 10px;
+    box-sizing: border-box;
+    border-left: 1px solid #eee;
+  }
+  .video-right .video_div{
+    width: 100%;
+    display: block;
+    display: flex;
+    align-items: center;
+  }
+</style>
+<div id="content" v-cloak>
+  <div class="right" id="second">
+    <div class="right-top">
+      <b>发布追评任务 / <strong>设置追评内容 </strong></b>
+    </div>
+    <div class="bottm">
+      <!-- 时间轴 -->
+      <table border="1" bordercolor="#eee" cellpadding="0" cellspacing="0" class="singular">
+        <tr style="background: #f5f7fa;">
+          <td>任务编号</td>
+          <td>店铺名</td>
+          <td>买手付款金额</td>
+          <td>买号</td>
+          <td>淘宝订单号</td>
+        </tr>
+        <tr>
+          <td>{{info.task_number}}</td>
+          <td>{{info.shop_name}}</td>
+          <td>{{info.user_principal}}</td>
+          <td>{{info.user_buyno_wangwang}}</td>
+          <td>{{info.table_order_id}}</td>
+        </tr>
+      </table>
+      <div class="service" v-for="(item,key) in info.goods">
+        <table border="1" bordercolor="#eee" cellpadding="0" cellspacing="0" class="singular" style="margin-bottom: 0!important;">
+          <tr style="background: #f5f7fa;">
+            <td>商品名</td>
+            <td>图片</td>
+            <td>价格</td>
+            <td>数量</td>
+            <td>规格</td>
+          </tr>
+          <tr>
+            <td>{{item.name}}</td>
+            <td><img :src="item.pc_img" alt="商品图" height="50px"></td>
+            <td>{{item.price}}</td>
+            <td>{{item.num}}</td>
+            <td>{{item.goods_spec}}</td>
+          </tr>
+        </table>
+        <div class="service-p">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox @change="onClick(key)" v-model="item.is_praise">设置优质好评</el-checkbox>
+          </div>
+          <div class="service-right">
+            <div class="between-comments">
+              <b>上传优质好评</b>
+              <div class="comments" v-if="item.is_praise">
+                <div style="flex-wrap: wrap;">
+                  <span class="goods">文字好评：</span>
+                  <el-input :rows="2" placeholder="请输入内容" size="mini" style='width: 398px;' type="textarea" v-model="item.praise">
+                  </el-input>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="service-p">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox @change="showImg(key)" v-model="item.is_img_praise">上传图片好评</el-checkbox>
+          </div>
+          <div class="service-right">
+            <div class="between-comments">
+              <b>上传优质好评图片</b>
+              <div class="comments" v-if="item.is_img_praise">
+                <div style="flex-wrap: wrap;">
+                  <span class="goods">图片好评：</span>
+                  <div style="display: inline-block;position: relative;margin-right:4.5px;padding: 0;" v-for="(row,index) in item.img">
+                    <img :src="url+row" alt="" onerror="imgError(this)" style="height: 80px;width: 80px">
+                    <i @click="delImg(key,index)" class="el-icon-error" style="position: absolute;top:0px;right: 0px"></i>
+                  </div>
+                  <label style="display: inline-block">
+                    <input @change="getImg($event,key)" accept="image/gif,image/jpeg,image/x-png" name="file"
+                           style="position:absolute;opacity:0;" type="file"/>
+                    <img src="/images/add.jpg" style="width: 80px;height: 80px;">
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="service-p  cover">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox v-model="item.is_video_praise" @change="showVideo(key)">上传视频好评</el-checkbox>
+          </div>
+          <div class="video-right" v-if="item.is_video_praise">
+            <div class="video_div">
+              <div class="td-left">主商品视频：</div>
+              <div class="td-right" style="position:relative">
+                <!-- 上传视频 -->
+                <el-upload
+                        class="avatar-uploader"
+                        :action=getUrl(key)
+                        :show-file-list="false"
+                        :on-success="succress"
+                        :ref='key'
+                >
+                  <video v-if="item.video" :src="url+item.video" controls class="avatar"></video>
+                  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                </el-upload>
+                <span style="display: inline;position: absolute;right: 0px;top: 80px;color: red">*请确认评价图片与商品库内选择规格是否一致</span>
+              </div>
+            </div>
+          </div>
+          <div class="video-right" v-else>
+            <div class="between-comments">
+              <b>上传优质好评视频</b>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="foots">
+        <el-button @click="history.go(-1)" class='open3' type="text"><i class="el-icon-back"></i> 取消发布</el-button>
+        <el-button :plain="true" @click="setSubmit()" class='open2'>下一步 <i class="el-icon-d-arrow-right"></i>
+        </el-button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<style>
+  .el-dialog {
+    width: 950px !important;
+  }
+
+  .goodTable {
+    margin-bottom: 10px !important;
+    background: #f9f9f9 !important;
+  }
+</style>
+<link href="/static/seller/css/main.css" rel="stylesheet">
+<script src="/static/seller/js/app.js"></script>
+<script>
+    var name = new Vue({
+        el: "#content",
+        data: function () {
+            return {
+                url:'http://tfkzpic.oss-cn-hangzhou.aliyuncs.com',
+                task_id:"{$id}",
+                info:{
+                    id:"{$id}",
+                    task_number:'',
+                    user_buyno_wangwang:'',
+                    user_principal:'',
+                    table_order_id:'',
+                    shop_name:'',
+                    goods:{},
+                },
+            }
+        },
+        created: function () {
+            that = this;
+            this.getData();
+        },
+        methods: {
+            getData: function () {
+                $.post("{:url('review/getData')}", {id:this.task_id}, function (res) {
+                    console.log(res);
+                    if (res.code == 1) {
+                        that.info = res.data;
+                    } else {
+                        layer.msg(res.msg, {icon: 2,time:1500}, function () {
+                            window.history.go(-1);
+                        });
+                    }
+                })
+            },
+            getUrl:function(key){
+                return "{:url('review/uploadVideo','','',true)}/key/"+key;
+            },
+            // 显示隐藏优质好评
+            onClick:function(key) {
+                this.info.goods[key].praise = '';
+            },
+            /**
+             * 好评图片
+             */
+            showImg:function(key) {
+                this.info.goods[key].img = [];
+            },
+
+            showVideo:function(key) {
+                this.info.goods[key].video = '';
+            },
+
+            /* 获取图片的base64路径 */
+            getImg: function (e, val) {
+                var reader = new FileReader();
+                reader.readAsDataURL(e.target.files[0]);
+                reader.onload = function () {
+                    if (that.info.goods[val].img.length >= 5) return layer.msg('最多上传5张图片', {icon: 2});
+                    $.post("{:url('task/uploadBast64')}",{img:reader.result},function(res){
+                        if(res.code==1){
+                            that.info.goods[val].img.push(res.data);
+                            that.info.goods = JSON.parse(JSON.stringify(that.info.goods))
+                        }
+                    })
+                };
+            },
+            /* 删除图片 */
+            delImg: function (key, index) {
+                that.info.goods[key].img.splice(index, 1);
+            },
+
+            succress:function(res){
+                if(res.code==1){
+                    this.info.goods[res.key].video = res.data;
+                    that.info.goods = JSON.parse(JSON.stringify(that.info.goods))
+                }else{
+                    layer.alert(res.msg);
+                }
+            },
+            setSubmit:function(){
+                $.post("{:url('review/addTask')}", this.info, function (res) {
+                    if (res.code == 1) {
+                        location.href = res.url;
+                    } else {
+                        layer.msg(res.msg, {icon: 2,time:1500});
+                    }
+                })
+            },
+
+        },
+    });
+</script>
+{include file="public/footer" /}

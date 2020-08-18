@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <script src="/static/seller/js/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/seller/node_modules/element-ui/lib/theme-chalk/index.css" />
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/seller/css/register.css"/>
+    <script charset="utf-8" src="/static/seller/layer/layer.js" type="text/javascript"></script>
+    <script src="/static/seller/js/vue.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/seller/node_modules/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+      $(function() {
+          // 手机号正则表达式
+          var phoneReg = /^1[3-9]\d{9}$/;
+        var vm = new Vue({
+          el: ".container",
+          data: function() {
+            return {
+                disabled: false,
+                mobile:'',
+                seller_name:'',
+                login_pwd:'',
+                login_pwd2:'',
+                qq:'',
+                dxyzm:''
+            }
+          },
+          methods: {
+            /* 失败的弹框 */
+            alertError: function(e) {
+              this.$message.error(e);
+            },
+            /* 成功的弹框 */
+            alertSuccess: function(e) {
+              this.$message({
+                message: e,
+                type: "success"
+              });
+            },
+            click:function(){
+               if(!this.mobile) return layer.msg('手机号不能为空',{icon:2});
+               if (!phoneReg.test(this.mobile))return layer.msg('手机号码格式不规范,请检查后重新输入',{icon:2});
+               if(!this.login_pwd) return layer.msg('密码不能为空',{icon:2});
+               if(this.login_pwd2 !== this.login_pwd)return layer.msg('两次密码输入不一样',{icon:2});
+               if(!this.qq)return layer.msg('QQ账号不能为空',{icon:2});
+               if(!this.dxyzm)return layer.msg('验证码不能为空,请点击发送验证码',{icon:2});
+              $.ajax({
+                type : 'POST',
+                url : "{:url('Register/registerDo')}",
+                async : true,
+                data : {
+                  "mobile":vm.mobile,
+                  "seller_name":vm.seller_name,
+                  "login_pwd":vm.login_pwd,
+                  "qq":vm.qq,
+                  "code":vm.dxyzm,
+                  "type":"{$type}",
+                  "invite_code":"{$invite_code}"
+                },
+                success : function(data){
+                  if(data.code==1){
+                      layer.msg(data.msg,{icon:1});
+                    setTimeout(function(){
+                      return location.href=data.url;
+                    },3000)
+
+                  }else{
+                      return layer.msg(data.msg,{icon:2});
+                  }
+                },
+                error : function(XMLHttpRequest, textStatus) {
+                  alert(XMLHttpRequest.status + "," + textStatus);
+                }
+              });
+            },
+
+          }
+        });
+        var sendBtn = $(".login_box .login_input .yzm_input_box .el_btn1");
+
+
+        /* 验证码倒计时 */
+        sendBtn.click(function() {
+            var that = this;
+          $.ajax({
+            type : 'POST',
+            url : "{:url('login/mobileDo')}",
+            data : {
+              "mobile":vm.mobile,
+            },
+            success : function(data){
+                if(data.code==1){
+                    var num = 60;
+                    var timer = setInterval(function() {
+                        num--;
+                        vm.disabled = true;
+                        $(that).html(num + " s");
+                        if (num <= 0) {
+                            clearInterval(timer);
+                            $(that).html("重新发送");
+                            vm.disabled = false;
+                        } else if (num === 59) {
+                            return layer.msg('验证码发送成功!',{icon:1});
+                        }
+                    }, 1000);
+                }else{
+                    return layer.msg('验证码发送成功!',{icon:2});
+                }
+            },
+            error : function(XMLHttpRequest, textStatus, errorThrown) {
+              alert(XMLHttpRequest.status + "," + textStatus);
+            }
+          });
+        });
+
+      });
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- 注册区域 -->
+      <div class="login_box">
+        <p class="text_font">商家注册</p>
+        <div class="login_input">
+
+          <div class="input_box">
+            <img class="input_pic" src="/static/buy/img/phone.png" />
+            <input type="text" name="mobile" placeholder="请输入手机号" maxlength="13" class="user_input" v-model="mobile" autocomplete="off">
+          </div>
+          <div class="input_box">
+            <img class="input_pic" src="/static/buy/img/user.png" />
+            <input type="text" name="seller_name" placeholder="请输入用户名" maxlength="20" class="user_input" v-model="seller_name" autocomplete="off">
+          </div>
+          <div class="input_box">
+            <img class="input_pic" src="/static/buy/img/password.png" />
+            <input type="password" name="login_pwd" placeholder="请输入密码" class="user_input" v-model="login_pwd" autocomplete="off">
+          </div>
+          <div class="input_box">
+            <img class="input_pic" src="/static/buy/img/password.png" />
+            <input type="password" name="login_pwd2"  placeholder="请确认密码" class="user_input" v-model="login_pwd2">
+          </div>
+          <div class="input_box">
+            <img class="input_pic" src="/static/buy/img/qq.png" />
+            <input type="text" name="qq" placeholder="请输入QQ账号" class="user_input" maxlength="11" v-model="qq">
+          </div>
+          <!-- 验证码 -->
+          <div class="yzm_input_box">
+            <img class="yzm_pic" style="height: 26px;" src="/static/buy/img/123.png" />
+            <input type="text" placeholder="短信验证码" class="yzm_input" maxlength="6"  v-model="dxyzm">
+            <el-button class="el_btn1" type="primary" :disabled="disabled">发送验证码</el-button>
+          </div>
+          <div class="btn">
+            <el-button class="el_btn2" type="primary" @click="click">注册</el-button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </body>
+</html>

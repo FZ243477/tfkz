@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css"/>
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/maskLingQu.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png"/>
+    <script src="/static/buy/js/vue-2.6.10.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            /* 为element-ui组件提供数据绑定和事件 */
+            var vm = new Vue({
+                el: ".center_box",
+                data: function () {
+                    return {
+                        /* 待处理数据 */
+                        activeName: "first",
+
+                        /* 下拉选项卡数据 */
+                        options1: [{
+                            value1: 0,
+                            label1: "全部"
+                        }, {
+                            value1: 1,
+                            label1: "天猫"
+                        }, {
+                            value1: 2,
+                            label1: "淘宝"
+                        }],
+                        options2: [
+                            {volist name="buyno" id="vo"}
+                            {
+                            value2: '{$vo.id}',
+                            label2: '{$vo.wwid}'
+                            },
+                            {/volist}
+                        ],
+                        options3: [{
+                            value3: 0,
+                            label3: "全部"
+                        }, {
+                            value3: 1,
+                            label3: "文字好评"
+                        }, {
+                            value3: 2,
+                            label3: "淘口令"
+                        }, {
+                            value3: 3,
+                            label3: "二维码"
+                        }, {
+                            value3: 4,
+                            label3: "直通车"
+                        }, {
+                            value3: 5,
+                            label3: "通道任务"
+                        }],
+                        options4: [
+                            {
+                            value4: 1,
+                            label4: "电脑"
+                        },
+                            {
+                            value4: 2,
+                            label4: "手机"
+                        }],
+                        value1: "",
+                        value2: "",
+                        value3: "",
+                        value4: "",
+                        /* 日期的value值 */
+                        dateValue: "",
+                        /* 默认选中第一页 */
+                        currentPage: 1,
+                        total: 0,
+                        size: 10,
+                        sizes: [10, 20, 30, 40, 50],
+                        currentPage2: 1,
+                        /* 表格数据 */
+                        list: [],
+                    }
+                },
+                methods: {
+                    /* 所有任务 */
+                    handleClick: function (tab, event) {
+                        // console.log(tab, event);
+                    },
+                    /* 分页事件 */
+                    handleSizeChange: function (val) {
+                        this.size = val;
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    handleCurrentChange: function (val) {
+                        this.currentPage = val;
+                        this.getData();
+                    },
+                    /* 失败的弹框 */
+                    alertError: function (e) {
+                        this.$message({
+                            message: e,
+                            type: "error"
+                        });
+                    },
+                    /* 成功的弹框 */
+                    alertSuccess: function (e) {
+                        this.$message({
+                            message: e,
+                            type: "success"
+                        });
+                    },
+                    addTask: function (index) {
+                        var that = this;
+                        that.$confirm("是否添加此任务?", "温馨提示", {
+                            confirmButtonText: "确定",
+                            cancelButtonText: "取消",
+                            type: "warning"
+                        }).then(function () {
+                            //console.log(that.list[index].task_number);
+                            var task_number = that.list[index].task_number;
+                            var commission = that.list[index].user_reward;
+                            var total_price = that.list[index].total_price;
+                            var buyno_id = that.value2;
+                            var terminal=that.value4;
+                            var user_divided=that.list[index].user_divided ;
+                            console.log(that.value2);
+                            $.ajax({
+                                type: "POST",
+                                url: "{:url('buy/task/get_task')}",
+                                async: true,
+                                data: {
+                                    'task_number': task_number,
+                                    'buyno_id': buyno_id,
+                                    'commission': commission,
+                                    'total_price': total_price,
+                                    'terminal':terminal,
+                                    'user_divided':user_divided,
+                                },
+                                success: function (data) {
+                                    if (data.code == 1) {
+                                        that.alertSuccess(data.msg);
+                                        setTimeout(function () {
+                                            return location.href = data.url;
+                                        }, 3000);
+                                    } else {
+                                        that.alertError(data.msg);
+                                        setTimeout(function () {
+                                            return location.href = "{:url('task/index')}";
+                                        }, 3000);
+                                        // return that.alertError(data.msg);
+                                    }
+                                },
+                                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                            // that.alertSuccess("添加成功");
+                        }).catch(function (error) {
+                        });
+                    },
+                    /* 给表格上色 */
+                    cellStyle: function (e) {
+                        // console.log(e);
+                        if (e.columnIndex === 4) {
+                            var taskProgress = this.list[e.rowIndex].progress;
+                            /* 截取后面的百分比符号并转换成NumBer类型 */
+                            taskProgress = taskProgress.substring(taskProgress, taskProgress.lastIndexOf("%"));
+                            taskProgress = Number(taskProgress);
+                            // console.log(taskProgress);
+
+                            /* 根据完成百分比动态改变颜色 */
+                            if (taskProgress === 100) {
+                                return "color:green";
+                            } else {
+                                return "color:red";
+                            }
+
+                        } else if (e.columnIndex === 2) {
+                            return "color:rgb(30, 144, 255);"
+                        }
+                    },
+                    getData: function () {
+                        var that = this;
+                        $.post("{:url('task/index')}", {
+                            page: that.currentPage,
+                            datetime: that.dateValue,
+                            size: that.size,
+                            task_type:that.value3,
+                            terminal:that.value4
+                        }, function (res) {
+                            console.log(res);
+                            if (res.code == 1) {
+                                that.list = res.data.list;
+                                console.log(that.list)
+                                that.total = res.data.total;
+                                for (var i = 0; i < that.list.length; i++) {
+                                    that.list[i].progress =parseInt(that.list[i].progress) + "%"
+                                }
+                            } else {
+                                vm.alertError(res.msg);
+                            }
+                        })
+                    },
+                    search: function () {
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    // 获取日期的值
+                    getDateValue: function (val) {
+                        console.log(val);
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    // 获取任务类型的值
+                    getTaskValue: function (val) {
+                        // console.log(val);
+                        this.currentPage = 1;
+                        this.getData();
+                    },
+                    //    获取终端的值
+                    getZhongDuanValue: function (val) {
+                        // console.log(val);
+                        this.currentPage = 1;
+                        this.getData();
+                    }
+                },
+                created: function () {
+                    this.getData();
+                }
+            });
+
+            /* 初始化jQuery */
+            $(function () {
+
+                /* 调用jQuery实现选择导航栏效果 */
+                $(".title a").click(function () {
+                    $(this).addClass("add_color").siblings().removeClass("add_color");
+                });
+
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+
+            <!-- 任务管理 -->
+            <div class="renwuguanli_box">
+                <!-- 任务管理标题 -->
+                <div class="renwuguanli">
+                    <div class="renwuguanli_item">
+                        <a href="javascript:" class="renwuguanli_item_select">任务管理</a>
+                    </div>
+                </div>
+                <!-- 所有任务 -->
+                <div class="alltask" style="margin-top: 10px;">
+                    <el-tabs v-model="activeName" @tab-click="handleClick">
+                        <el-tab-pane label="所有任务" name="first"></el-tab-pane>
+                    </el-tabs>
+                </div>
+                <!-- 选项卡第一行 -->
+                <div class="select_row_one">
+                    <p>买号:</p>
+                    <el-select class="el_select" v-model="value2" clearable placeholder="请选择" size="small">
+                        <el-option v-for="(item,index) in options2" :key="index" :label="item.label2"
+                                   :value="item.value2">
+                        </el-option>
+                    </el-select>
+                    <p>任务类型:</p>
+                    <el-select class="el_select" @change="getTaskValue" v-model="value3" clearable placeholder="请选择"
+                               size="small">
+                        <el-option v-for="(item,index) in options3" :key="index" :label="item.label3"
+                                   :value="item.value3">
+                        </el-option>
+                    </el-select>
+                </div>
+                <!-- 选项卡第二行 -->
+                <div class="select_row_two">
+                    <p>终端:</p>
+                    <el-select class="el_select" @change="getZhongDuanValue" v-model="value4" clearable placeholder="请选择" size="small">
+                        <el-option v-for="item in options4" :key="item.value4" :label="item.label4"
+                                   :value="item.value4">
+                        </el-option>
+                    </el-select>
+                    <!--<p>任务起止时间:</p>-->
+                    <!--<el-date-picker class="el_date" @change="getDateValue" v-model="dateValue" type="daterange"-->
+                                    <!--range-separator="至"-->
+                                    <!--start-placeholder="开始日期" end-placeholder="结束日期" size="small"-->
+                                    <!--value-format="yyyy-MM-dd">-->
+                    <!--</el-date-picker>-->
+                </div>
+                <!-- 数据列表 -->
+                <div class="shuju_table">
+                    <template>
+                        <el-table :data="list" border :header-cell-style="{background:'#f5f7fa'}"
+                                  :cell-style="cellStyle">
+                            <el-table-column prop="rand_num" label="商家任务ID编号" align="center">
+                            </el-table-column>
+                            <el-table-column prop="mobile" label="商家" align="center">
+                            </el-table-column>
+                            <el-table-column prop="total_price" label="垫付资金" align="center">
+                            </el-table-column>
+                            <el-table-column label="佣金" align="center">
+                                <template slot-scope="scope">
+                                    <div>{{list[scope.$index].user_reward}}<span>+{{(list[scope.$index].user_divided/list[scope.$index].num).toFixed(2) }}</span></div>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="num" label="任务总数" align="center">
+                            </el-table-column>
+                            <el-table-column prop="progress" label="任务领取进度" align="center">
+                            </el-table-column>
+                            <el-table-column label="接收状态" align="center">
+                                <template slot-scope="scope">
+                                    <el-button @click="addTask(scope.$index)">添加任务单</el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </template>
+                </div>
+                <!-- 分页 -->
+                <div class="fenye">
+                    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes=sizes :page-size=size
+                                   layout="total, sizes, prev, pager, next, jumper" :total=total
+                                   background>
+                    </el-pagination>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

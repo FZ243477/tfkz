@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+  <title>个人通知</title>
+  <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+  <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+  <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+  <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+  <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+  <script>
+      $(function () {
+          var vm = new Vue({
+              el: ".tfkz-container",
+              data: function () {
+                  return {
+                      // 弹框默认不显示
+                      singleDialogShow: false,
+                      // 红点默认显示
+                      redShow: true,
+                      singleIndex: 0,
+                      // 右下角数据
+                      detail: {
+                          title: "",
+                          author: "",
+                          content: "",
+                          create_time: ""
+                      }
+                  };
+              },
+              methods: {
+                  // 分页事件
+                  pageChange: function (val) {
+                      this.msgPage = val;
+                      this.msgGetData();
+                  },
+                  // 列表点击事件
+                  singlePersonListActive: function (index) {
+                      this.singleIndex = index;
+                      this.singlePersonList[index].look = 1;
+                      this.singleDialogShow = true;
+                      this.detail = this.singlePersonList[index];
+                      var id = this.singlePersonList[index].id;
+                      $.post("{:url('helpcenter/setMsg')}", {id:id}, function (res) {
+                          console.log(res);
+                      })
+                  }
+              },
+              mixins: [singlePersonMixin],
+              mounted: function () {
+                  publicFunction();
+              }
+          });
+      });
+  </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+  <!-- 页面头部 -->
+  <div class="page-header">
+    <div class="arrow-left" onclick="javascript:history.back(-1);">
+      <van-icon class="arrow-left-item" name="arrow-left" />
+    </div>
+    <div class="page-title">个人通知</div>
+    <div class="menu-box" onclick="slideBarClick()">
+      <van-icon class="menu-box-item" name="bars" />
+    </div>
+  </div>
+
+  <!-- 下拉菜单 -->
+  {include file="public/left" /}
+
+  <!-- 滚动容器 -->
+  <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+    <!-- 公用tab标签 -->
+    <div class="public-tab-title">
+      <span class="active">个人通知</span>
+    </div>
+
+    <!-- 个人通知 -->
+    <div class="help-center">
+      <!-- 个人通知列表 -->
+      <div class="help-center-list">
+        <div
+                class="help-center-list-item"
+                @click="singlePersonListActive(index)"
+                v-for="(item,index) in singlePersonList"
+                :key="index">
+          <span v-if="item.look===0" class="red-color"></span>
+          <p>{{item.title}}</p>
+          <div class="help-center-list-item-time">
+            <van-icon class="help-center-list-item-time-icon" name="clock-o"></van-icon>
+            <span>{{item.create_time}}</span>
+          </div>
+        </div>
+      </div>
+      <!-- 分页 -->
+      <div class="public-page">
+        <span class="public-page-total">共 {{msgTotal}} 条</span>
+        <van-pagination
+                class="public-page-item"
+                @change="pageChange"
+                v-model="msgPage"
+                :items-per-page="5"
+                :total-items="msgTotal"
+                :show-page-size="2"
+                force-ellipses></van-pagination>
+      </div>
+      <!-- 内容弹框 -->
+      <van-dialog v-model="singleDialogShow" title="个人通知" show-cancel-button>
+        <div class="help-detail">
+          <h1 class="help-detail-title">{{detail.title}}</h1>
+          <div class="help-detail-content">{{detail.content}}</div>
+          <p class="help-detail-fenlei">{{detail.author}}</p>
+          <p class="help-date">{{detail.create_time}}</p>
+        </div>
+      </van-dialog>
+    </div>
+
+  </div>
+
+  <!-- tabBar -->
+  {include file="public/footer" /}

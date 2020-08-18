@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>待处理事项</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        /* 默认弹框不开启 */
+                        dialogVisible: false,
+                        /* 图片路径 */
+                        localFile: "",
+                        // 图片临时路径
+                        fileList:[],
+                        ystime:"{$list.ys_time}",
+                        inputValue:"",
+                        inputNumber:"",
+                        /* 数据1 */
+                        testData: [
+                            {volist name="product" id="vo"  }
+                            {
+                                taskBianHao: "{$list.task_number}",
+                                zhongDuan:"{$list.terminal}",
+                                time: "{$list.create_time}",
+                                type: "{$list.task_type}",
+                                taskTime: "{$list.ending_time|date='m-d H:i:s',###}",
+                                principal: "{$list.principal}",
+                                taskNum: "{$list.task_number}",
+                                title: "{$vo.name}",
+                                content: "{$vo.text_praise}",
+                                img:"{$vo.img_praise}",
+                                video:"{$vo.video_praise}",
+                                maiHao: "{$list.wwid}",
+                                kuaiDi: "{$list.delivery}",
+                                danHao: "{$list.delivery_num}",
+                                price: "{$list.seller_principal}"
+                            },
+                            {/volist}
+                        ],
+                        /*任务ID*/
+                        task_id:"{$list.id}",
+                        // 提示内容
+                        alertNum:{$list.seller_principal}
+                    };
+                },
+                    mixins:[singlePersonMixin],
+                        filters: {
+                        setName: function (val) {
+                            if (val.length > 6) {
+                                return val.substr(0, 6) + "...";
+                            }
+                            return val;
+                        }
+                    },
+                    methods:{
+                        // 确认上传图片
+                        dialogConfirm:function(){
+                            console.log(this.localFile);
+                            var that = this;
+                            if(!that.inputValue) return alertError("请填写订单号！");
+                            if(!that.inputNumber) return alertError("请填写金额！");
+                            if(that.localFile.length===0) return alertError("请上传好评截图！");
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('mobile/task/take_wk')}",
+                                async : true,
+                                data : {
+                                    "high_praise_img":that.localFile,
+                                    "task_id":that.task_id,
+                                    "wk_order_detail":that.inputValue,
+                                    "wk_input_detail":that.inputNumber
+                                },
+                                success : function(data){
+                                    if(data.code==1){
+                                        alertSuccess(data.msg);
+                                        setTimeout(function(){
+                                            return location.href=data.url;
+                                        },3000)
+                                    }else{
+                                        return alertError(data.msg);
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                        },
+                        inputchange:function(){
+                            this.inputNumber = Number(this.inputNumber).toFixed(2);
+                            var that=this;
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('buy/task/wknumberchange')}",
+                                async : true,
+                                data : {
+                                    'number':that.inputNumber,
+                                    'task_id':that.user_task_id
+                                },
+                                success : function(data){
+                                    // console.log(data);
+                                    if(data.code==1){
+                                        return;
+                                    }else{
+                                        setTimeout(function () {
+                                            that.inputNumber="";
+                                        },3000);
+                                        return alertError(data.msg);
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                        },
+                        // 阻止弹框默认关闭
+                        beforeClose: function (action, done) {
+                            if (action === "confirm") {
+                                done(false);
+                            } else {
+                                done();
+                            }
+                        },
+                        // 删除图片
+                        handleRemove:function (file) {
+                            this.localFile = "";
+                        },
+                        // 图片改变事件
+                        handleChange:function (file){
+                            this.localFile = file.content;
+                        },
+                    },
+                    mounted: function () {
+                        publicFunction();
+                    }
+                });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">待处理事项</div>
+        <div class="menu-box" >
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span class="active">待处理事项</span>
+        </div>
+        <!-- 卡片 -->
+        <div class="TaskManagement">
+            <div
+                    class="Task-management"
+                    v-for="(item,index) in testData"
+                    :key="index">
+                <div class="TaskTop">
+                    <div class="managementHeng">
+                        <p>终端：</p>
+                        <p>{{item.zhongDuan}}</p>
+                    </div>
+                    <div class="managementHeng">
+                        <p>接手买号：</p>
+                        <p>{{item.taskBianHao}}</p>
+                    </div>
+                    <div class="managementHeng">
+                        <p>任务类型：</p>
+                        <p>{{item.type}}</p>
+                    </div>
+                    <div class="managementHeng">
+                        <p>任务截止时间：</p>
+                        <p>{{item.taskTime}}</p>
+                    </div>
+                    <div class="managementHeng">
+                        <p>垫付本金(元)：</p>
+                        <p>{{item.principal}}</p>
+                    </div>
+
+                    <div class="managementHeng">
+                        <p>任务编号：</p>
+                        <p>{{item.taskNum}}</p>
+                    </div>
+                </div>
+                <div class="TaskBottom">
+                    <img src="/static/mobile/img/bolang.png" alt="" />
+                    <div class="TaskBottomPosition">
+                        <p>
+                            操作：
+                            <b class="task-bottom-single-box">
+                                <a href="javascript:" @click="handleQuXiao(index)">取消</a>
+                            </b>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="Task-management" v-if="testData.length===0">
+                <div class="TaskTop" style="text-align: center">暂无内容</div>
+                <div class="TaskBottom">
+                    <img src="/static/mobile/img/bolang.png" alt="" />
+                    <div class="TaskBottomPosition"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <p style="text-align: center;font-size: 0.5rem;">尾款时间：{{ystime}}</p>
+        <div class="zhuipin-btn" style="margin: 0px auto;
+    text-align: right;
+    margin-right: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;">
+            <van-button style="text-align: center;" type="danger" @click="dialogVisible = true">上传尾款截图</van-button>
+        </div>
+        <div style="width:80%;margin:auto;">
+            <div class="task_row2">
+                <p>1. 商家订单要求：注意自己的号，注意自己的号，注意自己的号!最近查的比较紧，不要影响彼此之间的账号安全！无需假聊，提交订单先不付款，到首页看同款【注意：在同款详情页里至少看1-2分钟】在回来对比下付款！</p>
+                <p>2. 未按指定文字好评，图片好评，将扣除10银锭</p>
+                <p>3. 评价环节，胡乱评价、复制他人评价、评价与商品不符、中差评、低星评分等恶劣评价行为,将下架买号一个月</p>
+                <p>4. 请复制以上指定内容到淘宝进行评价</p>
+                <p>5. 无指定好评可根据商品15字左右自由发挥</p>
+            </div>
+        </div>
+        <!-- 上传图片弹框 -->
+        <van-dialog @confirm="dialogConfirm" :before-close="beforeClose" v-model="dialogVisible" title="温馨提示" show-cancel-button>
+            <div style="width:90%;margin:0 auto;">
+                <p>1. 填写当前订单信息</p>
+                <p style="color: red">*如任务商品拍下后产生2个订单号，请将2个订单号同时填写到下方，两个订单号中间用减号'-'隔开。</p>
+                <!-- 订单号 -->
+                <div class="task-step-three-detail-dingdanhao">
+                    <span class="task-step-three-detail-span">订单号：</span>
+                    <div class="public-input">
+                        <input type="text" placeholder="请输入内容" v-model="inputValue">
+                    </div>
+                </div>
+                <p>2. 填写实际付款金额</p>
+                <div class="task-step-three-detail-dingdanhao">
+                    <span>付款金额：</span>
+                    <div class="task-step-three-detail-stepper">
+                        <div class="public-input">
+                            <input type="number" @change="inputchange" v-model.lazy="inputNumber">
+                        </div>
+                    </div>
+                </div>
+                <p style="color: red">*实际付款金额不得超过或者小于订单金额100元</p>
+            </div>
+            <div class="zhuipin-task-upload">
+                <p>3.请上传好评截图：</p>
+                <van-uploader
+                        @delete="handleRemove"
+                        :after-read="handleChange"
+                        v-model="fileList"
+                        multiple
+                        :max-count="1"></van-uploader>
+            </div>
+        </van-dialog>
+    </div>
+    {include file="public/footer" /}

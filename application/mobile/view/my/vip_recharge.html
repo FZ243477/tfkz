@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title>会员VIP</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        priceList:[
+                            {price:{$vip[0]},time:3},{price:{$vip[1]},time:6},{price:{$vip[2]},time:9},{price:{$vip[3]},time:12}
+                        ],
+                        curPrice:{$vip[0]},
+                        curIndex:0,
+                        curIndex2:0,
+                        curDate:3,
+                        //支付方式
+                        pay: [{
+                            img: "/static/mobile/img/zhifubao.png",
+                            name: "支付宝"
+                        }, {
+                            img: "/static/mobile/img/yuanbao2.png",
+                            name: "本金支付"
+                        }, {
+                            img: "/static/mobile/img/yuanbao3.png",
+                            name: "银锭支付"
+                        }],
+                        pageType:0,
+                        // 默认分页
+                        currentPage: 1,
+                        // 表格数据
+                        tableData: [
+                            {
+                                date: "2019-10-28 15:38:51",
+                                price: "-0.01",
+                                enddate: "2021-07-10",
+                                beizhu: "购买3个月会员使用支付宝支付0.01元,到期时间2021-07-10 18:02:54"
+                            },
+                            {
+                                date: "2019-10-28 15:38:51",
+                                price: "-80",
+                                enddate: "2021-07-10",
+                                beizhu: "购买3个月会员使用支付宝支付0.01元,到期时间2021-07-10 18:02:54"
+                            }
+                        ]
+                    };
+                },
+                mounted: function () {
+                    publicFunction();
+                },
+                // 调用混入
+                mixins: [dateMixin, tabMixin, singlePersonMixin],
+                methods: {
+                    // 切换页面跳转
+                    changeType:function(e){
+                        var type = e.currentTarget.dataset.type;
+                        if(type==="0"){
+                            location.href="{:url('mobile/my/vip_recharge')}"
+                        }else if(type==="1"){
+                            location.href="{:url('mobile/my/vip_record')}"
+                        }
+                    },
+                    //会员套餐
+                    packages(index) {
+                        this.curIndex = index;
+                        /* 套餐值 */
+                        this.curDate = this.priceList[index].time;
+                        this.curPrice = this.priceList[index].price;
+                    },
+                    //支付方式下标
+                    pays(index) {
+                        this.curIndex2 = index;
+                    },
+                    //确认支付弹框
+                    Vips() {
+                        var that = this;
+                        this.$dialog.confirm({
+                            title: "温馨提示",
+                            message: "您确定要支付吗？"
+                        }).then(function () {
+                            if(that.curIndex2 == 0){
+                                $.ajax({
+                                    type : 'POST',
+                                    url : "{:url('mobile/my/creat_order')}",
+                                    async : true,
+                                    data : {
+                                        "user_type":2,
+                                        "type":2,
+                                        "price":that.curPrice,
+                                    },
+                                    success : function(data){
+                                        if(data.code==1){
+                                            alertSuccess(data.msg);
+                                            setTimeout(function(){
+                                                return location.href=data.url;
+                                            },3000)
+
+                                        }else{
+                                            return alertError(data.msg);
+                                        }
+                                    },
+                                    error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                        alert(XMLHttpRequest.status + "," + textStatus);
+                                    }
+                                });
+                            }else if(that.curIndex2 == 1){
+                                $.ajax({
+                                    type : 'POST',
+                                    url : "{:url('mobile/my/principal_member')}",
+                                    async : true,
+                                    data : {
+                                        "type":2,//账号充值
+                                        "price":that.curPrice,
+                                        "date":that.curDate
+                                    },
+                                    success : function(data){
+                                        if(data.code==1){
+                                            alertSuccess(data.msg);
+                                            setTimeout(function(){
+                                                return location.href=data.url;
+                                            },3000)
+
+                                        }else{
+                                            return alertError(data.msg);
+                                        }
+                                    },
+                                    error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                        alert(XMLHttpRequest.status + "," + textStatus);
+                                    }
+                                });
+                            }else if(that.curIndex2 == 2){
+                                $.ajax({
+                                    type : 'POST',
+                                    url : "{:url('mobile/my/silver_member')}",
+                                    async : true,
+                                    data : {
+                                        "type":2,//账号充值
+                                        "price":that.curPrice,
+                                        "date":that.curDate
+                                    },
+                                    success : function(data){
+                                        if(data.code==1){
+                                            alertSuccess(data.msg);
+                                            setTimeout(function(){
+                                                return location.href=data.url;
+                                            },3000)
+
+                                        }else{
+                                            return alertError(data.msg);
+                                        }
+                                    },
+                                    error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                        alert(XMLHttpRequest.status + "," + textStatus);
+                                    }
+                                });
+                            }
+                        }).catch(function () {});
+                    },
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">会员VIP</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span class="active" data-type="0" @click="changeType">充值会员</span>
+            <span data-type="1" @click="changeType">会员VIP记录</span>
+        </div>
+
+        <div class="recharge">
+
+            <!-- 充值会员 -->
+            <div class="Vips-big">
+                <div class="Vips-title">
+                    <p>会员: <span>{$users.username}</span></p>
+                    <p>状态: <span>
+                        {if condition="$users.vip ==1"}VIP会员
+                                    {else /} 不是会员
+                                    {/if}
+                    </span></p>
+                    <p>到期时间: <span>{$users.vip_time|date="Y-m-d",###}</span></p>
+                </div>
+                <div class="Vips-package">
+                    <p class="Vips-package-title">会员套餐：</p>
+                    <ul>
+                        <li v-for="(item,index) in priceList" :class="index == curIndex ? 'Vip-list':''" @click="packages(index)">
+                            <p><span>{{item.time}}</span>个月</p>
+                            <p><img src="/static/mobile/img/vip_money.png" />{{item.price}}元/银锭</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="recharge-money">
+                    <p class="Vips-pack">当前选中套餐：</p>
+                    <img src="/static/mobile/img/clock.png" />
+                    <span>{{curDate}}个月</span>
+                    <b>|</b>
+                    <img src="/static/mobile/img/vip_money.png" />
+                    <span>{{curPrice}}元/银锭</span>
+                </div>
+                <div class="Vips-package">
+                    <p class="Vips-package-title">支付方式：</p>
+                    <ol>
+                        <li v-for="(item,index) in pay" :class="index == curIndex2 ? 'vipIl':''" @click="pays(index)">
+                            <img :src="item.img" />
+                            <p>{{item.name}}</p>
+                        </li>
+                    </ol>
+                </div>
+                <div class="recharge-money">
+                    <p class="Vips-pack">支付金额：</p>
+                    <img src="/static/mobile/img/vip_money.png" />
+                    <span>{{curPrice.toFixed(2)}}元/银锭</span>
+                </div>
+                <van-button type="info" @click="Vips">
+                    <van-icon name="passed" />
+                    <b>确认支付</b></van-button>
+            </div>
+
+        </div>
+    </div>
+    {include file="public/footer" /}

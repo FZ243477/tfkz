@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css"/>
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/makeTask.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png"/>
+    <script src="/static/buy/js/vue-2.6.10.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            /* 初始化一个Vue */
+            var vm = new Vue({
+                el: ".center_box",
+                /* 注册页面自定义组件 */
+                data: function () {
+                    return {
+                        /* 起止日期value值 */
+                        dateValue: "",
+                        /* 表格数据 */
+                        tableData: [
+                            {volist name="have_task" id="vo"}
+                            {
+                            id:"{$vo.id}",
+                            zhongDuan: "{if condition="$vo.terminal ==1"}电脑{elseif condition="$vo.terminal ==2"/}手机端{/if}",
+                            taskType: "{$vo.task_type}",
+                            shangJia: "{$vo.seller}",
+                            benJin: "{$vo.principal}",
+                            yongJin: "{$vo.commission}",
+                                user_divided:"{$vo.user_divided}",
+                                maiHao: "{$vo.user_buyno_wangwang}",
+                                taskStep:"{$vo.task_step}",
+                            },
+                            {/volist}
+                        ],
+                        /* 默认选中第一页 */
+                        currentPage: 1,
+                        /*任务完成状态 到第几步*/
+                    }
+                },
+                methods: {
+                    /* 给表格上色 */
+                    cellStyle: function (e) {
+                        if (e.columnIndex === 4) {
+                            return "color:red;";
+                        }
+
+                    },
+                    /* 失败的弹框 */
+                    alertError: function (e) {
+                        this.$message({
+                            message: e,
+                            type: "error"
+                        });
+                    },
+                    /* 成功的弹框 */
+                    alertSuccess: function (e) {
+                        this.$message({
+                            message: e,
+                            type: "success"
+                        });
+                    },
+                    /* 分页事件1 */
+                    handleSizeChange: function (val) {
+                        console.log("每页" + val + "条");
+                    },
+                    handleCurrentChange: function (val) {
+                        console.log("当前页" + val);
+                    },
+                    /* 点击放弃的时候 */
+                    handleFangQi: function (index) {
+
+                        var that = this;
+                        console.log(that.tableData[index].id);
+                        that.$confirm("是否删除此条订单,删除任务单冻结的银锭将不会返还?", "温馨提示", {
+                            confirmButtonText: "确定",
+                            cancelButtonText: "取消",
+                            type: "warning"
+                        }).then(function () {
+                            var id=that.tableData[index].id;
+                            $.ajax({
+                                type: "POST",
+                                url: "{:url('buy/task/del_task')}",
+                                async: true,
+                                data: {
+                                    'id': id,
+                                },
+                                success: function (data) {
+                                    if (data.code == 1) {
+                                        that.alertSuccess(data.msg);
+                                        setTimeout(function () {
+                                            return location.href = data.url;
+                                        }, 3000);
+                                    } else {
+                                        return that.alertError(data.msg);
+                                    }
+                                },
+                                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                        }).catch(function () {
+                            that.$message({
+                                type: "info",
+                                message: "您取消了操作"
+                            });
+                        });
+                    },
+                    gostep:function(index){
+                        var that = this;
+                        var id=that.tableData[index].id;
+                        var taskStep=that.tableData[index].taskStep;
+                        sessionStorage.setItem("active",taskStep);
+                        location.href='/index.php/buy/task/taskstep/id/'+id+'';
+                }
+                }
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;<span class="msg_title_txt">任务列表</span></p>
+            </div>
+            <div class="user_content">
+
+                <!-- 做任务 -->
+                <div class="web_gonggao">
+                    <div class="gonggao_row">
+                        <div class="gonggao_top">
+                            <a href="javascript:" class="select_on">做任务</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 做任务部分 -->
+                <div class="shuju_table">
+                    <!-- 数据列表 -->
+                    <el-table :data="tableData" border
+                              header-cell-style="background:#f5f7fa;"
+                              :cell-style="cellStyle" style="width: 100%;">
+                        <el-table-column prop="zhongDuan" label="终端" align="center">
+                        </el-table-column>
+                        <el-table-column prop="taskType" label="任务类型" align="center">
+                        </el-table-column>
+                        <el-table-column prop="shangJia" label="商家" align="center">
+                        </el-table-column>
+                        <el-table-column prop="benJin" label="垫付本金(元)" align="center">
+                        </el-table-column>
+                        <el-table-column  label="佣金" align="center">
+                            <template slot-scope="scope">
+                                <div>{{tableData[scope.$index].yongJin}}<span>+{{tableData[scope.$index].user_divided }}</span></div>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="maiHao" label="接手买号" align="center">
+                        </el-table-column>
+                        <el-table-column label="操作" align="center">
+                            <template slot-scope="scope">
+                                <el-button type="text" @click="gostep(scope.$index)">去完成</el-button>
+                                <el-button type="text" @click="handleFangQi(scope.$index)">放弃</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                    <!-- 分页 -->
+                    <div class="fenye">
+                        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+                                       :current-page="currentPage"
+                                       :page-sizes="[10,20,30,40,50]" :page-size="1"
+                                       layout="total, sizes, prev, pager, next, jumper"
+                                       :total="tableData.length"
+                                       background>
+                        </el-pagination>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>追评任务详情</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+        $(function () {
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        // 数据1
+                        taskData: {
+                            maiHao: "{$list.wwid}",
+                            type: "{$list.task_type}",
+                            zhongDuan: "{$list.terminal}",
+                            benJin: "{$list.user_principal}",
+                            yongJin: "{$list.commission}",
+                            user_divided:"{$list.user_divided}",
+                            money: "{$list.seller_principal}",
+                            dianPu: "{$list.shop_name}",
+                            taskNum: "{$list.task_number}",
+                            time: "{$list.create_time}",
+                            taskType: "{$list.state}",
+                            delType:"{$list.deltask_type}",
+                            goods_price:"{$list.goods_price}",
+                            seller_name:"{$list.seller_name}",
+                            upload_img:"{$list.img}",
+                        },
+                        // 数据2
+                        taskData2: [
+                            {volist name="product" id="vo"  }
+                            {
+                                title: "{$vo.name}",
+                                content: "{$vo.wenzi}",
+                                img:"{$vo.img}",
+                                video: "{$vo.video}"
+                            },
+                            {/volist}
+                        ],
+                    };
+                },
+                methods: {
+                    shouImg1:function (img) {
+                        if(img.length>0){
+                            var arr=[];
+                            arr.push(img);
+                            vant.ImagePreview({
+                                images: arr,
+                            });
+                        }else {
+                            alertError("当前没有图片");
+                        }
+                    },
+                    shouImg2:function (img) {
+                        if(img.length>0){
+                            var arr=[];
+                            arr.push(img);
+                            vant.ImagePreview({
+                                images: arr,
+                            });
+                        }else {
+                            alertError("当前没有图片");
+                        }
+                    }
+                },
+                // 调用混入
+                mixins: [singlePersonMixin],
+                mounted: function () {
+                    publicFunction();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">追评任务详情</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper">
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span class="active">追评任务详情</span>
+        </div>
+
+        <!-- 任务详情 -->
+        <div class="task-detail">
+
+            <!-- 追评任务信息 -->
+            <div class="public-card">
+                <div class="public-card-title">
+                    <div class="public-card-title-one" style="color: red">追评任务信息</div>
+                    <div class="public-card-title-two">
+                        <a href="">银锭记录</a>
+                        <a href="">本金记录</a>
+                    </div>
+                </div>
+                <div class="pulic-card-content">
+                    <!-- 卡片 -->
+                    <div class="task-detail-card">
+                        <p>买号：</p>
+                        <p>{{taskData.maiHao}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>任务类型：</p>
+                        <p>{{taskData.type}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>下单终端：</p>
+                        <p>{{taskData.zhongDuan}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>佣金：</p>
+                        <p>{{taskData.yongJin}}+{{taskData.user_divided}}银锭</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>任务金额：</p>
+                        <p>{{taskData.goods_price}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>垫付金额：</p>
+                        <p>{{taskData.benJin}}元</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>返款金额：</p>
+                        <p>{{taskData.money}}元</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>任务编号：</p>
+                        <p>{{taskData.taskNum}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>商家用户名：</p>
+                        <p>{{taskData.seller_name}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>店铺：</p>
+                        <p>{{taskData.dianPu.substr(0,3)+"..." }}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>创建时间：</p>
+                        <p>{{taskData.time}}</p>
+                    </div>
+                    <div class="task-detail-card">
+                        <p>任务状态：</p>
+                        <p>{{taskData.taskType}}<span v-if="taskData.taskType =='已取消'" style="margin-left: 10px;">{{taskData.delType}}</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 追评任务状态 -->
+            <div class="public-card">
+                <div class="public-card-title">
+                    <div class="public-card-title-one" style="color: red">追评任务详情</div>
+                </div>
+                <div class="pulic-card-content">
+                    <!-- 追评任务状态 -->
+                    <div class="task-detail-zhuipin">
+                        <div class="task-detail-zhuipin-item">
+                            <span>任务状态：</span>
+                            <span>已完成</span>
+                        </div>
+                        <div class="task-detail-zhuipin-item">
+                            <span>完成时间：</span>
+                            <span>2019-12-17 10:40:15</span>
+                        </div>
+                        <div class="task-detail-zhuipin-item" v-if="{$list.show}==0">
+                            <span>上传的追评图片：</span>
+                            <p>
+                                <img v-for="(item,index) in taskData.upload_img.split(',')" :src="item" alt="">
+                            </p>
+                        </div>
+                        <!-- 追评任务详情 -->
+                        <div class="task-detail-zhuipincard" v-for="(item,index) in taskData2">
+                            <div class="task-detail-zhuipincard-item">
+                                <span>商品名称：</span>
+                                <span>{{item.title}}</span>
+                            </div>
+                            <div class="task-detail-zhuipincard-item">
+                                <span>追评内容：</span>
+                                <span>{{item.content}}</span>
+                            </div>
+                            <div class="task-detail-zhuipincard-item" v-if="item.img.split(',').length!==0">
+                                <span>图片：</span>
+                                <p>
+                                    <img :key="index2" :src="item2" alt="" v-for="(item2,index2) in item.img.split(',')">
+                                </p>
+                            </div>
+                            <div class="task-detail-zhuipincard-item" v-if="item.video">
+                                <span>视频：</span>
+                                <p>
+                                    <video style="width: 80%;height: 4rem" :src="item.video" controls="controls"></video>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    {include file="public/footer" /}

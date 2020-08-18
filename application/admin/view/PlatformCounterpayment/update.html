@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>接单详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="../../layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="../../css/public.css" media="all" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+
+    <link href="../assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/plugins/summernote/summernote.css" rel="stylesheet">
+
+    <link href="../assets/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Template Styles -->
+    <link href="../assets/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/plugins.min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/pages/formlayout.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/responsive.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/theme-color.css" rel="stylesheet" type="text/css" />
+    <!-- 提示 -->
+    <link rel="stylesheet" href="../../assets/plugins/jquery-toast/dist/jquery.toast.min.css">
+</head>
+
+<body class="childrenBody">
+    <form class="layui-form">
+            <label class=""> 请输入垫付本金:</label>
+                            <input type="number" class="silverIngot form-control text-center" name="silverIngot" lay-verify="silverIngot" value="0" min="0" max="">
+        <div class="text-right" style="padding-right: 20px;">
+            <br><br><br><button type="button" class="btn btn-primary" data-type="reload" lay-filter="reload" lay-submit> 保 存 </button>
+        </div>
+        </form>
+    <script type="text/javascript" src="../../layui/layui.js"></script>
+
+    <!-- start js include path -->
+    <script src="../assets/plugins/jquery/jquery.min.js"></script>
+    <!-- 提示 -->
+    <script src="../assets/plugins/jquery-toast/dist/jquery.toast.min.js"></script>
+    <script src="../assets/plugins/jquery-toast/dist/toast.js"></script>
+    <script>
+
+        layui.use(['form', 'layer', 'table', 'laytpl', 'laydate'], function () {
+            var form = layui.form,
+                layer = parent.layer === undefined ? layui.layer : top.layer,
+                $ = layui.jquery,
+                laytpl = layui.laytpl,
+                table = layui.table;
+                laydate = layui.laydate;
+            // $.toast({
+            //     heading: 'Welcome to my Elite admin',
+            //     text: 'Use the predefined ones, or specify a custom position object.',
+            //     position: 'top-right',
+            //     loaderBg:'#ff6849',
+            //     icon: 'error',
+            //     hideAfter: 3500
+            // });
+            form.render(); //刷新select选择框渲染
+
+            //验证数据
+            form.verify({
+                //我们既支持上述函数式的方式，也支持下述数组的形式
+                //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+                pass: [
+                    /^[\S]{6,12}$/
+                    , '密码必须6到12位，且不能出现空格'
+                ]
+            });
+            
+            //表单提交
+            form.on("submit(reload)", function (data) {
+                var field = data.field;
+                //弹出loading 加载
+                var index = top.layer.msg('数据提交中，请稍候', { icon: 16, time: false, shade: 0.8 });
+                
+                var silverIngot = field.silverIngot;  //备注
+                console.log(field)
+                setTimeout(function () {
+                    //这里实在是关不掉模态 只能刷新父页面来关闭了
+                    top.layer.close(index);
+                    top.layer.msg("搜索成功！");
+                    layer.closeAll();
+                    //刷新父页面
+                    parent.location.reload();
+                }, 500);
+                return false;
+            });
+        })
+
+    </script>
+</body>
+
+</html>

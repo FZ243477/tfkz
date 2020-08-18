@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<link rel="stylesheet" type="text/css" href="/static/seller/css/My_goods.css"/>
+		<link rel="stylesheet" type="text/css" href="/static/seller/node_modules/element-ui/lib/theme-chalk/index.css" />
+		<script src="/static/seller/js/vue.js" type="text/javascript" charset="utf-8"></script>
+		<script src="/static/seller/node_modules/element-ui/lib/index.js"></script>
+		<script src="/static/seller/js/jquery.min.js"></script>
+		<title></title>
+	</head>
+	<body>
+		<div class="center">
+										<!-- 选项 -->
+										<div class="hang" style="text-align: left;">
+											<el-form :inline="true" :model="formInline" class="demo-form-inline">
+												<el-form-item label="价格">
+													<el-input v-model="formInline.low" placeholder="最低价" class='low'></el-input>
+													-
+													<el-input v-model="formInline.high" placeholder="最高价" class='low'></el-input>
+												</el-form-item>
+												<el-form-item>
+													<el-input v-model="formInline.sousuo" placeholder="请输入关键字搜索" class='sousuo'  v-model="search"></el-input>
+												</el-form-item>
+												<el-form-item>
+													<el-button type="primary" class='search' ><i class="el-icon-search"></i> 搜索</el-button>
+												 </el-form-item>
+										  </el-form> 
+										</div>
+										<!-- 表格 -->
+											<div class="topHeader_s" >
+												<div style="width: 320px;">商品信息</div> 
+												<div style="width: 110px;">价格</div> 
+												<div style="width: 150px;">下单数量</div> 
+												<div style="width: 120px;">搜索价格</div> 
+												<div style="width: 190px;">操作</div>
+											</div>
+											<!-- 数组 -->
+											<div id='form'>
+												<div style="margin-bottom: 10px;"  id="table">
+													<div class="goodsCommon">
+														<table class="goodTable" border="0" cellspacing="0">
+															<tr>
+																<td colspan="4">
+																	<strong >
+																		<img src="/static/seller/img/taobao.png" class="iconImg"/>&nbsp;淘宝店铺：<span>123</span> 
+																	</strong> 
+																</td> 
+																<td style="width: 250px;border-bottom:1px solid #eee;">
+																</td>
+															</tr> 
+															<tr>
+																  <td class="td-one">
+																		  <img class="goodsPicture" alt="" src="http://47.111.176.53:80/group1/M00/00/14/rBB_a101FKmARKjjAAALhQEq0T8316.jpg" >&nbsp;&nbsp;
+																		  <p class="titles">唇膏</p>
+																  </td> 
+																  <td style="width:80px;text-align: right;">
+																	  <span style="color: red;" >100.00 元</span>
+																  </td> 
+																  <td style="width:150px;text-align: center;" ><span style="color: red;" >1 件</span></td> 
+																  <td style="width:130px;text-align:left;padding-left:20px ;"><span style="color: red;" >100.00 元</span></td>
+																  <td style="text-align:left;">
+																	  <div style="margin-right:20px;" >
+																		   <el-button type="danger" class='dangerous'><i class="el-icon-circle-plus"></i>&nbsp;选择</el-button>
+																	  </div>
+																  </td>
+																</tr>
+															</table>
+														</div>
+													</div>
+												</div>
+										<!-- 页数 -->
+										<div class="hang">
+										   <el-pagination background  :current-page="currentPage4"
+		:page-sizes="[5, 10,]"  :page-size="100"  layout="total, sizes, prev, pager, next, jumper"  :total="10"></el-pagination> 
+		                              </div>
+</div>
+			
+	<script>
+		var name = new Vue({
+			el: ".center",
+			data: function() {
+				return {
+					formInline: {
+						platform:'',//平台
+						store:'',//店铺
+						low:'',//最低价
+						high:'',//最高价
+						sousuo:''//搜索
+					},
+					 options: [{//页数选项
+					  value: '选项1',
+					  label: '5条/页'
+					}, {
+					  value: '选项2',
+					   label: '10条/页'
+					},],
+					value: '',
+					 currentPage4: 4,
+					}
+				},
+		    methods:{
+				handleDelete(index){
+                  // this.tableData.splice(index, 1);
+				  console.log(index);
+				},
+			}
+		})
+		
+		
+	</script>	
+	</body>
+	
+</html>

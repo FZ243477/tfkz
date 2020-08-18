@@ -1,0 +1,190 @@
+{include file="public/header" /}
+<link rel="stylesheet" type="text/css" href="/static/seller/css/myGoods.css" />
+<style>
+	.layui-layer {
+		top: 0px!important;
+	}
+</style>
+<div class="right">
+	<!-- 基本信息标题 -->
+	<div class="right-top">
+		<b>个人中心 / 商品管理 /<strong> 商品列表 </strong></b>
+	</div>
+	<div class="user_content" v-cloak>
+		<el-button type="primary"  @click="addGoods()" style="margin-bottom: 30px"><i class="el-icon-plus"></i> 添加商品</el-button>
+		<div class="user_content_top">
+			<!-- 选项 -->
+			<el-form :inline="true" class="demo-form-inline">
+				<el-form-item label="平台">
+					<el-select v-model="platform" placeholder="全部" size="medium" style='width: 100px;'>
+						<el-option label="全部" :value=0></el-option>
+						<el-option label="淘宝" :value=1></el-option>
+						<el-option label="天猫" :value=2></el-option>
+						<el-option label="飞猪" :value=3></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="店铺">
+					<el-select v-model="shop" placeholder="全部" size="medium" style='width: 149px;'>
+						<el-option label="全部" :value=0></el-option>
+						<el-option :label="item.shop_name" :value=item.id v-for="(item,key) in shops" :key="key"></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="价格">
+					<el-input v-model="min_price" placeholder="最低价" size="medium" style='width: 88px;'></el-input>
+					-
+					<el-input v-model="max_price" placeholder="最高价" size="medium" style='width: 88px;'></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-input v-model="word" placeholder="请输入关键字搜索" size="medium" style='width:158px;'></el-input>
+				</el-form-item>
+				<el-form-item>
+					<el-button type="primary" size="small" @click="search()"><i class="el-icon-search"></i> 搜索</el-button>
+				</el-form-item>
+			</el-form>
+		</div>
+		<!-- 表格 -->
+		<div class="topHeader_s">
+			<div style="width: 300px;">商品信息</div>
+			<div style="width: 110px;">价格</div>
+			<div style="width: 120px;">下单数量</div>
+			<div style="width: 120px;">搜索价格</div>
+			<div style="width: 200px;">操作</div>
+		</div>
+		<!-- 数组 -->
+		<div >
+			<div style="margin-bottom: 10px;" v-for="(item,index) in list" :key="index">
+				<div class="goodsCommon">
+					<table class="goodTable" border="0" cellspacing="0">
+						<tr>
+							<td colspan="4" style="width:800px;">
+								<strong>
+									<img :src="item.pic" class="iconImg" />&nbsp;{{item.type}}店铺：<span>{{item.shop_name}}</span>
+								</strong>
+							</td>
+							<td style="width: 250px;border-bottom:1px solid #eee;text-align: center">
+								<el-button type="danger" size="mini"  @click="delGoods(item.id)">删除</el-button>
+							</td>
+						</tr>
+						<tr>
+							<td class="td-one">
+								<img onerror="imgError(this)" class="goodsPicture" alt="" :src="item.pc_img">&nbsp;&nbsp;
+								<p class="titles">{{item.name}}</p>
+							</td>
+							<td style="width:160px;text-align: right;">
+								<span style="color: red;">{{item.price}} 元</span>
+							</td>
+							<td style="width:200px;text-align: center;"><span style="color: red;">{{item.num}} 件</span></td>
+							<td style="width:130px;text-align:left;padding-left:20px ;"><span style="color: red;">{{item.show_price}} 元</span></td>
+							<td>
+								<div style="text-align: center!important;">
+									<el-button type="primary" plain size="small" @click="edit(item.id)">编辑</el-button>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+		<!-- 页数 -->
+		<div class="hang">
+			<el-pagination
+							background
+							:current-page="page"
+							@current-change="pageChange"
+							@size-change="sizeChange"
+							:page-sizes="sizes"
+							:page-size="size"
+							layout="total, sizes, prev, pager, next, jumper"
+							:total="total">
+			</el-pagination>
+		</div>
+
+	</div>
+</div>
+<link rel="stylesheet" href="/static/seller/css/main.css">
+<script src="/static/seller/js/app.js"></script>
+<script type="text/javascript">
+$(function() {
+
+	/* 初始化一个Vue */
+	var vm = new Vue({
+		el: ".right",
+		data: function() {
+			return {
+				shops:{},
+				list:[],
+				sizes:[5,10,15,20,25],
+				size:5,
+				total:0,
+				page:1,
+				platform: 0, //平台
+				shop: 0, //店铺
+				min_price: '', //最低价
+				max_price: '', //最高价
+				word: '', //搜索
+			}
+		},
+		created:function(){
+			this.getData();
+		},
+		methods: {
+			getData:function(){
+				var loadingFlag= layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:6000 });
+				var that = this;
+				$.post("{:url('goods/index')}", {shop:this.shop,size:this.size,page:this.page,type:this.platform,min_price:this.min_price,max_price:this.max_price,word:this.word},function(res){
+					if(res.code==1){
+						that.shops = res.data.shop;
+						that.total = res.data.total;
+						that.list = res.data.list;
+						layer.close(loadingFlag);
+					}else{
+						layer.close(loadingFlag);
+						layer.msg('网络错误',{icon:2,time:2000});
+					}
+				});
+			},
+			search:function(){
+				this.getData();
+			},
+			pageChange:function(val){
+				this.page = val;
+				this.getData();
+			},
+			sizeChange:function(val){
+				this.page = 1;
+				this.size = val;
+				this.getData();
+			},
+			//添加
+			addGoods:function(code){
+				app.openSidebar({
+					title: '商品添加',
+					area: ['1000px', '90%'],
+					url:'{:url("goods/goods")}',
+				});
+			},
+			edit:function(id){
+				app.openSidebar({
+					title: '商品编辑',
+					area: ['1000px', '90%'],
+					url:'{:url("goods/edit","","",true)}/id/'+id,
+				});
+			},
+			delGoods:function(id){
+				var that = this;
+				$.post("{:url('goods/del')}",{id:id},function(res){
+					if(res.code==1){
+						layer.msg(res.msg,{icon:1,time:2000},function(){
+							that.getData();
+						});
+					}else{
+						layer.msg('网络错误',{icon:2,time:2000});
+					}
+				});
+			}
+		}
+	});
+
+});
+</script>
+{include file="public/footer" /}

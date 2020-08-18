@@ -1,0 +1,231 @@
+{include file="public/header" /}
+<!-- 右边盒子部分 -->
+<link rel="stylesheet" type="text/css" href="/static/seller/css/My_goods.css" />
+<link rel="stylesheet" type="text/css" href="/static/seller/css/status.css" />
+<div class="right" v-cloak>
+  <div class="right-top">
+    <b>任务情况 / <strong>继续发布 </strong></b>
+  </div>
+  <!-- 账单信息 -->
+  <div class="status">
+    <h3>账单信息</h3>
+    <div style="margin-top:30px ;">
+      <div>
+        <table border="1" cellpadding="0" bordercolor="#eee" cellspacing="0" class="informa">
+          <tr>
+            <th>分类</th>
+            <th>费用明细</th>
+            <th>小计</th>
+            <th>任务单数</th>
+            <th>合计</th>
+          </tr>
+          <tr>
+            <td :rowspan="rowspan">押金</td>
+            <td><span v-for="(item,index) in info.goods" :key="index">{{item.type}}： <b>{{(item.price * item.num).toFixed(2)}}</b> 元/单</span> </td>
+            <td><b>{{info.goods_price}}</b> 元 </td>
+            <td rowspan="16"><b>{{info.num}}</b> 单</td>
+            <td><b>{{info.goods_money}}</b> 元 </td>
+          </tr>
+          <tr v-if="info.is_free_shiping != 3">
+            <td>运费：<b>{{info.postage}}</b> 元/单</td>
+            <td><b>{{info.postage}}</b> 元 </td>
+            <td><b>{{info.postage_money}}</b> 元 </td>
+          </tr>
+          <tr v-if="info.is_free_shiping == 2">
+            <td>运费保证金：<b>{{info.margin}}</b> 元/单</td>
+            <td><b>{{info.margin}}</b> 元 </td>
+            <td><b>{{(info.margin * info.num).toFixed(2)}}</b> 元 </td>
+          </tr>
+          <tr>
+            <td rowspan="2">银锭</td>
+            <td colspan="2">套餐服务费： <b>{{info.service_price}}</b> 银锭/单 </td>
+            <td><b>{{(info.service_price * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.terminal==2">
+            <td colspan="2">移动端加成： <b> {{info.phone_fee}}</b> 银锭/ 单</td>
+            <td><b>{{(info.phone_fee * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr v-else>
+            <td colspan="2">pc端加成： <b> {{info.pc_fee}}</b> 银锭/ 单</td>
+            <td><b>{{(info.pc_fee * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr>
+            <td rowspan="13">增值服务费</td>
+            <td colspan="2">返款服务费： <b>{{info.refund_service_price}}</b> 银锭/单 </td>
+            <td><b>{{(info.refund_service_price * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.goods.length > 1">
+            <td colspan="2">多商品服务费： <b>{{info.goods_more_fee}}</b> 银锭/单 </td>
+            <td><b>{{(info.goods_more_fee * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.task_type == 4">
+            <td colspan="2" v-if="info.task_type == 4">直通车服务费： <b>2</b> 银锭/单</td>
+            <td><b>{{2 * info.num}}</b> 银锭</td>
+          </tr>
+          <tr v-if="info.task_type == 5">
+            <td colspan="2" v-if="info.task_type == 5">通道服务费： <b>2</b> 银锭/单</td>
+            <td><b>{{2 * info.num}}</b> 银锭</td>
+          </tr>
+          <tr v-if="info.add_reward > 0">
+            <td colspan="2">任务加赏佣金： <b>{{info.add_reward}}</b> 银锭/单 </td>
+            <td><b>{{info.add_reward * info.num}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.is_timing_pay==1">
+            <td colspan="2">定时付款： <b>{{info.timing_pay}}</b> 银锭/单 </td>
+            <td><b>{{(info.timing_pay * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.next_day==1">
+            <td colspan="2">隔天任务服务费： <b>{{info.next_day_fee}}</b> 银锭/单 </td>
+            <td><b>{{info.next_day_fee * info.num}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.is_repay==1">
+            <td colspan="2">回购任务服务费： <b>{{info.repay}}</b> 银锭/单 </td>
+            <td><b>{{info.repay * info.num}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.is_timing_publish==1">
+            <td colspan="2">定时发布： <b>{{info.timing_publish_pay}}</b> 银锭/单 </td>
+            <td><b>{{info.timing_publish_pay}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.union_interval_time > 0">
+            <td colspan="2">任务接单间隔： <b>{{info.	union_interval}}</b> 银锭/单 </td>
+            <td><b>{{info.union_interval}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.is_cycle_time > 0">
+            <td colspan="2">延长买家购买周期： <b>{{info.cycle}}</b> 银锭/单 </td>
+            <td><b>{{(info.cycle * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.is_praise">
+            <td colspan="2">文字优质好评： <b>{{info.praise_fee}}</b> 银锭/单 </td>
+            <td><b>{{(info.praise_fee * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.is_img_praise">
+            <td colspan="2">图片优质好评： <b>{{info.img_praise_fee}}</b> 银锭/单 </td>
+            <td><b>{{(info.img_praise_fee * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr v-if="info.is_video_praise">
+            <td colspan="2">视频优质好评： <b>{{info.video_praise_fee}}</b> 银锭/单 </td>
+            <td><b>{{(info.video_praise_fee * info.num).toFixed(2)}}</b> 银锭  </td>
+          </tr>
+          <tr>
+            <td colspan="8" class="th">
+              <p>总计 = 押金： <b>{{info.deposit}}</b> 元 + 银锭： <b>{{info.silver_ingot}}</b> 银锭</p>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="status">
+    <h3>选择支付方式</h3>
+    <p style="color: red">（必选押金支付，押金可当银锭使用，银锭不可当押金使用，银锭余额不足系统自动将押金转为不足的银锭金额）</p>
+    <div class="way">
+      <div class="way_top">
+        <label role="checkbox" aria-checked="true" class="el-checkbox is-checked">
+								<span aria-checked="mixed" class="el-checkbox__input is-checked">
+									<span class="el-checkbox__inner"></span>
+									<input type="checkbox" aria-hidden="true" class="el-checkbox__original" value="">
+								</span>
+          <span class="el-checkbox__label">
+									<span class="tipsText">押金支付</span>
+									<span class="vertcalSmall">&nbsp;（剩余押金：<b>{{balance}}</b> 元）</span>
+								</span>
+        </label>
+        <span>
+								<b v-if="is_reward_pay">- {{info.deposit}} 元</b>
+								<b v-else>- {{Number(info.deposit)+Number(info.silver_ingot)}} 银锭</b>
+								<strong v-if="!is_reward_pay">（{{info.deposit}} 元+{{info.silver_ingot}} 银锭）</strong>
+							</span>
+      </div>
+      <div class="hr"></div>
+      <div class="way_top">
+							<span>
+								<el-checkbox v-model="is_reward_pay">&nbsp;银锭支付</el-checkbox>
+								<span class="el-checkbox__label">
+									<span class="vertcalSmall">（剩余银锭：<b>{{reward}}</b> 银锭）</span>
+								</span>
+							</span>
+        <span v-if="is_reward_pay">
+								<b>- {{info.silver_ingot}} 银锭</b>
+							</span>
+      </div>
+    </div>
+    <div class="foots">
+      <el-button :plain="true" @click="confirm()" class='open2'>确认付款 <i class="el-icon-d-arrow-right"></i>
+      </el-button>
+    </div>
+  </div>
+</div>
+<script>
+    var name = new Vue({
+      el: ".right",
+      data: function () {
+          return {
+              info:{
+                  deposit:0,
+                  next_day:0,
+                  silver_ingot:0,
+                  service_price:0,
+                  phone_fee:1,
+                  task_type:1,
+                  goods:[],
+                  pc_fee:0,
+                  refund_service_price:0,
+                  num:0,
+                  add_reward:0,
+                  is_cycle_time:0,
+                  cycle:0,
+                  union_interval_time:0,
+                  union_interval:0,
+                  is_timing_publish:0,
+                  is_timing_pay:0,
+                  is_repay:0,
+                  is_praise:0,
+                  is_img_praise:0,
+                  is_video_praise:0,
+              },
+              timing_pay:"{$system.timing_pay}",
+              timing_publish:"{$system.timing_publish}",
+              praise:0,
+              img_praise:0,
+              video_praise:0,
+              is_reward_pay:true,
+              balance:"{$seller.balance}",
+              reward:"{$seller.reward}",
+              id:"{$id}",
+              rowspan:1,
+          }
+      },
+        created:function(){
+          that = this;
+          this.getData();
+      },
+      methods: {
+        getData:function(){
+            $.post("{:url('task/getPayData')}",{id:this.id},function(res){
+                if(res.code==1){
+                    that.info = res.data;
+                    if(that.info.is_free_shiping==1)that.rowspan=2;
+					          if(that.info.is_free_shiping==2)that.rowspan=3;
+                }else{
+                    return layer.msg(res.msg,{icon:2},function(){
+                        location.href=res.url;
+                    });
+                }
+            })
+        },
+          confirm:function(){
+              $.post("{:url('task/pay')}",{id:this.id,is_reward:this.is_reward_pay},function(res){
+                  if(res.code==1){
+                      layer.msg(res.msg,{icon:1},function(){
+                          location.href=res.url;
+                      });
+                  }else{
+                      layer.msg(res.msg,{icon:2});
+                  }
+              })
+          },
+      }
+    })
+</script>
+
+{include file="public/footer" /}

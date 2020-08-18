@@ -1,0 +1,130 @@
+{include file="public/header" /}
+<link rel="stylesheet" type="text/css" href="/static/seller/css/yaJinTiXian.css" />
+<!-- 右边盒子部分 -->
+<div class="right">
+	<!-- 基本信息标题 --> 
+	<div class="right-top">
+		<b>个人中心 / 资金管理 /<strong> 押金提现 </strong></b>
+	</div>
+	<div class="user_content">
+		<!-- 押金提现 -->
+		<div class="web_gonggao">
+			<div class="gonggao_row">
+				<div class="gonggao_top">
+					<a href="javascript:" class="select_on">押金提现</a>
+				</div>
+			</div>
+		</div>
+		<!-- 押金提现部分 -->
+		<div class="benjin_tixian">
+			<!-- 押金余额 -->
+			<div class="rest_price">
+				<p>押金余额:</p>
+				<span>{$seller.balance}</span>
+				<span>元</span>
+			</div>
+			<!-- 打款方式 -->
+			<div class="dakuan">
+				<p class="dakuan_title" style="align-self: flex-start;margin-top: 2px;">打款方式:</p>
+				<div class="dakuan_col">
+					<div class="dakuan_box1">
+						<span>银行卡转账</span>
+						<a href="{:url('index/bank')}" target="_blank" class="dakuan_view">查看提现账户</a>
+					</div>
+					<div class="dakuan_box2">
+						<p>提示: <span>提现账户只能绑定一张银行卡</span></p>
+					</div>
+				</div>
+			</div>
+			<!-- 提现金额 -->
+			<div class="dakuan">
+				<p class="dakuan_title" style="align-self: flex-start;margin-top: 9px;">提现金额:</p>
+				<div class="dakuan_col">
+					<div class="dakuan_box1">
+						<el-input-number v-model="tiXianNum" @change="handleChange" :min="tiXianPrice" :max="1000000"></el-input-number>
+						<span class="tixian_view">单次提现最低 <span style="color: red;" v-html="tiXianPrice"></span> 元</span>
+					</div>
+					<div class="tixian_box">
+						<p>提现操作平台将收取{{fee*100}}%手续费</p>
+						<p>预计2个工作日内（国家法定假日和双休日顺延）平台完成提现操作 到账时间以各大银行为准,预计3-5工作日左右
+						</p>
+					</div>
+				</div>
+			</div>
+			<!-- 到账金额 -->
+			<div class="rest_price">
+				<p>到账金额:</p>
+				<span v-html="daoZhangPrice"></span>
+				<span>元</span>
+			</div>
+			<!-- 提现密码 -->
+			<div class="tixian_password">
+				<p>提现密码:</p>
+				<el-input type="password" v-model="pay_pwd" placeholder="请输入6位提现密码" show-password
+									style="width: 180px;" maxlength="6"></el-input>
+				<!--<a href="javascript:">重置提现密码</a>-->
+			</div>
+			<!-- 申请提现按钮 -->
+			<div class="tixian_btn">
+				<el-button type="danger"  @click="tiXianBtnActive"><i class="el-icon-circle-check"></i> 申请提现</el-button>
+			</div>
+		</div>
+
+	
+
+	</div>
+</div>
+<script type="text/javascript">
+	$(function () {
+
+		/* 初始化一个Vue */
+		var vm = new Vue({
+			el: ".right",
+			data: function () {
+				return {
+					radio: "1",
+					/* 输入框数量默认值5 */
+					tiXianNum: "{$config.seller_min_money}",
+					/* 到账金额 */
+					daoZhangPrice: "{$config.seller_min_money-$config.seller_min_money*$config.seller_cash_fee}",
+					/* 提现最低金额 */
+					tiXianPrice: Number("{$config.seller_min_money}"),
+					/*提现手续费*/
+					fee: "{$config.seller_cash_fee}",
+					pay_pwd:'',
+				}
+			},
+			methods: {
+				/* 数字框事件 */
+				handleChange: function (value) {
+					this.tiXianNum =value;
+					this.daoZhangPrice = (this.tiXianNum - (this.tiXianNum*this.fee)).toFixed(2);
+				},
+				/* 点击提现 */
+				tiXianBtnActive: function () {
+					var that = this;
+					this.$confirm("您确定要提现吗?", "温馨提示", {
+						confirmButtonText: "确定",
+						cancelButtonText: "取消",
+						type: "warning"
+					}).then(function () {
+
+						$.post("{:url('recharge/cashDo')}",{price:that.tiXianNum,pay_pwd:that.pay_pwd},function(res){
+							if(res.code==1){
+								layer.msg(res.msg,{icon:1,time:2000},function(){
+									location.href=res.url;
+								});
+							}else {
+								layer.msg(res.msg,{icon:2,time:2000});
+							}
+						})
+					}).catch(function () {
+						layer.msg('取消操作',{icon:2,time:2000});
+					});
+				},
+
+			}
+		});
+	});
+</script>
+{include file="public/footer" /}

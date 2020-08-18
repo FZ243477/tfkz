@@ -1,0 +1,1224 @@
+{include file="public/header" /}
+<link href="/static/seller/css/editor.css" rel="stylesheet" type="text/css"/>
+<link href="/static/seller/css/My_goods.css" rel="stylesheet" type="text/css"/>
+<style>
+  /* 上传图片 */
+  .upload_pic {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+  }
+
+  .upload_pic:last-child {
+    border-bottom: none;
+  }
+
+  .upload_pic p {
+    width: 130px;
+  }
+
+  .el_pic_upload {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .layui-layer {
+    top: 0px!important;
+  }
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
+</style>
+<div id="content" v-cloak>
+  <!-- 选择任务类型和商品信息 -->
+  <div class="right" id="first">
+    <div class="right-top">
+      <b>发布任务 / <strong>选择任务类型和商品信息 </strong></b>
+    </div>
+    <div class="bottm">
+      <!-- 时间轴 -->
+      <div class="timeline">
+						<span class="alternative">
+							<i class="el-icon-edit "></i>
+							<b class="size">选择任务类型和商品信息</b>
+						</span>
+        <i class="el-icon-arrow-right"></i>
+        <span>
+							<i class="el-icon-s-tools"></i>
+							<b class="size">设置活动计划和增值服务</b>
+						</span>
+        <i class="el-icon-arrow-right"></i>
+        <span>
+							<i class="el-icon-success"></i>
+							<b class="size-font">支付</b>
+						</span>
+      </div>
+      <!-- 类型和商品信息 -->
+      <h5>1.选择店铺</h5>
+      <div class="radio">
+        <el-select placeholder="请选择" v-model="datainfo.shop_id">
+          <el-option :disabled="disabled" :key="key" :label="item.shop_name" :value="item.id"
+                     v-for="(item,key) in shop"></el-option>
+        </el-select>
+      </div>
+      <h5>2.任务类型</h5>
+      <div class="radio">
+        <el-radio :label="1" border size="medium" style='width: 150px;' v-model="datainfo.task_type">
+          <b class="icon iconfont icon-picture"></b> 文字好评
+          <el-tooltip class="item" content="{$pics[1]}" effect="dark" placement="top">
+            <img src="/static/seller/img/wenhao.png">
+          </el-tooltip>
+        </el-radio>
+        <el-radio :label="2" border size="medium" style='width: 138px;' v-model="datainfo.task_type">
+          <b class="icon iconfont icon-zhongzhirenzhengkouling"></b> 淘口令
+          <el-tooltip class="item" content="{$pics[2]}" effect="dark" placement="top">
+            <img src="/static/seller/img/wenhao.png">
+          </el-tooltip>
+        </el-radio>
+        <el-radio :label="3" border size="medium" style='width: 138px;' v-model="datainfo.task_type">
+          <b class="icon iconfont icon-ico"></b> 二维码
+          <el-tooltip class="item" content="{$pics[3]}" effect="dark" placement="top">
+            <img src="/static/seller/img/wenhao.png">
+          </el-tooltip>
+        </el-radio>
+        <el-radio :label="4" border size="medium" style='width:138px;' v-model="datainfo.task_type">
+          <b class="icon iconfont icon-zhitongche"></b> 直通车
+          <el-tooltip class="item" content="{$pics[4]}" effect="dark" placement="top">
+            <img src="/static/seller/img/wenhao.png">
+          </el-tooltip>
+        </el-radio>
+        <el-radio :label="5" border size="medium" style='width:138px;' v-model="datainfo.task_type">
+          <b class="icon iconfont icon-zhitongche"></b> 通道类
+          <el-tooltip class="item" content="{$pics[5]}" effect="dark" placement="top">
+            <img src="/static/seller/img/wenhao.png">
+          </el-tooltip>
+        </el-radio>
+      </div>
+      <h5>3.做任务终端</h5>
+      <div class="radio">
+        <el-radio :label="2" :value="2" border size="medium" style='width: 138px;' v-model="datainfo.terminal">
+          <b class="el-icon-mobile-phone"></b> 手机
+        </el-radio>
+        <el-radio :label="1" :value="1" border size="medium" style='width: 150px;' v-model="datainfo.terminal">
+          <b class="el-icon-s-platform"></b> pc端
+        </el-radio>
+      </div>
+      <h5>4.选择商品</h5>
+      <div class="radio" id='bangding'>
+        <el-button @click="selectGoods()" class='choose' size='medium' type="text"><i class="el-icon-plus"></i>从商品库中选择商品
+        </el-button>
+
+        <el-button @click="goodsAdd()" class="chooses" size='medium' type="primary"><i class="el-icon-plus"></i>
+          新建商品
+        </el-button>
+
+        <p style="color: red">( 注：请选择同一个店铺商品，如非同一店铺造成的损失平台概不承担，最多选择3个商品，1个主商品，2个副商品，每个副商品增加 <b style="font-size: 16px">2</b> 银锭 ) </p>
+        <!-- 表格 -->
+        <div id="tables" style="margin-top:20px ;">
+          <div class="topHeader_s">
+            <div style="width:300px;">商品信息</div>
+            <div style="width: 110px;">价格</div>
+            <div style="width: 150px;">下单数量</div>
+            <div style="width: 120px;">搜索价格</div>
+            <div style="width: 190px;">操作</div>
+          </div>
+          <!-- 数组 -->
+          <div id='form' v-for="(item,index) in goods">
+            <div id="table" style="margin-bottom: 10px;">
+              <div class="goodsCommon">
+                <table border="0" cellspacing="0" class="goodTable">
+                  <tr>
+                    <td colspan="4">
+                      <strong>
+                        <img alt="" class="iconImg" :src="item.pic"/>&nbsp;{{item.type}}店铺：<span>{{item.shop_name}}</span>
+                      </strong>
+                    </td>
+                    <td>
+                      <div style="float: right;width:150px;">
+                        <el-button :disabled="item.is_del" @click="goodsDel(index)" size='small'
+                                   style="float: right;display: block;"
+                                   type="danger">删除
+                        </el-button>
+                        <span style="color: red;float: right;margin-right:10px ;"> {{item.goods_type}}<template
+                                v-if="index > 0">{{index}}</template></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="td-one">
+                      <img :src="item.pc_img" alt="" class="goodsPicture"
+                           onerror="imgError(this)">&nbsp;&nbsp;
+                      <p class="titles">{{item.name}}</p>
+                    </td>
+                    <td style="width:100px;text-align:left;">
+                      <span style="color: red;">{{item.price}} 元</span>
+                    </td>
+                    <td style="width: 120px;text-align: center;"><span style="color: red;">{{item.num}} 件</span></td>
+                    <td style="width: 110px;text-align: center;"><span style="color: red;">{{item.show_price}} 元</span>
+                    </td>
+                    <td style="text-align: right;">
+                      <div style="text-align: right;margin-right:20px ;">
+                        <el-button @click='goodsEdit(item.id)' plain size='small' type="primary">
+                          编辑
+                        </el-button>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+      <template v-if="datainfo.task_type==2">
+        <h5>5.添加淘口令</h5>
+        <div>
+          <el-form label-width="70px" ref="form">
+            <el-form-item label="淘口令：">
+              <el-input type="textarea" v-model="datainfo.tao_word" maxlength="50" placeholder="输入通道入口,限制50字"></el-input>
+            </el-form-item>
+          </el-form>
+        </div>
+      </template>
+      <template v-if="datainfo.task_type==3">
+        <h5>5.上传二维码</h5>
+        <div class="upload_pic">
+          <p>二维码：</p>
+          <div class="el_pic_upload">
+            <el-upload :auto-upload="false" :file-list="img"
+                       :limit="1"
+                       :on-change="handleChange"
+                       :on-remove="handleRemove"
+                       action="string"
+                       list-type="picture-card"
+                       ref="unload">
+              <i class="el-icon-plus"></i>
+            </el-upload>
+          </div>
+        </div>
+      </template>
+      <template v-if="datainfo.task_type==5">
+        <h5>5.填写通道入口</h5>
+        <div>
+          <el-form label-width="90px" ref="form">
+            <el-form-item label="通道入口：">
+              <el-input v-model="datainfo.channel_name" maxlength="50" placeholder="输入通道入口,限制50字"></el-input>
+            </el-form-item>
+          </el-form>
+        </div>
+      </template>
+      <div class="foots">
+        <el-button @click="cancel(1)" class='open3' type="text"><i class="el-icon-back"></i> 取消发布</el-button>
+        <el-button :plain="true" @click="nextStep(1)" class='open2'>下一步 <i class="el-icon-d-arrow-right"></i>
+        </el-button>
+      </div>
+
+    </div>
+
+  </div>
+  <el-dialog :visible.sync="goodsShow" title="选择商品">
+    <div class="center">
+      <!-- 选项 -->
+      <div class="hang" style="text-align: left;">
+        <el-form :inline="true" :model="searchGoods" class="demo-form-inline">
+          <el-form-item label="价格">
+            <el-input class='low' placeholder="最低价" v-model="searchGoods.min_price"></el-input>
+            -
+            <el-input class='low' placeholder="最高价" v-model="searchGoods.max_price"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-input class='sousuo' placeholder="请输入关键字搜索" v-model="searchGoods.search"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="search()" class='search' type="primary"><i class="el-icon-search"></i> 搜索</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+      <!-- 表格 -->
+      <div class="topHeader_s">
+        <div style="width: 320px;">商品信息</div>
+        <div style="width: 110px;">价格</div>
+        <div style="width: 150px;">下单数量</div>
+        <div style="width: 120px;">搜索价格</div>
+        <div style="width: 190px;">操作</div>
+      </div>
+      <!-- 数组 -->
+      <div class='form'>
+        <div class="table" style="margin-bottom: 10px;">
+          <div class="goodsCommon">
+            <table :key="index" border="0" cellspacing="0" class="goodTable" v-for="(item,index) in goodslist">
+              <tr>
+                <td colspan="4">
+                  <strong>
+                    <img class="iconImg" :src="item.pic"/>&nbsp;{{item.type}}店铺：<span
+                          v-html="item.shop_name"></span>
+                  </strong>
+                </td>
+                <td style="width: 250px;border-bottom:1px solid #eee;">
+                </td>
+              </tr>
+              <tr>
+                <td class="td-one">
+                  <img :src="item.pc_img" alt="" class="goodsPicture" onerror="imgError(this)">&nbsp;&nbsp;
+                  <p class="titles">{{item.name}}</p>
+                </td>
+                <td style="width:80px;text-align: right;">
+                  <span style="color: red;">{{item.price}} 元</span>
+                </td>
+                <td style="width:150px;text-align: center;"><span style="color: red;">{{item.num}} 件</span></td>
+                <td style="width:130px;text-align:left;padding-left:20px ;"><span style="color: red;">{{item.show_price}} 元</span>
+                </td>
+                <td style="text-align:left;">
+                  <div style="margin-right:20px;">
+                    <el-button :disabled="judge(item.id)" @click="choose(item)" class='dangerous' type="danger"><i
+                            class="el-icon-circle-plus"></i>&nbsp;选择
+                    </el-button>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- 页数 -->
+      <div class="hang">
+        <el-pagination :current-page="searchGoods.page" :page-size="searchGoods.size" :page-sizes="sizes" :total="total"
+                       @current-change="changePage" @size-change="changeSize" background
+                       layout="total, sizes, prev, pager, next, jumper"></el-pagination>
+      </div>
+    </div>
+  </el-dialog>
+
+  <!-- ----------------------------------------------------------------------------------------------------------------------------------------------------------			 -->
+  <!-- 设置活动计划和增值服务-->
+  <div class="right" id="second" style="display: none;">
+    <div class="right-top">
+      <b>发布任务 / <strong>设置活动计划和增值服务 </strong></b>
+    </div>
+    <div class="bottm">
+      <!-- 时间轴 -->
+      <div class="timeline">
+						<span class="alternatives">
+							<i class="el-icon-check "></i>
+							<b class="size">选择任务类型和商品信息</b>
+						</span>
+        <i class="el-icon-arrow-right"></i>
+        <span class="alternative">
+							<i class="el-icon-s-tools"></i>
+							<b class="size">设置活动计划和增值服务</b>
+						</span>
+        <i class="el-icon-arrow-right"></i>
+        <span>
+							<i class="el-icon-success"></i>
+							<b class="size-font">支付</b>
+						</span>
+      </div>
+      <h5>1.设置任务单数 &nbsp;&nbsp;&nbsp;&nbsp;<p>注：平台每次发布最多 <b>10</b> 单任务</p>
+      </h5>
+      <table border="1" bordercolor="#eee" cellpadding="0" cellspacing="0" class="singular">
+        <tr style="background: #f5f7fa;">
+          <td>终端</td>
+          <td>关键词类型</td>
+          <td>关键词/淘口令/二维码/通道</td>
+          <td>设置单数</td>
+        </tr>
+        <tr v-if="datainfo.terminal==1">
+          <td>电脑端</td>
+          <td v-if="datainfo.task_type==5">通道</td>
+          <td v-else>关键词</td>
+          <td v-if="datainfo.task_type==5">{{datainfo.channel_name}}</td>
+          <td v-else>{{key}}</td>
+          <td>
+            <el-input-number :max='10' :min="0" @change="numChange" label="描述文字" size="small"
+                             v-model="pc_num"></el-input-number>
+          </td>
+        </tr>
+        <tr v-if="datainfo.terminal==2">
+          <td>手机端</td>
+          <td v-if="datainfo.task_type==1">关键词</td>
+          <td v-if="datainfo.task_type==2">淘口令</td>
+          <td v-if="datainfo.task_type==3">二维码</td>
+          <td v-if="datainfo.task_type==4">关键词</td>
+          <td v-if="datainfo.task_type==5">通道</td>
+          <td v-if="datainfo.task_type==1">{{key}}</td>
+          <td v-if="datainfo.task_type==2">{{datainfo.tao_word}}</td>
+          <td v-if="datainfo.task_type==3"><img :src="datainfo.qr_code" alt="二维码" onerror="imgError(this)"
+                                                style="height: 50px"></td>
+          <td v-if="datainfo.task_type==4">{{key}}</td>
+          <td v-if="datainfo.task_type==5">{{datainfo.channel_name}}</td>
+          <td>
+            <el-input-number :max='10' :min="0" @change="numChange" label="描述文字" size="small"
+                             v-model="mobile_num"></el-input-number>
+          </td>
+        </tr>
+        <tr style="background: #f5f7fa;">
+          <td colspan="4">
+            <div>
+              <p>手机端：<b>{{mobile_num}}</b> 单</p>
+              <p>电脑端：<b>{{pc_num}}</b> 单 </p>
+            </div>
+            <div>总计投放：{{datainfo.num}} 单</div>
+          </td>
+        </tr>
+      </table>
+      <div class="headline">
+        <h5>2.下单提示<p>（非必填）</p>
+        </h5>
+        <span>注：买手接任务时可看见该提示，提示内容自由填写，如：商品在第*页*行、聊天时不要问发货地和哪家快递等。属可选项，限100字内。</span>
+      </div>
+      <el-input :rows="2" autosize placeholder="请输入内容" type="textarea"
+                v-model="datainfo.memo" maxlength="100"></el-input>
+      <h5 style="margin-top:20px ;">3.增值服务 </h5>
+      <div class="service">
+        <div class="service-p ">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            是否包邮
+          </div>
+          <div class="service-right">
+            <div class="between-left">
+              <el-radio-group v-model="datainfo.is_free_shiping">
+                <el-radio :label="1">包邮</el-radio>
+                <el-radio :label="2">不包邮</el-radio>
+              </el-radio-group>
+            </div>
+            <div class="between-right">
+              <p v-if="datainfo.is_free_shiping==2"> 无需买手联系客服。商家每单额外支出 <b>10</b> 元作为运费押金，任务完成后运费押金将退还差价给商家 </p>
+            </div>
+          </div>
+        </div>
+        <div class="service-p">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            包裹重量
+          </div>
+          <div class="service-right">
+            <div class="between-left">
+              设置每个订单包裹重量
+              <el-input-number :max='30' :min="0" label="描述文字" size="small" v-model="datainfo.weight"></el-input-number>
+              kg
+            </div>
+            <div class="between-right">
+              <p> 最大不超过 <b>30kg</b>，可设置小数点后两位</p>
+            </div>
+          </div>
+        </div>
+        <div class="service-p">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            快速返款
+          </div>
+          <div class="service-right">
+            <div class="between-right">
+              <p> 服务费用为每单任务商品价格的 <b>0.6%</b></p>
+            </div>
+            <div class="between-right">
+              <el-tooltip effect="light" placement="bottom">
+                <div class="content" slot="content">
+                  {$pics[6]}
+                </div>
+                <i class="el-icon-question"></i>
+              </el-tooltip>
+            </div>
+          </div>
+        </div>
+        <div class="service-p ">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            加赏任务佣金
+          </div>
+          <div class="service-right">
+            <div class="between-left">
+              <el-input-number :min="0" label="描述文字" size="small" v-model="datainfo.add_reward"></el-input-number>
+              银锭
+            </div>
+            <div class="between-right">
+              <p> 总计 <b>{{datainfo.num}}</b> 单 金额 <b>{{datainfo.num * datainfo.add_reward}}</b> 银锭</p>
+            </div>
+          </div>
+        </div>
+        <div class="service-p ">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox v-model="datainfo.is_timing_pay">定时付款</el-checkbox>
+          </div>
+          <div class="service-right">
+            <div class="between-left">
+              <el-date-picker placeholder="选择日期时间" size="small" type="datetime" v-model="datainfo.timing_time"
+                              value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+            </div>
+            <div class="between-right">
+              <el-tooltip effect="light" placement="bottom">
+                <div class="content" slot="content">{$pics[7]}</div>
+                <i class="el-icon-question"></i>
+              </el-tooltip>
+            </div>
+          </div>
+        </div>
+        <div class="service-p ">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox v-model="datainfo.next_day">隔天任务</el-checkbox>
+          </div>
+          <div class="service-right">
+            <div class="between-left">
+              接单后隔天付款
+            </div>
+            <div class="between-right">
+              <el-tooltip effect="light" placement="bottom">
+                <div class="content" slot="content">{$pics[8]}</div>
+                <i class="el-icon-question"></i>
+              </el-tooltip>
+            </div>
+          </div>
+        </div>
+        <div class="service-p ">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox v-model="datainfo.is_timing_publish">定时发布</el-checkbox>
+          </div>
+          <div class="service-right">
+            <div class="between-left">
+              <el-date-picker placeholder="选择日期时间" size="small" type="datetime" v-model="datainfo.publish_time"
+                              value-format="yyyy-MM-dd HH:mm:ss"></el-date-picker>
+            </div>
+
+          </div>
+        </div>
+        <div class="service-p">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            任务接单间隔
+          </div>
+          <div class="service-right">
+            <div class="between-left">
+              设置上一个买手提交完成任务后
+              <el-input-number :min="0" label="描述文字" size="small"
+                               v-model="datainfo.union_interval_time"></el-input-number>
+              分钟后下一个买手接任务
+            </div>
+
+          </div>
+        </div>
+        <div class="service-p">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox v-model="datainfo.is_cycle_time">延长买家购物周期</el-checkbox>
+          </div>
+          <div class="service-right">
+            <div class="between-left">
+              <el-radio-group v-model="datainfo.cycle_time">
+                <div class="label">
+                  <el-radio :label="30">1个月<p>（ <b>1</b> 银锭/单/店铺）</p>
+                  </el-radio>
+                </div>
+                <div class="label">
+                  <el-radio :label="60">2个月<p>（ <b>2</b> 银锭/单/店铺）</p>
+                  </el-radio>
+                </div>
+                <div class="label">
+                  <el-radio :label="90">3个月<p>（ <b>3</b> 银锭/单/店铺）</p>
+                  </el-radio>
+                </div>
+              </el-radio-group>
+            </div>
+
+          </div>
+        </div>
+        <div class="service-p">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox @change="onClick()" v-model="datainfo.is_praise">设置优质好评</el-checkbox>
+          </div>
+          <div class="service-right">
+            <div class="between-comments">
+              <b>如未设置优质好评将默认15字文字好评</b>
+              <div class="comments" v-if="check">
+                <div style="flex-wrap: wrap;" v-for="(val,k) in datainfo.praise">
+                  <div v-for="(item,key) in val">
+                    <span class="goods">{{goods[key]['goods_type']}}<template v-if="key > 0">{{key}}</template>= </span>
+                    <el-input :rows="2" placeholder="请输入内容" size="mini" style='width: 398px;' type="textarea"
+                              v-model="item.str">
+                    </el-input>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="service-p">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox @change="showImg()" v-model="datainfo.is_img_praise">上传图片好评</el-checkbox>
+          </div>
+          <div class="service-right">
+            <div class="between-comments">
+              <b>上传优质好评图片</b>
+              <div class="comments" v-if="check_img">
+                <div style="flex-wrap: wrap;" v-for="(val,k) in datainfo.img">
+                  <div style="display: inline-block;position: relative;margin-right:4.5px;padding: 0;" v-for="(item,index) in datainfo.img[k]">
+                    <img :src="item" alt="" onerror="imgError(this)" style="height: 80px;width: 80px">
+                    <i @click="delImg(index)" class="el-icon-error" style="position: absolute;top:0px;right: 0px"></i>
+                  </div>
+                  <label style="display: inline-block">
+                    <input @change="getImg($event,k)" accept="image/gif,image/jpeg,image/x-png" name="file"
+                           style="position:absolute;opacity:0;" type="file"/>
+                    <img src="/images/add.jpg" style="width: 80px;height: 80px;">
+                  </label>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="service-p  cover">
+          <div class="service-left">&nbsp;&nbsp;&nbsp;
+            <el-checkbox v-model="datainfo.is_video_praise" @change="showVideo()">上传视频好评</el-checkbox>
+          </div>
+          <div class="service-right">
+
+            <div class="td-left">视频：</div>
+            <div class="td-right" style="position:relative">
+              <!-- 上传视频 -->
+              <el-upload
+                class="avatar-uploader"
+                action="{:url('task/uploadVideo')}"
+                :show-file-list="false"
+                :on-success="succress">
+                <video v-if="datainfo.video" :src="datainfo.video" controls class="avatar"></video>
+                <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+              </el-upload>
+              <span style="display: inline;position: absolute;right: 0px;top: 80px;color: red">*请确认评价图片与商品库内选择规格是否一致</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="foots">
+        <el-button @click="cancel(1)" class='open3' type="text"><i class="el-icon-back"></i> 取消发布</el-button>
+        <el-button @click="previous(1)" class='open3' type="text"><i class="el-icon-d-arrow-left"></i> 上一步</el-button>
+        <el-button :plain="true" @click="nextStep(2)" class='open2'>下一步 <i class="el-icon-d-arrow-right"></i>
+        </el-button>
+      </div>
+    </div>
+  </div>
+  <!-- ----------------------------------------------------------------------------------------------------------------------------------------------------------			 -->
+  <!-- 第三页 -->
+  <div class="right" id="third" style="display: none;">
+    <div class="right-top">
+      <b>发布任务 / <strong>支付 </strong></b>
+    </div>
+    <div class="bottm">
+      <!-- 时间轴 -->
+      <div class="timeline">
+						<span class="alternatives">
+							<i class="el-icon-check "></i>
+							<b class="size">选择任务类型和商品信息</b>
+						</span>
+        <i class="el-icon-arrow-right"></i>
+        <span class="alternatives">
+							<i class="el-icon-check "></i>
+							<b class="size">设置活动计划和增值服务</b>
+						</span>
+        <i class="el-icon-arrow-right"></i>
+        <span class="alternative">
+							<i class="el-icon-success"></i>
+							<b class="size-font">支付</b>
+						</span>
+      </div>
+      <h5>1.核对账单信息 </h5>
+      <table border="1" bordercolor="#eee" cellpadding="0" cellspacing="0" class="informa">
+        <tr>
+          <th>分类</th>
+          <th>费用明细</th>
+          <th>小计</th>
+          <th>任务单数</th>
+          <th>合计</th>
+        </tr>
+        <tr>
+          <td :rowspan="rowspan">押金</td>
+          <td>
+            <span :key="index" v-for="(item,index) in goods">{{item.goods_type}}<template
+                    v-if="index > 0">{{index}}</template>： <b>{{(item.price * item.num).toFixed(2)}}</b> 元/单</span>
+          </td>
+          <td><b>{{zprice}}</b> 元</td>
+          <td rowspan="16"><b>{{datainfo.num}}</b> 单</td>
+          <td><b>{{zprice * datainfo.num}}</b> 元</td>
+        </tr>
+        <tr v-if="datainfo.is_free_shiping!=3">
+          <td>运费：<b>{{datainfo.postage}}</b> 元/单</td>
+          <td><b>{{datainfo.postage}}</b> 元</td>
+          <td><b>{{datainfo.postage * datainfo.num}}</b> 元</td>
+        </tr>
+        <tr v-if="datainfo.is_free_shiping==2">
+          <td>运费保证金：<b>10</b> 元/单</td>
+          <td><b>10</b> 元</td>
+          <td><b>{{10 * datainfo.num}}</b> 元</td>
+        </tr>
+        <tr>
+          <td rowspan="2">银锭</td>
+          <td colspan="2">套餐服务费： <b>{{fee}}</b> 银锭/单</td>
+          <td><b>{{(fee * datainfo.num).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <p v-if="mobile_num > 0">移动端加成： <b> {{mobile_price}}</b> 银锭* <b> {{mobile_num}}</b> 单</p>
+            <p v-if="pc_num > 0">pc端加成： <b> {{pc_price}}</b> 银锭* <b> {{pc_num}}</b> 单</p>
+          </td>
+          <td><b>{{((mobile_price * mobile_num)+(pc_price * pc_num)).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr>
+          <td rowspan="13">增值服务费</td>
+          <td colspan="2">返款服务费： <b>{{(refund_fee * zprice).toFixed(2)}}</b> 银锭/单</td>
+          <td><b>{{(refund_fee * zprice * datainfo.num).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.task_type == 4">
+          <td colspan="2">直通车： <b>2</b> 银锭/单</td>
+          <td><b>{{2 * datainfo.num}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.task_type == 5">
+          <td colspan="2">通道任务： <b>2</b> 银锭/单</td>
+          <td><b>{{2 * datainfo.num}}</b> 银锭</td>
+        </tr>
+        <tr v-if="goods_num > 1">
+          <td colspan="2">多商品服务费： <b>{{goods_more_fee * (goods_num-1)}}</b> 银锭/单</td>
+          <td><b>{{goods_more_fee * (goods_num-1) * datainfo.num}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.task_type >= 4">
+          <td colspan="2" v-if="datainfo.task_type == 4">直通车服务费： <b>2</b> 银锭/单</td>
+          <td colspan="2" v-if="datainfo.task_type == 5">通道服务费： <b>2</b> 银锭/单</td>
+          <td><b>{{2 * datainfo.num}}</b> 银锭</td>
+        </tr>
+        <tr>
+          <td colspan="2">任务加赏佣金： <b>{{datainfo.add_reward}}</b> 银锭/单</td>
+          <td><b>{{datainfo.add_reward * datainfo.num}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.is_timing_pay">
+          <td colspan="2">定时付款： <b>{{timing_pay}}</b> 银锭/单</td>
+          <td><b>{{(timing_pay * datainfo.num).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.next_day">
+          <td colspan="2">隔天服务费： <b>{{next_day_fee}}</b> 银锭/单</td>
+          <td><b>{{(next_day_fee * datainfo.num).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.is_timing_publish">
+          <td colspan="2">定时发布： <b>{{timing_publish}}</b> 银锭/单</td>
+          <td><b>{{timing_publish}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.union_interval_time">
+          <td colspan="2">任务接单间隔： <b>{{union_interval}}</b> 银锭/单</td>
+          <td><b>{{union_interval}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.is_cycle_time">
+          <td colspan="2">延长买家购买周期： <b>{{datainfo.cycle_time / 30}}</b> 银锭/单</td>
+          <td><b>{{(datainfo.cycle_time * datainfo.num / 30).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.is_praise">
+          <td colspan="2">优质文字好评： <b>{{praise_fee}}</b> 银锭/单</td>
+          <td><b>{{(praise_fee * datainfo.num).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.is_img_praise">
+          <td colspan="2">优质图片好评： <b>{{img_praise}}</b> 银锭/单</td>
+          <td><b>{{(img_praise * datainfo.num).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr v-if="datainfo.is_video_praise">
+          <td colspan="2">优质视频好评： <b>{{video_praise}}</b> 银锭/单</td>
+          <td><b>{{(video_praise * datainfo.num).toFixed(2)}}</b> 银锭</td>
+        </tr>
+        <tr>
+          <td class="th" colspan="5">
+            <p>总计 = 押金： <b>{{((zprice * datainfo.num) + postage).toFixed(2)}}</b> 元 + 银锭：
+              <b>{{yinding}}</b> 银锭</p>
+          </td>
+        </tr>
+      </table>
+      <h5 style="margin-top:20px ;">2.选择支付方式<p>（必选押金支付，押金可当银锭使用，银锭不可当押金使用，银锭余额不足系统自动将押金转为不足的银锭金额）</p>
+      </h5>
+      <div class="way">
+        <div class="way_top">
+          <label aria-checked="true" class="el-checkbox is-checked" role="checkbox">
+								<span aria-checked="mixed" class="el-checkbox__input is-checked">
+									<span class="el-checkbox__inner"></span>
+									<input aria-hidden="true" class="el-checkbox__original" type="checkbox" value="">
+								</span>
+            <span class="el-checkbox__label">
+									<span class="tipsText">押金支付</span>
+									<span class="vertcalSmall">&nbsp;（剩余押金：<b>{{balance}}</b> 元）</span>
+								</span>
+          </label>
+          <span>
+								<b v-if="is_reward_pay">- {{((zprice * datainfo.num) + postage).toFixed(2)}} 元</b>
+								<b v-else>- {{((zprice * datainfo.num) + postage + yinding).toFixed(2)}} 元</b>
+								<strong v-if="!is_reward_pay">（{{((zprice * datainfo.num) + postage).toFixed(2)}} 元+{{yinding}} 银锭）</strong>
+							</span>
+        </div>
+        <div class="hr"></div>
+        <div class="way_top">
+							<span>
+								<el-checkbox v-model="is_reward_pay">&nbsp;银锭支付</el-checkbox>
+								<span class="el-checkbox__label">
+									<span class="vertcalSmall">（剩余银锭：<b>{{reward}}</b> 银锭）</span>
+								</span>
+							</span>
+          <span v-if="is_reward_pay">
+								<b>- {{yinding}} 银锭</b>
+							</span>
+        </div>
+      </div>
+      <div class="foots">
+        <el-button @click="cancel(2)" class='open3' type="text"><i class="el-icon-back"></i> 取消发布</el-button>
+        <el-button @click="previous(2)" class='open3' type="text"><i class="el-icon-d-arrow-left"></i> 上一步</el-button>
+        <el-button :plain="true" @click="confirm()" class='open2'>确认付款 <i class="el-icon-d-arrow-right"></i>
+        </el-button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<style>
+  .el-dialog {
+    width: 950px !important;
+  }
+
+  .goodTable {
+    margin-bottom: 10px !important;
+    background: #f9f9f9 !important;
+  }
+</style>
+<link href="/static/seller/css/main.css" rel="stylesheet">
+<script src="/static/seller/js/app.js"></script>
+<script>
+    var name = new Vue({
+        el: "#content",
+        data: function () {
+            return {
+                rowspan:1,
+                postage:0,
+                disabled: false,
+                shop: [],
+                datainfo: {
+                    shop_id: '',
+                    task_type: 1,
+                    goods_id: [],
+                    goods_price: [],
+                    goods_num: [],
+                    qr_code: '',
+                    tao_word: '',
+                    channel_name: '',
+                    terminal: 2,
+                    num: 0,
+                    memo: '',
+                    is_free_shiping: '',
+                    is_timing_publish: '',
+                    next_day: '',
+                    postage: 5,
+                    weight: '',
+                    add_reward: '',
+                    is_timing_pay: '',
+                    timing_time: '',
+                    union_interval_time: 0,
+                    is_cycle_time: '',
+                    cycle_time: '',
+                    is_praise: '',
+                    praise: [],
+                    is_img_praise: '',
+                    img: {},
+                    is_video_praise: '',
+                    video: '',
+                    text_day:'',
+
+                },
+                mobile_num: 0,
+                pc_num: 0,
+                key: '',
+                goodsShow: false, //选择商品弹窗
+                goodslist: [],
+                total: 0,
+                sizes: [5, 10,],
+                searchGoods: {
+                    shop_id: '',
+                    min_price: '',//最低价
+                    max_price: '',//最高价
+                    search: '',//搜索
+                    page: 1,
+                    size: 5,
+                },
+                goods: [],
+                praise: [],
+                praise_img: [],
+                checked: true,
+                fileList: [],
+                balance: "{$seller.balance}", //押金余额
+                reward: "{$seller.reward}", //银锭余额
+                check: false,
+                check_img: false,
+                is_reward_pay: true,
+                pay_reward: 0,
+                pay_balance: 0,
+                //上传视频
+                flag: false,
+                fee: 0, //套餐服务费
+                union_interval: "{$system.union_interval}",//接单间隔服务费
+                goods_more_fee: "{$system.goods_more_fee}",//多商品服务费
+                mobile_price: "{$system.phone_fee}",//手机端加成
+                pc_price: "{$system.pc_fee}",//pc端加成费
+                refund_fee: "{$system.refund_service_price}",//返款服务费
+                timing_pay: "{$system.timing_pay}",//定时付款服务费
+                timing_publish: "{$system.timing_publish}",//定时发布服务费
+                praise_fee: "{$system.praise}",//文字好评服务费
+                img_praise: "{$system.img_praise}",//图片好评服务费
+                video_praise: "{$system.video_praise}",//视频好评服务费
+                next_day_fee: "{$system.next_day}",//视频好评服务费
+                id: '',
+                yinding: 0,
+                goods_num:0,
+            }
+        },
+        created: function () {
+            that = this;
+            this.taskJudge();
+            this.getData();
+        },
+        computed: {
+            zprice() {
+                var result = 0;
+                for (var i = 0; i < this.goods.length; i++) {
+                    result += this.goods[i].price * this.goods[i].num;
+                }
+                return result;
+            }
+        },
+        methods: {
+            taskJudge: function () {
+                $.post("{:url('task/taskJudge')}", {}, function (res) {
+                    if (res.code == 0) {
+                        layer.msg(res.msg, {icon: 2}, function () {
+                            location.href = res.url;
+                        });
+                    }
+                })
+            },
+            getData: function () {
+                $.post("{:url('task/shop')}", {}, function (res) {
+                    if (res.code == 1) {
+                        that.shop = res.data;
+                    } else {
+                        layer.msg(res.msg, {icon: 2}, function () {
+                            location.href = res.url;
+                        });
+                    }
+                })
+            },
+            judge: function (id) {
+                if (this.datainfo.goods_id.indexOf(id) > -1) {
+                    return true;
+                } else {
+                    return false;
+                }
+            },
+            selectGoods: function () {
+                if (!this.datainfo.shop_id) return layer.msg('请先选择店铺！', {icon: 2});
+                that.searchGoods.shop_id = this.datainfo.shop_id;
+                that.goodsShow = true;
+                this.getGoodsData();
+            },
+            getGoodsData: function () {
+                $.post("{:url('task/getGoods')}", this.searchGoods, function (res) {
+                    console.log(res);
+                    if (res.code == 1) {
+                        that.goodslist = res.data.list;
+                        that.total = res.data.total;
+
+                    } else {
+                        layer.msg(res.msg, {icon: 2});
+                    }
+                })
+            },
+            search: function () {
+                this.getGoodsData();
+            },
+            changeSize: function (val) {
+                this.searchGoods.size = val;
+                this.getGoodsData();
+            },
+            changePage: function (val) {
+                this.searchGoods.page = val;
+                this.getGoodsData();
+            },
+            choose: function (item) {
+                var that = this;
+                $.post("{:url('task/verifyGoods')}", {id: item.id}, function (res) {
+                    if (res.code == 1) {
+                        that.goodsShow = false;
+                        that.disabled = true;
+                        if (that.goods.length >= 3) return layer.msg('商品最多只能添加3个！', {icon: 2});
+                        if (that.goods.length > 0) {
+                            item.goods_type = '副商品';
+                            item.is_del = false;
+                        } else {
+                            item.goods_type = '主商品';
+                            item.is_del = true;
+                        }
+                        that.goods.push(item);
+                        that.datainfo.goods_id.push(item.id);
+                        that.datainfo.goods_price.push(item.price);
+                        that.datainfo.goods_num.push(item.num);
+                        that.goods_num++;
+                    } else {
+                        return layer.msg(res.msg, {icon: 2});
+                    }
+                })
+
+            },
+            goodsDel: function (index) {
+                this.goods.splice(index, 1);
+                this.datainfo.goods_id.splice(index, 1);
+                this.datainfo.goods_price.splice(index, 1);
+                this.datainfo.goods_num.splice(index, 1);
+                that.goods_num--;
+                if (this.goods.length == 0) {
+                    this.disabled = false;
+                }
+            },
+            goodsEdit: function (id) {
+                app.openSidebar({
+                    title: '商品编辑',
+                    area: ['1000px', '90%'],
+                    url: '{:url("goods/edit","","",true)}/id/' + id,
+                });
+            },
+            goodsAdd: function () {
+                app.openSidebar({
+                    title: '商品添加',
+                    area: ['1000px', '90%'],
+                    url: '{:url("goods/taskGoods")}',
+                });
+            },
+            /* 获取图片的base64路径 */
+            handleChange: function (e) {
+                var that = this;
+                var reader = new FileReader();
+                reader.readAsDataURL(e.raw);
+                reader.onload = function () {
+                    that.localFile = reader.result;
+                    that.datainfo.qr_code = reader.result;
+                }
+            },
+            /* 删除图片 */
+            handleRemove: function (file) {
+                // console.log(file);
+            },
+
+            //下一步
+            nextStep: function (num) {
+                if (num == 1) {
+                    if (!this.datainfo.shop_id) return layer.msg('请选择店铺!', {icon: 2});
+                    if (!this.datainfo.task_type) return layer.msg('请选择任务类型!', {icon: 2});
+                    if (this.goods.length <= 0) return layer.msg('请选择商品!', {icon: 2});
+                    if (!this.datainfo.terminal) return layer.msg('请选择终端类型', {icon: 2});
+                    if (this.datainfo.terminal==1)this.mobile_num=0;
+                    if (this.datainfo.terminal==2)this.pc_num=0;
+                    if (this.datainfo.task_type==2 && this.datainfo.tao_word=='')return  layer.msg('淘口令不能为空', {icon: 2});
+                    if (this.datainfo.task_type==3 && this.datainfo.qr_code=='')return  layer.msg('二维码不能为空', {icon: 2});
+                    if (this.datainfo.task_type==5 && this.datainfo.channel_name=='')return  layer.msg('通道名称不能为空', {icon: 2});
+                    if (this.datainfo.terminal == 1 && (this.datainfo.task_type == 2 || this.datainfo.task_type == 3)) return layer.msg('淘口令和二维码只能在手机上使用', {icon: 2});
+                    if (this.datainfo.task_type == 1 || this.datainfo.task_type == 4) {
+                        $.post("{:url('task/goodsKey')}", {
+                            type: this.datainfo.terminal,
+                            goods_id: this.datainfo.goods_id
+                        }, function (res) {
+                            if (res.code == 1) {
+                                that.key = res.data;
+                                $("#first").hide(); //隐藏第一步
+                                $("#second").show(); //显示第二步
+                            } else {
+                                return layer.msg(res.msg, {icon: 2});
+                            }
+                        });
+                    } else {
+                        $("#first").hide(); //隐藏第一步
+                        $("#second").show(); //显示第二步
+                    }
+                } else {
+                    if (this.datainfo.num <= 0) return layer.msg('请填写任务单数!', {icon: 2});
+                    if (this.datainfo.weight <= 0) return layer.msg('请填写商品重量!', {icon: 2});
+                    if (this.datainfo.add_reward == 1) return layer.msg('加赏佣金最少2银锭!', {icon: 2});
+                    if (this.datainfo.add_reward > 20) return layer.msg('加赏佣金，最多20银锭!', {icon: 2});
+                    if(this.datainfo.is_video_praise==true && this.datainfo.video==''){
+                        return layer.msg('请上传视频并等视频上传完成！',{icon: 2});
+                    };
+                    var loadingFlag;
+                    loadingFlag= layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:100000 });
+                    $.post("{:url('task/taskAdd')}", this.datainfo, function (res) {
+                        if (res.code == 1) {
+                            that.id = res.data.id;
+                            that.yinding = res.data.yinding;
+                            that.fee = res.data.fee;
+                            that.datainfo.is_free_shiping = res.data.is_free_shiping;
+                            if(res.data.is_free_shiping==1){
+                                that.rowspan = 2;
+                                that.postage=that.datainfo.num * 5;
+                            }
+                            if(res.data.is_free_shiping==2){
+                                that.rowspan = 3;
+                                that.postage=that.datainfo.num * 15;
+                            }
+                            layer.close(loadingFlag);
+                            $("#third").show(); //显示第三步
+                            $("#second").hide(); //隐藏第二步
+                        } else {
+                            layer.close(loadingFlag);
+                            layer.msg(res.msg, {icon: 2});
+                        }
+                    })
+                }
+
+            },
+            //取消发布
+            cancel: function (num) {
+                if(num==1)return history.go(-1);
+                $.post("{:url('Release/cancel')}", {id: this.id}, function (res) {
+                    if (res.code == 1) {
+                       return  location.href="{url('index/index')}";
+                    }
+                })
+                history.go(-1);
+                // location.reload();
+            },
+            // 设置单数
+            numChange() {
+                this.datainfo.num = this.mobile_num + this.pc_num;
+            },
+            //上一步
+            previous: function (num) {
+                if (num == 1) {
+                    $("#first").show(); //显示第一步
+                    $("#second").hide(); //隐藏第二步
+                } else {
+                    $("#second").show(); //显示第一步
+                    $("#third").hide(); //隐藏第二步
+                }
+            },
+            // 显示隐藏优质好评
+            onClick:function() {
+                if (that.datainfo.num <= 0){
+                    this.datainfo.is_praise = false;
+                    return layer.msg('请填写任务单数', {icon: 2});
+                }
+                this.datainfo.praise = [];
+                if (this.datainfo.is_praise == true) {
+                    for (var j = 0; j < this.datainfo.num; j++) {
+                        this.praise = [];
+                        for (var i = 0; i < this.goods.length; i++) {
+                            this.praise.push({str: ''});
+                        }
+                        this.datainfo.praise.push(this.praise);
+                    }
+                    this.check = true;
+                } else {
+                    this.praise = [];
+                    this.check = false;
+                }
+            },
+            /**
+             * 好评图片
+             */
+            showImg:function() {
+                if (that.datainfo.num <= 0){
+                    this.datainfo.is_img_praise = false;
+                    return layer.msg('请填写任务单数', {icon: 2});
+                }
+                if (that.datainfo.num > 5){
+                    this.datainfo.is_img_praise = false;
+                    return layer.msg('图片任务一次仅能发布5单任务', {icon: 2});
+                }
+                if (that.datainfo.goods_id.length > 1){
+                    this.datainfo.is_img_praise = false;
+                    return layer.msg('图片好评仅限单连接任务！', {icon: 2});
+                }
+                if (this.datainfo.is_img_praise == true) {
+                    for (var j = 0; j < this.datainfo.num; j++) {
+                        this.praise_img = [];
+                        this.datainfo.img[j] = this.praise_img;
+                    }
+                    this.check_img = true;
+                } else {
+                    this.praise_img = [];
+                    this.check_img = false;
+                }
+            },
+
+            showVideo:function() {
+                if (that.datainfo.num != 1){
+                    this.datainfo.is_video_praise = false;
+                    return layer.msg('视频任务有且仅能发一单任务！', {icon: 2});
+                }
+                if (that.datainfo.goods_id.length > 1){
+                    this.datainfo.is_video_praise = false;
+                    return layer.msg('视频好评只能发布单一商品任务！', {icon: 2});
+                }
+            },
+
+            /* 获取图片的base64路径 */
+            getImg: function (e, index) {
+                var reader = new FileReader();
+                var img = '';
+                reader.readAsDataURL(e.target.files[0]);
+                reader.onload = function () {
+                    if (that.datainfo.img[index].length >= 5) return layer.msg('最多上传5张图片', {icon: 2});
+                    that.datainfo.img[index].push(reader.result);
+                    that.datainfo = JSON.parse(JSON.stringify(that.datainfo))
+                };
+            },
+            /* 删除图片 */
+            delImg: function (key, index) {
+                that.datainfo.img[key].splice(index, 1);
+            },
+
+            succress:function(res){
+              if(res.code==1){
+                this.datainfo.video = res.data;
+              }else{
+                layer.alert(res.msg);
+              }
+            },
+
+            // 上传视频
+            handleChange3: function (e) {
+                if(!this.datainfo.is_video_praise)return false;
+                var that = this;
+                var reader = new FileReader();
+                reader.readAsDataURL(e.raw);
+                reader.onload = function () {
+                    that.flag = true;
+                    that.datainfo.video = reader.result;
+                }
+            },
+            confirm: function () {
+                $.post("{:url('task/pay')}", {id: this.id, is_reward: this.is_reward_pay}, function (res) {
+                    if (res.code == 1) {
+                        layer.msg(res.msg, {icon: 1}, function () {
+                            location.href = res.url;
+                        });
+                    } else {
+                        layer.msg(res.msg, {icon: 2});
+                    }
+                })
+            },
+
+        },
+    });
+</script>
+{include file="public/footer" /}

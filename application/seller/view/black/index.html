@@ -1,0 +1,178 @@
+{include file="public/header" /}
+<style>
+  .el-form-item__label {
+    width: 120px;
+  }
+
+  .el-dialog {
+    width: 600px !important;
+  }
+</style>
+<!-- 右边盒子部分 -->
+<div class="right">
+  <!-- 基本信息标题 -->
+  <div class="right-top">
+    <b>个人中心 / 黑名单列表</b>
+  </div>
+  <div style="background: white;padding: 20px;">
+    <el-button type="primary" style="width: 120px;margin-bottom: 20px;" @click="add"><i
+            class="el-icon-plus"></i>添加
+    </el-button>
+    <el-table :data="list" border :header-cell-style="{background:'#f5f7fa'}">
+      <el-table-column prop="wangwang" label="旺旺号" align="center">
+      </el-table-column>
+      <el-table-column label="拉黑类型" align="center">
+        <teemlate slot-scope="scope">
+          <div v-html="list[scope.$index].state===0?'永久拉黑':'限时拉黑'"></div>
+        </teemlate>
+      </el-table-column>
+      <!--<el-table-column prop="end_time" label="拉黑时限" align="center" width="100">
+      </el-table-column>-->
+      <el-table-column prop="status" label="状态" align="center">
+      </el-table-column>
+      <el-table-column prop="remarks" label="审核备注" align="center" width="200">
+      </el-table-column>
+      <el-table-column prop="create_time" label="添加时间" align="center" width="100">
+      </el-table-column>
+      <el-table-column prop="update_time" label="修改时间" align="center" width="100">
+      </el-table-column>
+      <el-table-column label="操作" align="center">
+        <teemlate slot-scope="scope">
+          <!--<el-button type="primary" @click="edit(scope.$index)"><i class="el-icon-edit"></i>修改</el-button>-->
+          <el-button type="primary" @click="del(list[scope.$index].id)" v-if="list[scope.$index].status!=1"><i class="el-icon-delete"></i>删除</el-button>
+        </teemlate>
+      </el-table-column>
+    </el-table>
+    <div style="padding-top: 20px;display: flex;align-items: center;justify-content: center;">
+      <el-pagination background
+                     @size-change="handleSizeChange"
+                     @current-change="handleCurrentChange"
+                     :current-page="page"
+                     :page-sizes="sizes"
+                     :page-size="size"
+                     layout="total, sizes, prev, pager, next, jumper"
+                     :total="total">
+      </el-pagination>
+    </div>
+  </div>
+  <el-dialog :title="name[state]" :visible.sync="dialog">
+    <el-form :model="form">
+      <el-form-item label="旺旺号">
+        <el-input v-model="form.wangwang" autocomplete="off" style="width: 300px;"></el-input>
+      </el-form-item>
+      <el-form-item label="拉黑类型">
+        <el-select v-model="form.state" placeholder="请选择拉黑类型" style="width: 300px;">
+          <el-option label="永久拉黑" :value="0"></el-option>
+          <!--<el-option label="限时拉黑" :value="1"></el-option>-->
+        </el-select>
+        </el-form-item>
+      <p style="color:red;font-size: 20px;font-weight: bold">*添加后,请带截图私聊在线客服拉黑原因</p>
+      <!--<el-form-item label="拉黑时限" v-if="form.state===1">
+          <el-date-picker v-model="form.end_time" type="datetime" placeholder="选择日期时间" style="width: 300px;" value-format="yyyy-MM-dd HH:mm">
+          </el-date-picker>
+        </el-form-item>-->
+      </el-form>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="dialog = false">取 消</el-button>
+      <el-button type="primary" @click="agree()">确 定</el-button>
+    </div>
+  </el-dialog>
+</div>
+<script type="text/javascript">
+    $(function () {
+
+        /* 初始化一个Vue */
+        var vm = new Vue({
+            el: ".right",
+            data: function () {
+                return {
+                    list: [],
+                    size: 10,
+                    sizes: [10, 15, 20, 25, 30],
+                    page: 1,
+                    total: 0,
+                    dialog: false,
+                    form: {
+                        id:'',
+                        wangwang: '',
+                        state: '',
+                        end_time: '',
+                    },
+                    state: 0,
+                    name: ['添加黑名单', '修改黑名单'],
+                }
+            },
+            created: function () {
+                this.getData();
+            },
+            methods: {
+                getData: function () {
+                    var loadingFlag;
+                    loadingFlag = layer.msg('正在读取数据，请稍候……', {icon: 16, shade: 0.5, shadeClose: false, time: 6000});
+                    var that = this;
+                    $.post("{:url('Black/getData')}", {size: this.size, page: this.page}, function (res) {
+                        if (res.code === 1) {
+                            that.list = res.data.list;
+                            that.total = res.data.total;
+                            layer.close(loadingFlag);
+                        } else {
+                            layer.close(loadingFlag);
+                            layer.msg('网络错误！', {icon: 2});
+                        }
+                    })
+                },
+                edit: function (index) {
+                    this.form.wangwang = this.list[index].wangwang;
+                    this.form.state = this.list[index].state;
+                    this.form.end_time = this.list[index].end_time=='暂无数据' ? '' : this.list[index].end_time;
+                    this.form.id = this.list[index].id;
+                    this.state = 1;
+                    this.dialog = true;
+                    console.log(this.form.end_time)
+                },
+                add: function () {
+                    this.form.wangwang = '';
+                    this.form.id = '';
+                    this.form.state = 0;
+                    this.form.end_time = '';
+                    this.state = 0;
+                    this.dialog = true;
+                },
+                handleSizeChange: function (val) {
+                    this.size = val;
+                    this.getData();
+                },
+                handleCurrentChange: function (val) {
+                    this.page = val;
+                    this.getData();
+                },
+                agree:function(){
+                    this.dialog = false;
+                    var that = this;
+                    $.post("{:url('Black/editData')}", this.form, function (res) {
+                        if (res.code === 1) {
+                            layer.msg(res.msg, {icon: 1},function(){
+                                that.getData();
+                            });
+                        } else {
+                            layer.msg(res.msg, {icon: 2});
+                        }
+                    })
+                },
+                del:function(id){
+                    $.post("{:url('Black/del')}", {id:id}, function (res) {
+                        if (res.code === 1) {
+                            layer.msg(res.msg, {icon: 1},function(){
+                                that.getData();
+                            });
+                        } else {
+                            layer.msg(res.msg, {icon: 2});
+                        }
+                    })
+                }
+
+            }
+        });
+    });
+</script>
+{include file="public/footer" /}

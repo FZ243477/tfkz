@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>同福客栈</title>
+    <link rel="stylesheet" type="text/css" href="/static/buy/element-ui/lib/theme-chalk/index.css"/>
+    <!-- 页面内容CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/buy/css/pageCss/jiBenXinXi.css"/>
+    <link rel="Shortcut Icon" type="image/x-icon" href="/static/buy/img/index.png" />
+    <script src="/static/buy/js/vue-2.6.10.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/element-ui/lib/index.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/static/buy/js/jquery-1.12.4.min.js" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            // 手机号正则表达式
+            var phoneReg = /^1[3-9]\d{9}$/;
+            // 支付密码正则,6位数字密码,验证码同样适用
+            var zhifuReg = /^\d{6}$/;
+
+            /* 为element-ui组件提供数据绑定和事件 */
+            var vm = new Vue({
+               el: ".center_box",
+                data: function () {
+                    return {
+                        /* 默认隐藏弹框 */
+                        dialogusername: false,
+                        dialogPhoneNum: false,
+                        dialogPassWord: false,
+                        dialogZhiFuPassWord: false,
+                        /* 验证码按钮默认不禁用 */
+                        yzmDisabled: false,
+                        yzmDisabled2: false,
+                        yzmDisabled3: false,
+                        /* 默认的验证码按钮文字内容 */
+                        yzmMsg: "发送验证码",
+                        yzmMsg2: "发送验证码",
+                        yzmMsg3: "发送验证码",
+                        usernameObj:{
+                            username:"",
+                        },
+                        phoneNumObj: {
+                            oldPhoneNum: "",
+                            zhifuPassWord: "",
+                            newPhoneNum: "",
+                            newYzmNum: ""
+                        },
+                        passWordObj: {
+                            oldPassWord: "",
+                            newPassWord: "",
+                            queRenPassWord: "",
+                            phoneNum: "",
+                            newYzmNum: ""
+                        },
+                        zhifuPassWordObj: {
+                            oldZhiFuPassWord: "",
+                            newZhiFuPassWord: "",
+                            queRenZhiFuPassWord: "",
+                            phoneNum: "",
+                            yzmNum: ""
+                        }
+                    }
+                },
+                methods: {
+                    /* 下拉菜单事件 */
+                    handleOpen: function (key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    handleClose: function (key, keyPath) {
+                        // console.log(key, keyPath);
+                    },
+                    /* 消息弹框事件 */
+                    openMsg: function () {
+                        this.$alert("暂无消息通知", "个人通知", {});
+                    },
+                    /* 失败的弹框 */
+                    alertError: function (e) {
+                        this.$message.error(e);
+                    },
+                    /* 成功的弹框 */
+                    alertSuccess: function (e) {
+                        this.$message({
+                            message: e,
+                            type: "success"
+                        });
+                    },
+                    /* 打开弹框并清空表单 */
+                    openDialogusername: function () {
+                        this.dialogusername = true;
+                        this.usernameObj.username = "";
+                    },
+                    openDialogPassWord: function () {
+                        this.dialogPassWord = true;
+                        this.passWordObj.oldPassWord = "";
+                        this.passWordObj.newPassWord = "";
+                        this.passWordObj.queRenPassWord = "";
+                        this.passWordObj.phoneNum = "";
+                        this.passWordObj.newYzmNum = "";
+                    },
+                    openDialogZhiFuPassWord: function () {
+                        this.dialogZhiFuPassWord = true;
+                        this.zhifuPassWordObj.oldZhiFuPassWord = "";
+                        this.zhifuPassWordObj.newZhiFuPassWord = "";
+                        this.zhifuPassWordObj.queRenZhiFuPassWord = "";
+                        this.zhifuPassWordObj.phoneNum = "";
+                        this.zhifuPassWordObj.yzmNum = "";
+                    },
+                    openDialogPhoneNum: function () {
+                        this.dialogPhoneNum = true;
+                        this.phoneNumObj.oldPhoneNum = "";
+                        this.phoneNumObj.zhifuPassWord = "";
+                        this.phoneNumObj.newPhoneNum = "";
+                        this.phoneNumObj.newYzmNum = "";
+                    },
+                    usernameBtnActive:function (){
+                        if(!this.usernameObj.username) return vm.alertError("新昵称输入不能为空");
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('buy/my/editusername')}",
+                            async : true,
+                            data : {
+                                "username":vm.usernameObj.username,
+                            },
+                            success : function(data){
+                                if(data.code==1){
+                                    vm.alertSuccess(data.msg);
+                                    setTimeout(function(){
+                                        return location.href=data.url;
+                                    },3000)
+
+                                }else{
+                                    return vm.alertError(data.msg);
+                                }
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                    },
+                    /* 第一个表单验证 */
+                    phoneBtnActive: function () {
+                             if(!this.phoneNumObj.oldPhoneNum){ return vm.alertError("原手机号码不能为空");}
+                             if(!this.phoneNumObj.zhifuPassWord) {return vm.alertError("支付密码不能为空");}
+                             if(!this.phoneNumObj.newPhoneNum) {return vm.alertError("新手机号码不能为空");}
+                             if(!this.phoneNumObj.newYzmNum) {return vm.alertError("新手机号码验证码不能为空");}
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('buy/my/editphone')}",
+                                async : true,
+                                data : {
+                                    "oldphone":vm.phoneNumObj.oldPhoneNum,
+                                    "pay_pwd":vm.phoneNumObj.zhifuPassWord,
+                                    "mobile":vm.phoneNumObj.newPhoneNum,
+                                    "dxyzm":vm.phoneNumObj.newYzmNum,
+                                },
+                                success : function(data){
+                                    if(data.code==1){
+                                        vm.alertSuccess(data.msg);
+                                        setTimeout(function(){
+                                            return location.href=data.url;
+                                        },3000)
+
+                                    }else{
+                                        return vm.alertError(data.msg);
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                    },
+                    /* 第二个表单验证 */
+                    editBtnActive: function () {
+                        if(!this.passWordObj.oldPassWord) {return vm.alertError("原登录密码不能为空");}
+                        if(!this.passWordObj.newPassWord) {return vm.alertError("新登录密码不能为空");}
+                        if(!this.passWordObj.queRenPassWord){ return vm.alertError("确认登录密码不能为空");}
+                        if(!this.passWordObj.phoneNum){ return vm.alertError("手机号码不能为空");}
+                        if(!this.passWordObj.newYzmNum) {return vm.alertError("验证码不能为空");}
+                        if (!zhifuReg.test(this.passWordObj.newYzmNum)) {
+                            return vm.alertError("验证码格式不规范");}
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('buy/my/edit_login_pwd')}",
+                            async : true,
+                            data : {
+                                "oldloginpwd":vm.passWordObj.oldPassWord,
+                                "login_pwd":vm.passWordObj.newPassWord,
+                                "login_pwd2":vm.passWordObj.queRenPassWord,
+                                "mobile":vm.passWordObj.phoneNum,
+                                "dxyzm":vm.passWordObj.newYzmNum,
+                            },
+                            success : function(data){
+                                if(data.code==1){
+                                    vm.alertSuccess(data.msg);
+                                    setTimeout(function(){
+                                        return location.href=data.url;
+                                    },3000)
+
+                                }else{
+                                    return vm.alertError(data.msg);
+                                }
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                    },
+                    /* 第三个表单验证 */
+                    zhiFuBtnActive: function () {
+                        if(!this.zhifuPassWordObj.newZhiFuPassWord) {return vm.alertError("新支付密码不能为空");}
+                        if(!this.zhifuPassWordObj.queRenZhiFuPassWord) {return vm.alertError("确认新密码不能为空");}
+                        if(!this.zhifuPassWordObj.phoneNum){ return vm.alertError("手机号码不能为空");}
+                        if(!this.zhifuPassWordObj.yzmNum) return vm.alertError("验证码不能为空");
+                        if (!zhifuReg.test(this.zhifuPassWordObj.newZhiFuPassWord)) {
+                            return vm.alertError("您输入的密码不规范");}
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('buy/my/edit_pay_pwd')}",
+                            async : true,
+                            data : {
+                                "pay_pwd":vm.zhifuPassWordObj.newZhiFuPassWord,
+                                "pay_pwd2":vm.zhifuPassWordObj.queRenZhiFuPassWord,
+                                "mobile":vm.zhifuPassWordObj.phoneNum,
+                                "dxyzm":vm.zhifuPassWordObj.yzmNum,
+                            },
+                            success : function(data){
+                                if(data.code==1){
+                                    vm.alertSuccess(data.msg);
+                                    setTimeout(function(){
+                                        return location.href=data.url;
+                                    },3000)
+
+                                }else{
+                                    return vm.alertError(data.msg);
+                                }
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                    },
+                    /* 发送验证码 */
+                    sendYzm: function () {
+                        if(!vm.phoneNumObj.newPhoneNum){ return vm.alertError("手机号码不能为空");}
+                        if (!phoneReg.test(vm.phoneNumObj.newPhoneNum)) {
+                            return vm.alertError("手机号码格式不规范,请检查后重新输入");}
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('way/send_code')}",
+                            async : true,
+                            data : {
+                                "mobile":vm.phoneNumObj.newPhoneNum,
+                                "dxyzm":vm.phoneNumObj.newYzmNum,
+                            },
+                            success : function(data){
+                                // vm.alertError(data.msg);
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                        var num = 60;
+                        var that = this;
+                        var timer = setInterval(function () {
+                            num--;
+                            that.yzmDisabled = true;
+                            that.yzmMsg = "还剩 " + num + " 秒";
+                            if (num <= 0) {
+                                clearInterval(timer);
+                                that.yzmMsg = "重新发送";
+                                that.yzmDisabled = false;
+                            } else if (num === 59) {
+                                that.alertSuccess("验证码发送成功,若接收失败请耐心等待一分钟后点击重新发送");
+                            }
+                        }, 1000);
+                    },
+                    sendYzm2: function () {
+                        if(!this.passWordObj.phoneNum){ return vm.alertError("手机号码不能为空");}
+                        if (!phoneReg.test(vm.passWordObj.phoneNum)) {
+                            return vm.alertError("手机号码格式不规范,请检查后重新输入");}
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('way/send_code')}",
+                            async : true,
+                            data : {
+                                "mobile":vm.passWordObj.phoneNum,
+                                "dxyzm":vm.passWordObj.newYzmNum,
+                            },
+                            success : function(data){
+                                // vm.alertError(data.msg);
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                        var num = 60;
+                        var that = this;
+                        var timer = setInterval(function () {
+                            num--;
+                            that.yzmDisabled2 = true;
+                            that.yzmMsg2 = "还剩 " + num + " 秒";
+                            if (num <= 0) {
+                                clearInterval(timer);
+                                that.yzmMsg2 = "重新发送";
+                                that.yzmDisabled2 = false;
+                            } else if (num === 59) {
+                                that.alertSuccess("验证码发送成功,若接收失败请耐心等待一分钟后点击重新发送");
+                            }
+                        }, 1000);
+                    },
+                    sendYzm3: function () {
+                        if(!this.zhifuPassWordObj.phoneNum){ return vm.alertError("手机号码不能为空");}
+                        if (!phoneReg.test(vm.zhifuPassWordObj.phoneNum)) {
+                            return vm.alertError("手机号码格式不规范,请检查后重新输入");}
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('way/send_code')}",
+                            async : true,
+                            data : {
+                                "mobile":vm.zhifuPassWordObj.phoneNum,
+                                "dxyzm":vm.zhifuPassWordObj.yzmNum,
+                            },
+                            success : function(data){
+                                // vm.alertError(data.msg);
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                        var num = 60;
+                        var that = this;
+                        var timer = setInterval(function () {
+                            num--;
+                            that.yzmDisabled3 = true;
+                            that.yzmMsg3 = "还剩 " + num + " 秒";
+                            if (num <= 0) {
+                                clearInterval(timer);
+                                that.yzmMsg3 = "重新发送";
+                                that.yzmDisabled3 = false;
+                            } else if (num === 59) {
+                                that.alertSuccess("验证码发送成功,若接收失败请耐心等待一分钟后点击重新发送");
+                            }
+                        }, 1000);
+                    }
+
+                },
+            {notempty name="editpass"}
+            {if condition="$editpass ==1"}
+                created:function(){
+                    this.dialogZhiFuPassWord=true;
+                }
+            {else}
+            {/if}
+            {/notempty}
+            });
+
+            /* 调用jQuery实现选择导航栏效果 */
+            $(function () {
+
+                $(".title a").click(function () {
+                    $(this).addClass("add_color").siblings().removeClass("add_color");
+                });
+
+            });
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+
+    <!-- 头部 -->
+    {include file="public/header" /}
+
+    <!-- 中间内容部分 -->
+    <div class="center_box">
+        <!-- 下拉列表 -->
+        {include file="public/left" /}
+
+        <!-- 右边盒子部分 -->
+        <!-- 右边盒子部分 -->
+        <div class="right_box">
+            <!-- 基本信息标题 -->
+            <div class="msg_title">
+                <p>个人中心&nbsp;/&nbsp;账号信息&nbsp;/&nbsp;<span class="msg_title_txt">基本信息</span></p>
+            </div>
+            <div class="user_content">
+                <img src="/static/buy/img/imgheade.png" alt="" class="user_touxiang"/>
+                <p class="user_name">{$users.username}</p>
+
+                <!-- 用户信息 -->
+                <div class="user_info">
+                    <!-- 用户信息左 -->
+                    <div class="user_left">
+                        <div class="user_detail">
+                            <div>昵称:</div>
+                            <div class="user_gray">{$users.username}</div>
+                            <!--<el-button type="primary" icon="el-icon-edit" circle size="small"-->
+                                       <!--@click="openDialogusername"></el-button>-->
+                        </div>
+                        <div class="user_detail">
+                            <div>会员状态:</div>
+                            <div class="user_gray">
+                                {if condition="$users.vip ==1"}VIP会员
+                                {else /} 不是会员
+                                {/if}
+                            </div>
+                        </div>
+                        <div class="user_detail">
+                            <div>VIP时限:</div>
+                            <div class="user_gray">{$users.vip_time|date="Y-m-d",###}</div>
+                        </div>
+                        <div class="user_detail">
+                            <div>QQ账号:</div>
+                            <div class="user_gray">{$users.qq}</div>
+                        </div>
+                    </div>
+                    <!-- 用户信息右 -->
+                    <div class="user_right">
+                        <div class="user_detail">
+                            <div>手机号码:</div>
+                            <div class="user_gray">{$users.mobile}</div>
+                            <el-button type="primary" icon="el-icon-edit" circle size="small"
+                                       @click="openDialogPhoneNum"></el-button>
+                        </div>
+                        <div class="user_detail">
+                            <div>VIP延时:</div>
+                            <div><a href="{:url('my/vip_recharge')}" class="user_blue">点击延时VIP</a></div>
+                        </div>
+                        <div class="user_detail">
+                            <div>登录密码:</div>
+                            <div class="user_blue">**********</div>
+                            <div class="user_btn">
+                                <el-button type="primary" icon="el-icon-edit" circle size="small"
+                                           @click="openDialogPassWord"></el-button>
+                            </div>
+                        </div>
+                        <div class="user_detail">
+                            <div>支付密码:</div>
+                            <div class="user_blue">**********</div>
+                            <div class="user_btn">
+                                <el-button type="primary" icon="el-icon-edit" circle size="small"
+                                           @click="openDialogZhiFuPassWord"></el-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 修改用户名 -->
+                <el-dialog title="修改用户名" :visible.sync="dialogusername">
+                    <div class="form_box">
+                        <el-form ref="form" :model="usernameObj" class="el_form">
+                            <div class="el_form_item">
+                                <p>新用户名:</p>
+                                <el-input v-model="usernameObj.username" placeholder="请输入新昵称" maxlength="11" class="el_form_width"
+                                          clearable>
+                                    <i
+                                            slot="prefix"
+                                            class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+                                            src="/static/buy/img/user.png" alt="" style="width: 24px;"/></i>
+                                </el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                        </el-form>
+                        <!-- 修改密码按钮 -->
+                        <div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+                            <el-button @click="dialogusername = false" size="small">取 消</el-button>
+                            <el-button @click="usernameBtnActive" type="primary" size="small">确 定</el-button>
+                        </div>
+                    </div>
+                </el-dialog>
+                <!-- 修改手机号码弹框 -->
+                <el-dialog title="修改手机号码" :visible.sync="dialogPhoneNum">
+                    <div class="form_box">
+                        <el-form ref="form" :model="phoneNumObj" class="el_form">
+                            <div class="el_form_item">
+                                <p>原手机号码:</p>
+                                <el-input v-model="phoneNumObj.oldPhoneNum" placeholder="请输入原手机号码" maxlength="11" class="el_form_width"
+                                          clearable>
+                                    <i
+                                            slot="prefix"
+                                            class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+                                            src="/static/buy/img/phone.png" alt="" style="width: 24px;"/></i>
+                                </el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>支付密码:</p>
+                                <el-input type="password"  v-model="phoneNumObj.zhifuPassWord" placeholder="请输入6位支付密码"
+                                          class="el_form_width" maxlength="6"></el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>新手机号码:</p>
+                                <el-input v-model="phoneNumObj.newPhoneNum" placeholder="请输入新手机号码" maxlength="13" class="el_form_width"
+                                          clearable>
+                                    <i
+                                            slot="prefix"
+                                            class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+                                            src="/static/buy/img/phone.png" alt="" style="width: 24px;"/></i>
+                                </el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>验证码:</p>
+                                <el-input v-model="phoneNumObj.newYzmNum" placeholder="请输入验证码" maxlength="6" class="el_form_width"
+                                          style="width: 160px;margin-right: 40px;" clearable><i
+                                        slot="prefix"
+                                        class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+                                        src="/static/buy/img/123.png" alt="" style="width: 24px;"/></i>
+                                </el-input>
+                                <el-button type="primary" style="width: 100px;padding: 0;height: 40px;line-height: 40px;"
+                                           @click="sendYzm" :disabled="yzmDisabled" v-html="yzmMsg"></el-button>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                        </el-form>
+                        <!-- 修改密码按钮 -->
+                        <div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+                            <el-button @click="dialogPhoneNum = false" size="small">取 消</el-button>
+                            <el-button @click="phoneBtnActive" type="primary" size="small">确 定</el-button>
+                        </div>
+                    </div>
+                </el-dialog>
+
+                <!-- 修改密码弹框 -->
+                <el-dialog title="修改登录密码" :visible.sync="dialogPassWord">
+                    <div class="form_box">
+                        <el-form ref="form" :model="passWordObj" class="el_form">
+                            <div class="el_form_item">
+                                <p>原登录密码:</p>
+                                <el-input type="password"  v-model="passWordObj.oldPassWord" placeholder="请输入原登录密码"
+                                          class="el_form_width" maxlength="16"></el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>新登录密码:</p>
+                                <el-input type="password" show-password v-model="passWordObj.newPassWord" placeholder="请输入新登录密码"
+                                          class="el_form_width" maxlength="16"></el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>确认新密码:</p>
+                                <el-input type="password" show-password v-model="passWordObj.queRenPassWord" placeholder="请确认新登录密码"
+                                          class="el_form_width" maxlength="16"></el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>手机号码:</p>
+                                <el-input v-model="passWordObj.phoneNum" placeholder="请输入手机号码" maxlength="11" class="el_form_width"
+                                          clearable>
+                                    <i
+                                            slot="prefix"
+                                            class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+                                            src="/static/buy/img/phone.png" alt="" style="width: 24px;"/></i>
+                                </el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>验证码:</p>
+                                <el-input v-model="passWordObj.newYzmNum" placeholder="请输入验证码" maxlength="6" class="el_form_width"
+                                          style="width: 160px;margin-right: 40px;" clearable><i
+                                        slot="prefix"
+                                        class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+                                        src="/static/buy/img/123.png" alt="" style="width: 24px;"/></i>
+                                </el-input>
+                                <el-button type="primary" style="width: 100px;padding: 0;height: 40px;line-height: 40px;"
+                                           @click="sendYzm2" :disabled="yzmDisabled2" v-html="yzmMsg2"></el-button>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                        </el-form>
+                        <!-- 修改密码按钮 -->
+                        <div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+                            <el-button @click="dialogPassWord = false" size="small">取 消</el-button>
+                            <el-button @click="editBtnActive" type="primary" size="small">确 定</el-button>
+                        </div>
+                    </div>
+                </el-dialog>
+
+                <!-- 支付密码弹框 -->
+                <el-dialog title="修改支付密码" :visible.sync="dialogZhiFuPassWord">
+                    <div class="form_box">
+                        <el-form ref="form" :model="zhifuPassWordObj" class="el_form">
+                            <!--{if condition="$users.pay_pwd"}-->
+                            <!--<div class="el_form_item">-->
+                                <!--<p>原支付密码:</p>-->
+                                <!--<el-input type="password"  v-model="zhifuPassWordObj.oldZhiFuPassWord"-->
+                                          <!--placeholder="请输入原支付密码"-->
+                                          <!--class="el_form_width" maxlength="6"></el-input>-->
+                                <!--<span style="margin-left: 10px;color: red;">*</span>-->
+                            <!--</div>-->
+                            <!--{else /}-->
+                            <!--{/if}-->
+                            <div class="el_form_item">
+                                <p>新支付密码:</p>
+                                <el-input type="password" show-password v-model="zhifuPassWordObj.newZhiFuPassWord"
+                                          placeholder="请输入6位支付密码"
+                                          class="el_form_width" maxlength="6"></el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>确认新密码:</p>
+                                <el-input type="password" show-password v-model="zhifuPassWordObj.queRenZhiFuPassWord"
+                                          placeholder="请确认新支付密码"
+                                          class="el_form_width" maxlength="6"></el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>手机号码:</p>
+                                <el-input v-model="zhifuPassWordObj.phoneNum" placeholder="请输入手机号" maxlength="11" class="el_form_width"
+                                          clearable>
+                                    <i
+                                            slot="prefix"
+                                            class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+                                            src="/static/buy/img/phone.png" alt="" style="width: 24px;"/></i>
+                                </el-input>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                            <div class="el_form_item">
+                                <p>验证码:</p>
+                                <el-input v-model="zhifuPassWordObj.yzmNum" placeholder="请输入验证码" maxlength="6" class="el_form_width"
+                                          style="width: 160px;margin-right: 40px;" clearable><i
+                                        slot="prefix"
+                                        class="el-input__icon" style="display: flex;flex-direction: row;align-items: center;"><img
+                                        src="/static/buy/img/123.png" alt="" style="width: 24px;"/></i>
+                                </el-input>
+                                <el-button type="primary" style="width: 100px;padding: 0;height: 40px;line-height: 40px;"
+                                           @click="sendYzm3" :disabled="yzmDisabled3" v-html="yzmMsg3"></el-button>
+                                <span style="margin-left: 10px;color: red;">*</span>
+                            </div>
+                        </el-form>
+                        <!-- 支付密码按钮 -->
+                        <div slot="footer" class="dialog-footer" style="align-self: flex-end;margin: 20px;">
+                            <el-button @click="dialogZhiFuPassWord = false" size="small">取 消</el-button>
+                            <el-button type="primary" @click="zhiFuBtnActive" size="small">确 定</el-button>
+                        </div>
+                    </div>
+                </el-dialog>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 底部 -->
+    {include file="public/footer" /}

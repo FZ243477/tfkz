@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>买号</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+</head>
+<style>
+    .layui-table-cell {
+        font-size:16px;
+        padding:0 5px;
+        height:auto;
+        overflow:visible;
+        text-overflow:inherit;
+        white-space:normal;
+        word-break: break-all;
+    }
+</style>
+<body class="childrenBody">
+    <input  type="hidden" name="dataid" lay-verify="beizhu" autocomplete="off" class="layui-input dataid">
+    <table id="userList" lay-filter="userList"></table>
+    <!--操作-->
+	<script type="text/html" id="userListBar">
+        <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">审核|编辑</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="del">删除</a>
+    </script>
+    <script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+    <script>
+        layui.use(['form', 'layer', 'table', 'laytpl', 'laydate'], function () {
+            var form = layui.form,
+                layer = parent.layer === undefined ? layui.layer : top.layer,
+                $ = layui.jquery,
+                laytpl = layui.laytpl,
+                table = layui.table;
+            laydate = layui.laydate;
+            //ip所在地截图
+            var collectionNumber1 = function (d) {
+                return '<img src="'+d.collectionNumber1+'" style="height: 170px; width: 200px;" >';
+            };
+            //旺旺档案截图
+            var collectionNumber2 = function (d) {
+                return '<img src="'+d.collectionNumber2+'" style="height: 170px; width: 200px;" >';
+            };
+            //支付宝实名截图
+            var collectionNumber3 = function (d) {
+                return '<img src="'+d.collectionNumber3+'" style="height: 170px; width: 200px;" >';
+            };
+            var tplImg2 = function (d) {
+                return '<img src="'+d.ipimg+'" style="height: 170px; width: 200px;" >';
+            };
+            var tplImg3 = function (d) {
+                return '<img src="'+d.wwdaimg+'" style="height: 170px; width: 200px;" >';
+            };
+            var tplImg4 = function (d) {
+                return '<img src="'+d.alipayimg+'" style="height: 170px; width: 200px;" >';
+            };
+            var tplImg5 = function (d) {
+                return '<img src="'+d.idcardimg+'" style="height: 170px; width: 200px;" >';
+            };
+            var username = function (d) {
+                return '<p class="p2">'+d.uid.username+'</p>';
+            };
+            var state = function (d) {
+                if(d.state==0){
+                    return '<span class="red">未审核</span>';
+                }else if(d.state==1){
+                    return '<span class="green">审核通过</span>';
+                }else if(d.state==2){
+                    return '<span class="red">拒绝</span>';
+                }
+            }
+            //用户列表
+            var dataid = $(".dataid").val(); //id
+            var tableIns = table.render({
+                elem: '#userList',
+                url: '/index.php/admin/buyer/maihao/id/'+dataid+'',
+                method:'POST',
+                cellMinWidth: 95,
+                page: true,
+                height: "full-125",
+                limits: [10, 15, 20, 25],
+                limit: 10,
+                id: "userListTable",
+                cols: [[
+                    { field: 'id', title: '序号', minWidth: 50, width:60, align: "center" },
+                    { field: 'id', title: '用户名', minWidth: 50, width:60,width:80, align: "center", templet: username },
+                    { field: 'addressphone', title: '收货人手机号码', minWidth: 80, width:110, align: "center" },
+                    { field: 'wwid', title: '旺旺号', minWidth: 80, width:150, align: "center" },
+                    { field: 'addressname', title: '收货人姓名', minWidth: 80, width:80, align: "center" },
+                    { field: 'detail_address', title: '收货地址', minWidth: 80, width:350, align: "center" },
+                    // { field: 'ipimg', title: 'IP所在地截图', minWidth: 95, align: "center", templet: tplImg2 },
+                    // { field: 'wwdaimg', title: '旺旺档案截图', minWidth: 95, align: "center", templet: tplImg3 },
+                    // { field: 'alipayimg', title: '支付宝实名截图', minWidth: 95, align: "center", templet: tplImg4 },
+                    // { field: 'idcardimg', title: '身份证正面截图', minWidth: 95, height: 315, align: "center", templet: tplImg5 },
+                    { field: 'state', title: '状态', minWidth: 50, width: 110, align: "center",templet:state },
+                     { title: '操作', minWidth: 175, templet: '#userListBar', fixed: "right", align: "center" }
+                ]]
+            });
+
+            //验证数据
+            form.verify({
+                phone: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    //   if(!/^1[3456789]\d{9}$/.test(value)){
+                    //     return '手机号码有误，请重填';
+                    //   }
+                }
+                , name: function (value, item) {
+
+                }
+                , pass: [
+                    /^[\S]{6,12}$/
+                    , '密码必须6到12位，且不能出现空格'
+                ]
+            });
+            //表单提交
+            form.on("submit(reload)", function (data) {
+                var field = data.field;
+                //弹出loading 加载
+                var index = top.layer.msg('数据提交中，请稍候', { icon: 16, time: false, shade: 0.8 });
+                //第一种获取方法
+                var name = $(".name").val(); //名字
+                var beizhu = field.beizhu;  //qq号
+
+                table.reload("userListTable", {
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    },
+                    where: {
+                        name: name,    //姓名
+                        beizhu: beizhu //备注
+                    }
+                })
+                setTimeout(function () {
+                    top.layer.close(index);
+                    top.layer.msg("搜索成功！");
+                }, 500);
+                return false;
+            });
+            //监听行工具事件
+            table.on('tool(userList)', function (obj) {
+                var layEvent = obj.event,
+                    data = obj.data;
+                console.log(data);
+
+                if (obj.event === 'del'){
+                    layer.confirm('您确定要删除该用户吗?',{btn: ['确定', '取消'],title:"提示"}, function(){
+                        $.ajax({
+                            type: "post",
+                            url: '/index.php/admin/buyer/del_buyno',
+                            data: {
+                                'id':data.id,
+                                'uid':data.uid.id
+                            },
+                            dataType: "json",
+                            async:false,
+                            success:function(data) {
+                                if(data.code == 1){
+                                    layer.msg(data.msg, {icon: 1},function () {
+                                        layer.closeAll();
+                                        window.location.reload();
+                                        parent.window.location.reload();
+                                    });
+                                }else{
+                                    layer.msg(data.msg, {icon: 2});
+                                    //layer.msg('删除失败', {icon: 2});
+                                }
+                            }
+                        });
+                    });
+                }else if (obj.event === 'edit'){
+                    maihaobianji(data);
+                }
+            });
+        })
+        function maihaobianji(edit) {
+            layui.layer.open({
+                type: 2,
+                content: "maihaobianji.html",
+                area: ['900px', '650px'],
+                title: '审核',
+                shadeClose: true,
+                success : function(layero, index){
+                    var body = layui.layer.getChildFrame('body', index);
+                    //审核模态框中需要数据
+                    //因为名字我不知道 就简单写了两个 模仿即可
+                    if(edit){
+                        //console.log(edit,1111111111111);
+                        body.find(".dataid").val(edit.id);
+                    }
+                    setTimeout(function(){
+                        layui.layer.tips('点击此处返回', '.layui-layer-setwin .layui-layer-close', {
+                            tips: 3
+                        });
+                    },500)
+                }
+            })
+        }
+    </script>
+</body>
+
+</html>

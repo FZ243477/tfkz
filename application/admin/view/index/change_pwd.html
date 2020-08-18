@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>修改密码--layui后台管理模板 2.0</title>
+	<meta name="renderer" content="webkit">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="format-detection" content="telephone=no">
+	<link rel="stylesheet" href="/admin_style/layui/css/layui.css" media="all" />
+	<link rel="stylesheet" href="/admin_style/css/public.css" media="all" />
+</head>
+<body class="childrenBody">
+<form class="layui-form">
+	<div class="layui-col-xs12 layui-col-sm6 layui-col-md6">
+		<div class="layui-input-block layui-red pwdTips">旧密码必须输入，新密码必须两次输入一致才能提交</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">用户名</label>
+			<div class="layui-input-block">
+				<input type="text" name="name" value="{:session('admin_name')}" disabled class="layui-input layui-disabled">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">旧密码</label>
+			<div class="layui-input-block">
+				<input type="password" name="pwd" value="" placeholder="请输入旧密码" lay-verify="required|oldPwd" class="layui-input pwd">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">新密码</label>
+			<div class="layui-input-block">
+				<input type="password" name="pwd1" value="" placeholder="请输入新密码" lay-verify="required|newPwd" id="oldPwd" class="layui-input pwd">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">确认密码</label>
+			<div class="layui-input-block">
+				<input type="password" name="pwd2" value="" placeholder="请确认密码" lay-verify="required|confirmPwd" class="layui-input pwd">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<div class="layui-input-block">
+				<button class="layui-btn" type="button" onclick="changePwd()">立即修改</button>
+				<button type="reset" type="button" class="layui-btn layui-btn-primary">重置</button>
+			</div>
+		</div>
+	</div>
+</form>
+<script type="text/javascript" src="/admin_style/layui/layui.js"></script>
+<script type="text/javascript" src="/static/seller/js/jquery.min.js"></script>
+<script type="text/javascript" src="/admin_style/js/cache.js"></script>
+</body>
+</html>
+<script>
+	function changePwd() {
+		var pwd = $('input[name=pwd]').val();
+		var pwd1 = $('input[name=pwd1]').val();
+		var pwd2 = $('input[name=pwd2]').val();
+		if(pwd1!=pwd2){
+			layer.msg("两次密码不相同！",{icon:2}) ;
+		}
+		$.post("/index.php/admin/index/changePwd",{pwd:pwd,pwd1:pwd1,pwd2:pwd2},function (res) {
+			if(res.code==0){
+				layer.msg(res.msg,{icon:2,time:1000},function () {
+				});
+			}else {
+				return  layer.msg(res.msg,{icon:1},function () {
+					window.location.href = res.url;
+				});
+			}
+
+		})
+	}
+</script>

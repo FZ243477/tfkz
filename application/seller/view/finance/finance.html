@@ -1,0 +1,381 @@
+{include file="public/header" /}
+	<link rel="stylesheet" type="text/css" href="/static/seller/css/shouzhijilv.css" />
+		<!-- 右边盒子部分 -->
+		<div class="right">
+			<!-- 基本信息标题 -->
+			<div class="right-top">
+			    <b>个人中心 / 资金管理 /<strong> {{str[state-1]}} </strong></b>
+			</div>
+			<div class="user_content">
+				<!-- 本金提现 -->
+				<div class="web_gonggao">
+					<div class="gonggao_row">
+						<div class="gonggao_top" @click="state=1">
+							<a href="javascript:" :class="state==1 ? 'select_on' : ''">押金记录</a>
+						</div>
+						<div class="gonggao_top" @click="state=3">
+							<a href="javascript:" :class="state==3 ? 'select_on' : ''">银锭记录</a>
+						</div>
+						<div class="gonggao_top" @click="state=2">
+							<a href="javascript:" :class="state==2 ? 'select_on' : ''">提现记录</a>
+						</div>
+					</div>
+				</div>
+				<div>
+					<!-- 押金记录部分 -->
+					<div class="shuju_table" v-if="state==1">
+						<!-- 搜索区域 -->
+						<div class="benjin_search">
+							<el-select v-model="type" placeholder="请选择">
+								<el-option
+												label="请选择"
+												value="">
+								</el-option>
+								<el-option
+												v-for="(item,key) in config"
+												:key="key"
+												:label="item"
+												:value="key">
+								</el-option>
+							</el-select>
+							<el-date-picker class="el_date" v-model="dateValue" type="daterange" range-separator="至"
+															start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
+							</el-date-picker>
+							<el-button type="primary" @click="searchDeposit()"><i class="el-icon-search"></i> 搜索</el-button>
+							<el-button type="primary" @click="excelDeposit()"><i class="el-icon-download"></i> 导出</el-button>
+						</div>
+						<!-- 数据列表 -->
+						<el-table :data="tableData" border header-cell-style="background:#f5f7fa;" :cell-style="cellStyle">
+							<el-table-column prop="id" label="流水号" align="center">
+							</el-table-column>
+							<el-table-column prop="price" label="收支明细" align="center">
+							</el-table-column>
+							<el-table-column prop="type" label="财务类型" align="center">
+							</el-table-column>
+							<el-table-column prop="yprice" label="结余" align="center">
+							</el-table-column>
+							<el-table-column prop="create_time" label="日期" align="center" width="100">
+							</el-table-column>
+							<el-table-column prop="memo" label="备注" align="center">
+							</el-table-column>
+						</el-table>
+						<!-- 分页 -->
+						<div class="fenye">
+							<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+														 :current-page="currentPage"
+														 :page-sizes="sizes" :page-size="1"
+														 layout="total, sizes, prev, pager, next, jumper"
+														 :total="total1"
+														 background>
+							</el-pagination>
+						</div>
+					</div>
+
+					<!-- 提现记录部分 -->
+					<div class="shuju_table2" v-if="state==2">
+						<!-- 搜索区域 -->
+						<div class="benjin_search">
+							<el-date-picker class="el_date" v-model="dateValue2" type="daterange" range-separator="至"
+															start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
+							</el-date-picker>
+							<el-button type="primary" @click="searchCash()"><i class="el-icon-search"></i> 搜索</el-button>
+						</div>
+						<!-- 数据列表 -->
+						<el-table :data="tableData2" border header-cell-style="background:#f5f7fa;" :cell-style="cellStyle2">
+							<el-table-column prop="id" label="流水号" align="center">
+							</el-table-column>
+							<el-table-column prop="price" label="金额" align="center">
+							</el-table-column>
+							<el-table-column prop="poundage" label="费用" align="center">
+							</el-table-column>
+							<el-table-column prop="toaccount" label="到账金额" align="center">
+							</el-table-column>
+							<el-table-column prop="yprice" label="账户余额" align="center">
+							</el-table-column>
+							<el-table-column prop="state" label="状态" align="center">
+							</el-table-column>
+							<el-table-column prop="create_time" label="日期" align="center">
+							</el-table-column>
+							<el-table-column prop="memo" label="拒绝原因" align="center">
+							</el-table-column>
+						</el-table>
+						<!-- 分页 -->
+						<div class="fenye2">
+							<el-pagination @size-change="handleSizeChange2" @current-change="handleCurrentChange2"
+														 :current-page="currentPage2"
+														 :page-sizes="sizes" :page-size="1"
+														 layout="total, sizes, prev, pager, next, jumper"
+														 :total="total2"
+														 background>
+							</el-pagination>
+						</div>
+					</div>
+
+					<!-- 银锭提现部分 -->
+					<div class="shuju_table3" v-if="state==3">
+						<!-- 搜索区域 -->
+						<div class="benjin_search">
+							<el-select v-model="type2" placeholder="请选择">
+								<el-option
+												label="请选择"
+												value="">
+								</el-option>
+								<el-option
+												v-for="(item,key) in config"
+												:key="key"
+												:label="item"
+												:value="key">
+								</el-option>
+							</el-select>
+							<el-date-picker class="el_date" v-model="dateValue3" type="daterange" range-separator="至"
+															start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
+							</el-date-picker>
+							<el-button type="primary" @click="searchReward()"><i class="el-icon-search"></i> 搜索</el-button>
+							<el-button type="primary" @click="excelReward()"><i class="el-icon-download"></i> 导出</el-button>
+						</div>
+						<!-- 数据列表 -->
+						<el-table :data="tableData3" border header-cell-style="background:#f5f7fa;" :cell-style="cellStyle3">
+							<el-table-column prop="id" label="流水号" align="center">
+							</el-table-column>
+							<el-table-column prop="price" label="收支明细" align="center">
+							</el-table-column>
+							<el-table-column prop="type" label="财务类型" align="center">
+							</el-table-column>
+							<el-table-column prop="yprice" label="结余" align="center">
+							</el-table-column>
+							<el-table-column prop="create_time" label="日期" align="center" width="100">
+							</el-table-column>
+							<el-table-column prop="memo" label="备注" align="center">
+							</el-table-column>
+						</el-table>
+						<!-- 分页 -->
+						<div class="fenye3">
+							<el-pagination @size-change="handleSizeChange3" @current-change="handleCurrentChange3"
+														 :current-page="currentPage3"
+														 :page-sizes="sizes" :page-size="1"
+														 layout="total, sizes, prev, pager, next, jumper"
+														 :total="total3"
+														 background>
+							</el-pagination>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	<script type="text/javascript">
+		$(function () {
+
+			/* 初始化一个Vue */
+			var vm = new Vue({
+				el: ".right",
+				data: function () {
+					return {
+						/* 起止日期value值 */
+						dateValue: "",
+						dateValue2: "",
+						dateValue3: "",
+						/* 搜索框value值 */
+						type: "",
+						type2: "",
+						config:[],
+						state:1,
+						str:['押金记录','提现记录','银锭记录'],
+						total1:0,
+						total2:0,
+						total3:0,
+						size1:10,
+						size2:10,
+						size3:10,
+						sizes:[10,20,30,40,50],
+						/* 表格数据 */
+						tableData: [],
+						/* 表格数据2 */
+						tableData2: [],
+						tableData3: [],
+						/* 默认选中第一页 */
+						currentPage: 1,
+						currentPage2: 1,
+						currentPage3: 1
+					}
+				},
+				created:function(){
+					this.getData();
+				},
+				methods: {
+					getData:function(){
+						var loadingFlag;
+						loadingFlag= layer.msg('正在读取数据，请稍候……', { icon: 16, shade: 0.5,shadeClose:false,time:6000 });
+						var that = this;
+						$.post("{:url('finance/financeDo')}",{},function (res) {
+							if(res.code==1){
+								console.log(res.data.list3);
+								that.tableData = res.data.list1;
+								that.tableData2 = res.data.list2;
+								that.tableData3 = res.data.list3;
+								that.total1 = res.data.total1;
+								that.total2 = res.data.total2;
+								that.total3 = res.data.total3;
+								that.config = res.data.config;
+								layer.close(loadingFlag);
+							}else{
+								layer.close(loadingFlag);
+								layer.msg('网络错误！',{icon:2});
+							}
+						})
+					},
+					getYpriceData:function(){
+						var that = this;
+						$.post("{:url('finance/depositRecharge')}",{page:this.currentPage,datetime:this.dateValue,size:this.size1,type:this.type},function (res) {
+							if(res.code==1){
+								that.tableData = res.data.list;
+								that.total1 = res.data.total;
+							}else{
+								layer.msg('网络错误！',{icon:2});
+							}
+						})
+					},
+					getDpriceData:function(){
+						var that = this;
+						$.post("{:url('finance/rewardRecharge')}",{page:this.currentPage3,datetime:this.dateValue3,size:this.size1,type:this.type2},function (res) {
+							if(res.code==1){
+								that.tableData3 = res.data.list;
+								that.total3 = res.data.total;
+							}else{
+								layer.msg('网络错误！',{icon:2});
+							}
+						})
+					},
+					getCashData:function(){
+						var that = this;
+						$.post("{:url('finance/cash')}",{page:this.currentPage2,datetime:this.dateValue2,size:this.size1},function (res) {
+							if(res.code==1){
+								that.tableData2 = res.data.list;
+								that.total2 = res.data.total;
+							}else{
+								layer.msg('网络错误！',{icon:2});
+							}
+						})
+					},
+					searchDeposit:function(){
+						this.currentPage = 1;
+						this.getYpriceData();
+					},
+					searchCash:function(){
+						this.currentPage2 = 1;
+						this.getCashData();
+					},
+					searchReward:function(){
+						this.currentPage3 = 1;
+						this.getDpriceData();
+					},
+					/* 给表格1上色 */
+					cellStyle: function (e) {
+						var jinE = this.tableData[e.rowIndex].price;
+						jinE = Number(jinE);
+
+						if (e.columnIndex === 1) {
+							if (jinE > 0) {
+								return "color: rgb(103, 194, 58);";
+							} else if (jinE <= 0) {
+								return "color:red;";
+							}
+						};
+						if (e.columnIndex === 2) {
+							return "color:#66b1ff";
+						};
+
+					},
+					/* 给表格2上色 */
+					cellStyle2: function (e) {
+						var jinE = this.tableData2[e.rowIndex].price;
+						jinE = Number(jinE);
+
+						if (e.columnIndex === 1) {
+							if (jinE > 0) {
+								return "color: rgb(103, 194, 58);";
+							} else if (jinE <= 0) {
+								return "color:red;";
+							}
+						};
+						if (e.columnIndex === 3) {
+							return "color:#66b1ff";
+						};
+
+					},
+					/* 给表格3上色 */
+					cellStyle3: function (e) {
+						var jinE = this.tableData3[e.rowIndex].price;
+						jinE = Number(jinE);
+
+						if (e.columnIndex === 1) {
+							if (jinE > 0) {
+								return "color: rgb(103, 194, 58);";
+							} else if (jinE <= 0) {
+								return "color:red;";
+							}
+						};
+						if (e.columnIndex === 2) {
+							return "color:#66b1ff";
+						};
+
+					},
+					/* 给表格
+					/* 分页事件1 */
+					handleSizeChange: function (val) {
+						this.size1 = val;
+						this.currentPage = 1;
+						this.getYpriceData();
+					},
+					handleCurrentChange: function (val) {
+						this.currentPage = val;
+						this.getYpriceData();
+					},
+					/* 分页事件2 */
+					handleSizeChange2: function (val) {
+						this.size2 = val;
+						this.currentPage2 = 1;
+						this.getCashData();
+					},
+					handleCurrentChange2: function (val) {
+						this.currentPage2 = val;
+						this.getCashData();
+					},
+					/* 分页事件3 */
+					handleSizeChange3: function (val) {
+						this.size3 = val;
+						this.currentPage3 = 1;
+						this.getDpriceData();
+					},
+					handleCurrentChange3: function (val) {
+						this.currentPage3 = val;
+						this.getDpriceData();
+					},
+					excelDeposit:function () {
+						var start = "";
+						var end = "";
+						if(this.dateValue){
+							start = this.dateValue[0];
+							end = this.dateValue[1];
+						}else{
+							return layer.msg('确请选着时间区间，并最多只能选择1个月的区间',{icon:2,time:2000});
+						}
+						window.open("{:url('finance/excelDeposit','','',false)}/start/"+start+"/end/"+end+"/type/"+this.type);
+					},
+					excelReward:function () {
+						var start = "";
+						var end = "";
+						if(this.dateValue3){
+							 start = this.dateValue3[0];
+							 end = this.dateValue3[1];
+						}else{
+							return layer.msg('确请选着时间区间，并最多只能选择1个月的区间',{icon:2,time:2000});
+						}
+						window.open("{:url('finance/excelReward','','',false)}/start/"+start+"/end/"+end+"/type/"+this.type2);
+					}
+
+				}
+			});
+		});
+	</script>
+{include file="public/footer" /}

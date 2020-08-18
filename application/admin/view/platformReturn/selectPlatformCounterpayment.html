@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>接单详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="../../layui/css/layui.css" media="all" />
+    <link rel="stylesheet" href="../../css/public.css" media="all" />
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_1308190_7kttvg3l5i.css" media="all" />
+
+    <link href="../assets/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/plugins/summernote/summernote.css" rel="stylesheet">
+
+    <link href="../assets/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+    <!-- Template Styles -->
+    <link href="../assets/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/plugins.min.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/pages/formlayout.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/responsive.css" rel="stylesheet" type="text/css" />
+    <link href="../assets/css/theme-color.css" rel="stylesheet" type="text/css" />
+    <!-- 提示 -->
+    <link rel="stylesheet" href="../../assets/plugins/jquery-toast/dist/jquery.toast.min.css">
+</head>
+
+<body class="childrenBody">
+    <form class="layui-form">
+        <div class="table-wrap">
+            <div class="table-responsive text-center">
+                <table class="table display product-overview mb-30 table-bordered" id="support_table5">
+                    <thead>
+                        <h3>详情</h3>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>卖家用户名</td>
+                            <td>
+                                <input type="text" class="name form-control" name="name" lay-verify="name" value="淘宝"
+                                    readonly></td>
+                            <td>卖家店铺名</td>
+                            <td>
+                                <input type="text" class="phone form-control" name="phone" lay-verify="phone"
+                                    value="电脑办公" readonly></td>
+                            <td>订单类型</td>
+                            <td>
+                                <input type="text" class="phone form-control" name="phone" lay-verify="phone"
+                                    value="文字好评" readonly></td>
+                        </tr>
+                        <tr>
+                            <td>订单平台</td>
+                            <td>
+                                <input type="text" name="time1" lay-verify="time1" autocomplete="off"
+                                    class="time1 form-control layui-input time1" value="1单" readonly>
+                            <td>卖家旺旺ID</td>
+                            <td>
+                                <input type="text" name="time1" lay-verify="time1" autocomplete="off"
+                                    class="time1 form-control layui-input time1" value="0单" readonly>
+                            </td>
+                            <td>任务本金</td>
+                            <td>
+                                <input type="text" name="time1" lay-verify="time1" autocomplete="off"
+                                    class="time1 form-control layui-input time1" id="application-time1" value="1单"
+                                    readonly>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>订单信息</td>
+                            <td colspan="1">
+                                <input type="text" class="qq form-control" name="qq" value="1单" readonly>
+                            </td>
+                            <td>是否包邮</td>
+                            <td colspan="1">
+                                <input type="text" class="qq form-control" name="qq" value="手机" readonly>
+                            </td>
+                            <td>邮费</td>
+                            <td>
+                                <input type="text" class="qq form-control" name="qq" lay-verify="qq"
+                                    value="2 银锭 * 1 单 = 2 银锭" readonly>
+                            </td>
+                        </tr>
+                        <tr>
+
+                            <td>买家用户名</td>
+                            <td colspan="2">
+                                <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="无" readonly>
+                            </td>
+                            <td>买家旺旺ID</td>
+                            <td colspan="2">
+                                <input type="text" class="qq form-control" name="qq" lay-verify="qq"
+                                    value="0.732 银锭 * 1 单 = 0.732 银锭" readonly>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>返款本金</td>
+                            <td colspan="2">
+                                <span>32元</span>
+                                <a href="#" class="djxg">点击修改</a>
+                            </td>
+                            <td>任务佣金</td>
+                            <td colspan="2">
+                                <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="无" readonly>
+                            </td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>搜索关键词截图</td>
+                            <td colspan="5">
+                                <input type="text" class="qq form-control" name="qq" lay-verify="qq" value="无" readonly>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>核对商品链接</td>
+                            <td colspan="2">主商品链接</td>
+                            <td colspan="3">
+                                <a href="#">查看商品</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>聊天截图</td>
+                            <td colspan="5">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>付款订单截图</td>
+                            <td colspan="5">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                            </td>
+                        </tr>
+                        <tr>
+
+                            <td>好评截图</td>
+                            <td colspan="5">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                                <img src="https://img.alicdn.com/imgextra/i4/2549841410/TB2HYfyw_CWBKNjSZFtXXaC3FXa_!!2549841410.jpg_100x100q90.jpg"
+                                    class="img-rounded">
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+    <script type="text/javascript" src="../../layui/layui.js"></script>
+
+    <!-- start js include path -->
+    <script src="../assets/plugins/jquery/jquery.min.js"></script>
+    <!-- 提示 -->
+    <script src="../assets/plugins/jquery-toast/dist/jquery.toast.min.js"></script>
+    <script src="../assets/plugins/jquery-toast/dist/toast.js"></script>
+    <script>
+
+        layui.use(['form', 'layer', 'table', 'laytpl', 'laydate'], function () {
+            var form = layui.form,
+                layer = parent.layer === undefined ? layui.layer : top.layer,
+                $ = layui.jquery,
+                laytpl = layui.laytpl,
+                table = layui.table;
+            laydate = layui.laydate;
+            // $.toast({
+            //     heading: 'Welcome to my Elite admin',
+            //     text: 'Use the predefined ones, or specify a custom position object.',
+            //     position: 'top-right',
+            //     loaderBg:'#ff6849',
+            //     icon: 'error',
+            //     hideAfter: 3500
+            // });
+            form.render(); //刷新select选择框渲染
+
+            //验证数据
+            form.verify({
+                phone: function (value, item) { //value：表单的值、item：表单的DOM对象
+                    if (!/^1[3456789]\d{9}$/.test(value)) {
+                        return '手机号码有误，请重填';
+                    }
+                }
+                , qq: function (value, item) {
+                    if (value.length > 10) {
+                        return 'QQ有误，请重填';
+                    }
+                }
+                //我们既支持上述函数式的方式，也支持下述数组的形式
+                //数组的两个值分别代表：[正则匹配、匹配不符时的提示文字]
+                , pass: [
+                    /^[\S]{6,12}$/
+                    , '密码必须6到12位，且不能出现空格'
+                ]
+            });
+            //表单提交
+            form.on("submit(reload)", function (data) {
+                var field = data.field;
+                //弹出loading 加载
+                var index = top.layer.msg('数据提交中，请稍候', { icon: 16, time1: false, shade: 0.8 });
+                var name = field.name;  //姓名
+                var phone = field.phone;  //手机号
+                var principal = field.principal;  //本金
+                var silverIngot = field.silverIngot;  //银锭
+                var qq = field.qq;  //qq
+                var recommender = field.recommender;  //推荐人
+                var vip = field.vip;  //VIP
+                var time1 = field.time1;  //到期时间
+                var remarks = field.remarks;  //备注
+                console.log(field)
+                settime1out(function () {
+                    //这里实在是关不掉模态 只能刷新父页面来关闭了
+                    top.layer.close(index);
+                    top.layer.msg("搜索成功！");
+                    layer.closeAll();
+                    //刷新父页面
+                    parent.location.reload();
+                }, 500);
+                return false;
+            });
+            $('.djxg').click(function(){
+                var index = layui.layer.open({
+                    type: 2,
+                    content: "update.html",
+                    area: ['400px', '250px'],
+                    title: '修改',
+                    success: function (layero, index) {
+                        settime1out(function () {
+                            layui.layer.tips('点击此处返回', '.layui-layer-setwin .layui-layer-close', {
+                                tips: 3
+                            });
+                        }, 500)
+                    }
+                })
+            })
+        })
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,220 @@
+<div class="header" v-cloak>
+    <div class="top_bg">
+        <div class="top">
+            <div class="top_left">
+                <span>{$users.username}</span>
+                <span class="gang">|</span>
+                <a href="javascript:void (0)" class="tuichu">退出</a>
+            </div>
+            <div class="top_right">
+                <span>本金: <span class="price_color">{$users.balance}</span>元</span>
+                <span class="gang">|</span>
+                <span>银锭: <span class="price_color">{$users.reward}</span>银锭</span>
+            </div>
+        </div>
+    </div>
+<!--    &lt;!&ndash; 导航栏 &ndash;&gt;-->
+<!--    <div class="nav">-->
+<!--        <a href="javascript:"><img class="logo" src="/static/buy/img/logo.png" alt="同福客栈"/></a>-->
+<!--        <div class="title">-->
+<!--            <a href="{:url('my/index')}" {notempty name="topnav" } {if condition="$topnav == 1" }class="add_color" {/if}{/notempty}>-->
+<!--            个人中心</a>-->
+<!--            <a href="{:url('helpcenter/index')}" {notempty name="topnav" } {if condition="$topnav == 2"-->
+<!--               }class="add_color" {/if}{/notempty}> 帮助中心</a>-->
+<!--            <a href="{:url('money/withsilver',['hnav'=>'3','nav'=>'2'])}" {notempty name="topnav" } {if condition="$topnav == 3"-->
+<!--               }class="add_color" {/if}{/notempty}> 银锭充值</a>-->
+<!--            <a href="{:url('money/withdrawal',['hnav'=>'3','nav'=>'1'])}" {notempty name="topnav" } {if condition="$topnav == 4"-->
+<!--               }class="add_color" {/if}{/notempty}> 本金提现</a>-->
+<!--            <a href="{:url('task/index',['hnav'=>'2','nav'=>'1'])}" {notempty name="topnav" } {if condition="$topnav == 5" }class="add_color" {/if}{/notempty}>-->
+<!--            任务大厅</a>-->
+<!--        </div>-->
+<!--        <div class="bell_btn">-->
+<!--            <button type="button" class="el-button el-button&#45;&#45;default el-button&#45;&#45;small is-circle"-->
+<!--                    @click="dialogVisible = true">-->
+<!--                <i class="el-icon-bell"></i>-->
+<!--            </button>-->
+<!--            <div class="red_type" v-show="num > 0">{{num}}</div>-->
+<!--        </div>-->
+<!--        <div class="renwu_btn">-->
+<!--            <button class="el-button el-button&#45;&#45;danger" @click="maketask">-->
+<!--                <img class="renwu_img" src="/static/buy/img/renwu.png" alt=""/>-->
+<!--                <span>做任务</span>-->
+<!--            </button>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    &lt;!&ndash; 弹出框内容 &ndash;&gt;-->
+<!--    <el-dialog :visible.sync="dialogVisible" title="个人通知">-->
+<!--        <div v-if="state==1" class="center_box1">-->
+
+<!--            &lt;!&ndash; 左边部分 &ndash;&gt;-->
+<!--            <div class="left_box1">-->
+<!--                <div class="left_table">-->
+<!--                    <div :class="[index>=1?'hide_border':'',currentIndex===index?'selectOn':'']"-->
+<!--                         @click="handleClickTable(index)"-->
+<!--                         class="left_table_item"-->
+<!--                         v-for="(item,index) in tableList">-->
+<!--                        <div class="txt">-->
+<!--                            <span :class="item.look==1?'type_color':''"></span>-->
+<!--                            <p v-html="item.title"></p>-->
+<!--                        </div>-->
+<!--                        <div class="time">-->
+<!--                            <i class="el-icon-time"></i>-->
+<!--                            <span v-html="item.create_time"></span>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="fenye">-->
+<!--                    <el-pagination current-change="setPage"-->
+<!--                                   :page-size="5"-->
+<!--                                   :total="total" :pager-count="5"-->
+<!--                                   background-->
+<!--                                   layout="prev, pager, next">-->
+<!--                    </el-pagination>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; 右边盒子部分 &ndash;&gt;-->
+<!--            <div class="right_box1">-->
+<!--                <h1 v-html="title" style="margin-bottom: 20px;"></h1>-->
+<!--                <div>-->
+<!--                    <p style="text-indent: 2em" v-html="content">-->
+<!--                </div>-->
+<!--                <div style="display: flex;flex-direction: column;align-self: flex-end;justify-content: flex-end; margin-top: 20px">-->
+<!--                    <p v-html="admin"></p>-->
+<!--                    <p v-html="datetime"></p>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--        </div>-->
+<!--                <div v-else>-->
+<!--                    <span class="masigg">暂无通知</span>-->
+<!--                </div>-->
+<!--    </el-dialog>-->
+
+</div>
+<!--<script>-->
+<!--    $(function () {-->
+
+<!--        vm=new Vue({-->
+<!--            el: ".header",-->
+<!--            data: function () {-->
+<!--                return {-->
+<!--                    curIndex: 0,-->
+<!--                    dialogVisible: false,-->
+<!--                    tableList: [],-->
+<!--                    currentIndex: 0,-->
+<!--                    title: "",-->
+<!--                    state: 0,-->
+<!--                    content: "",-->
+<!--                    datetime: "",-->
+<!--                    admin: "",-->
+<!--                    total: 0,-->
+<!--                    page: 1,-->
+<!--                    num:0-->
+<!--                }-->
+<!--            },-->
+<!--            methods: {-->
+<!--                maketask:function(){-->
+<!--                    location.href="{:url('task/maketask')}"-->
+<!--                },-->
+<!--                /* 消息弹框事件 */-->
+<!--                openMsg: function () {-->
+<!--                    this.dialogTableVisible = true;-->
+<!--                    if(this.tableList.length > 0){-->
+<!--                        this.setData(0);-->
+<!--                    }-->
+<!--                },-->
+<!--                handleClickTable: function (index) {-->
+<!--                    this.title = this.tableList[index].title;-->
+<!--                    this.content = this.tableList[index].content;-->
+<!--                    this.datetime = this.tableList[index].create_time;-->
+<!--                    this.admin = this.tableList[index].author;-->
+<!--                    this.currentIndex = index;-->
+<!--                    this.tableList[index].type = true;-->
+<!--                    this.setData(index);-->
+<!--                },-->
+<!--                getData: function () {-->
+<!--                    var that = this;-->
+<!--                    $.post("{:url('index/msg')}", {page: this.page}, function (res) {-->
+<!--                        if (res.code == 1) {-->
+<!--                            console.log(res);-->
+<!--                            that.tableList = res.data.list;-->
+<!--                            that.total = res.data.total;-->
+<!--                            that.num = res.data.num;-->
+<!--                            if (that.tableList.length > 0) {-->
+<!--                                that.state = 1;-->
+<!--                                that.title = that.tableList[0].title;-->
+<!--                                that.content = that.tableList[0].content;-->
+<!--                                that.datetime = that.tableList[0].create_time;-->
+<!--                                that.admin = that.tableList[0].author;-->
+<!--                            } else {-->
+<!--                                that.state = 0;-->
+<!--                            }-->
+<!--                        } else {-->
+<!--                            layer.msg('网络错误');-->
+<!--                        }-->
+<!--                    })-->
+<!--                },-->
+<!--                setData:function(index){-->
+<!--                    var that = this;-->
+<!--                    if(this.tableList[index].look==1)return;-->
+<!--                    that.tableList[index].look=1;-->
+<!--                    $.post("{:url('index/setMsg')}", {id: this.tableList[index].id}, function (res) {-->
+<!--                        if(res.data == 0)that.num=0;-->
+<!--                    })-->
+<!--                },-->
+<!--                setPage(val) {-->
+<!--                    this.page = val;-->
+<!--                    this.getData();-->
+<!--                },-->
+<!--                addColor: function (index) {-->
+<!--                    this.curIndex = index;-->
+<!--                },-->
+
+<!--                /* 失败的弹框 */-->
+<!--                alertError: function (e) {-->
+<!--                    this.$message.error(e);-->
+<!--                },-->
+<!--                /* 成功的弹框 */-->
+<!--                alertSuccess: function (e) {-->
+<!--                    this.$message({-->
+<!--                        message: e,-->
+<!--                        type: "success"-->
+<!--                    });-->
+<!--                },-->
+<!--            },-->
+<!--            created() {-->
+<!--                this.getData();-->
+<!--            }-->
+<!--        });-->
+
+<!--        $(function () {-->
+<!--            $(".tuichu").click(function () {-->
+<!--                $.ajax({-->
+<!--                    type: 'POST',-->
+<!--                    url: "{:url('login/logout')}",-->
+<!--                    async: true,-->
+<!--                    data: {-->
+<!--                        "aoData": 'aaaa',//测试数据,-->
+<!--                    },-->
+<!--                    success: function (data) {-->
+<!--                        console.log(data);-->
+<!--                        if (data.code == 1) {-->
+<!--                            vm.alertSuccess(data.msg);-->
+<!--                            setTimeout(function () {-->
+<!--                                return location.href = data.url;-->
+<!--                            }, 3000)-->
+
+<!--                        } else {-->
+<!--                            return vm.alertError(data.msg);-->
+<!--                        }-->
+<!--                    },-->
+<!--                    error: function (XMLHttpRequest, textStatus, errorThrown) {-->
+<!--                        alert(XMLHttpRequest.status + "," + textStatus);-->
+<!--                    }-->
+<!--                });-->
+<!--            });-->
+<!--        });-->
+
+<!--    });-->
+<!--</script>-->

@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>买号添加</title>
+    <link rel="stylesheet" href="/static/mobile/css/plugin.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/iconfont/iconfont.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/public.css" type="text/css">
+    <link rel="stylesheet" href="/static/mobile/css/page.css" type="text/css">
+    <script src="/static/mobile/js/all.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/jquery-1.12.4.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vue-2.6.10.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/vant.min.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/muse-ui.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/js/public.js" type="text/javascript" charset="UTF-8"></script>
+    <script src="/static/mobile/area/area.js" type="text/javascript" charset="UTF-8"></script>
+    <script>
+
+        $(function () {
+            // 手机号正则表达式
+            var phoneReg = /^1[3-9]\d{9}$/;
+            var vm = new Vue({
+                el: ".tfkz-container",
+                data: function () {
+                    return {
+                        /* 示例图 */
+                        urlwwimg:"/static/buy/img/wwimg3.png",
+                        urlzfb:"/static/buy/img/zhifubaorenzheng.png",
+                        urlip:"/static/buy/img/ipbd.png",
+                        urlidcard:"/static/buy/img/idcard.png",
+                        /* 表格数据 */
+                        tableData: [
+                            {volist name="buyno" id="vo"}
+                            {
+                                wwid: `{$vo.wwid}`,
+                                id:'{$vo.id}',
+                                name: `{$vo.addressname}`,
+                                address: '{$vo.addresspro}{$vo.addresscity}{$vo.addressarea}{$vo.addresstext}',
+                                zhifubaoNum: '{$vo.alipayimg}',
+                                addressphone:'{$vo.addressphone}',
+                                beizhu:'{$vo.note}',
+                                maiHaoZhuangTai: "{if condition="$vo.state ==0"}未审核{elseif condition="$vo.state ==1"/}审核通过{else /}已禁用{/if}"
+                            },
+                            {/volist}
+                        ],
+                        imageList1:["/static/buy/img/wwimg1.png","/static/buy/img/wwimg2.png","/static/buy/img/wwimg3.png"],
+                        imageList2:["/static/buy/img/ipbd.png"],
+                        imageList3:["/static/buy/img/idcard.png"],
+                        imageList4:["/static/buy/img/zhifubaorenzheng.png"],
+                        /* 输入框value值 */
+                        vipNameValue: "",
+                        shouHuoNameValue: "",
+                        addressValue: "",
+                        phoneValue: "",
+                        yzmValue: "",
+                        renZhengValue: "",
+                        IDNameValue: "",
+                        formValue: {
+                            province: "请选择省",
+                            city: "请选择市",
+                            province2: "请选择省",
+                            city2: "请选择市",
+                            region2: "请选择区",
+                        },
+                        /* 图片用变量保存路径 */
+                        localFile: [],
+                        localFile2: [],
+                        localFile3: [],
+                        localFile4: [],
+                        showImage1: false,
+                        showImage2: false,
+                        showImage3: false,
+                        showImage4: false,
+                        // 百度链接
+                        baiduUrl: "https://www.baidu.com/from=844b/s?word=IP&ts=5685995&t_kt=0&ie=utf-8&fm_kl=021394be2f&rsv_iqid=2079839240&rsv_t=9006%252BjHlHGklnhEgNnV5KJB4TYtwhzpKD2vHa3peKYSai2PLb4CUZNUsHw&sa=ib&ms=1&rsv_pq=2079839240&tj=1&rsv_sug4=4250&ss=100000000001&inputT=2109&sugid=11360376724890930400",
+                        // 验证码文字
+                        yzmMsg: "发送验证码",
+                        btnDisabled: false
+                    };
+                },
+                // 调用混入
+                mixins: [areaMixin, tabMixin, singlePersonMixin],
+                methods: {
+                        deleteTable: function(index) {
+                            console.log(index);
+                            var that = this;
+                            that.$dialog.confirm({
+                                title: "温馨提示",
+                                message: "是否修改？"
+                            }).then(function () {
+
+                                var id=that.tableData[index].id;
+                                //alert(id);
+                                location.href="{:url('my/edit_buyno','','',true)}/id/"+id;
+                            }).catch(function () {});
+                        },
+                    setAreaShow: function () {
+                        this.areaShow = !this.areaShow;
+                    },
+                    setAreaShow2: function () {
+                        this.areaShow2 = !this.areaShow2;
+                    },
+                    // 地区确认按钮
+                    areaConfirm: function (val) {
+                        this.formValue.province = val[0].name;
+                        this.formValue.city = val[1].name;
+                        this.areaShow = false;
+                    },
+                    areaConfirm2: function (val) {
+                        this.formValue.province2 = val[0].name;
+                        this.formValue.city2 = val[1].name;
+                        this.formValue.region2 = val[2].name;
+                        this.areaShow2 = false;
+                    },
+                    // 图片change事件
+                    imageChange: function (index) {
+                        // console.log(index);
+                    },
+                    // 发送验证码
+                    sendYzm: function () {
+                        if(!vm.phoneValue) return alertError("收货人手机号码不能为空");
+                        if (!phoneReg.test(vm.phoneValue)) {
+                            return alertError("手机号码格式不规范,请检查后重新输入");}
+                        $.ajax({
+                            type : 'POST',
+                            url : "{:url('mobile/way/send_code')}",
+                            async : true,
+                            data : {
+                                "mobile":vm.phoneValue,
+                                "dxyzm":vm.yzmValue
+                            },
+                            success : function(data){
+                                // vm.alertError(data.msg);
+                            },
+                            error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                alert(XMLHttpRequest.status + "," + textStatus);
+                            }
+                        });
+                        var num = 60;
+                        var that = this;
+                        that.btnDisabled = true;
+                        var timer = setInterval(function () {
+                            num--;
+                            that.yzmMsg = "还剩 " + num + " 秒";
+                            if (num <= 0) {
+                                that.btnDisabled = false;
+                                that.yzmMsg = "重新发送";
+                                clearInterval(timer);
+                            }
+                            if (num === 59) {
+                                alertSuccess("验证码发送成功");
+                            }
+                        }, 1000);
+                    },
+                        click:function(){
+                            if(!this.IDNameValue) return alertError("旺旺ID不能为空");
+                            if(!this.formValue.province) return alertError("请选择旺旺常用登陆地");
+                            if(!this.shouHuoNameValue) return alertError("收货人姓名不能为空");
+                            if(!this.formValue.province2) return alertError("收货地址不能为空");
+                            if(!this.addressValue) return alertError("收货地址详细信息不能为空");
+                            if(!this.phoneValue) return alertError("收货人手机号码不能为空");
+                            if(!this.renZhengValue) return alertError("支付宝认证姓名不能为空");
+                            if(!this.yzmValue) return alertError("请输入手机号验证码");
+                            if(this.localFile.length<= 0) return alertError("旺旺档案截图不能为空");
+                            if(this.localFile2.length<= 0) return alertError("IP地址截图不能为空");
+                            if(this.localFile3.length<= 0) return alertError("身份证正面截图不能为空");
+                            if(this.localFile4.length<= 0) return alertError("支付宝实名认证截图不能为空");
+                            $.ajax({
+                                type : 'POST',
+                                url : "{:url('mobile/my/addbuyno')}",
+                                async : true,
+                                data : {
+                                    "wwid":vm.IDNameValue,
+                                    "provinceValue2":vm.formValue.province,
+                                    "cityValue2":vm.formValue.city,
+                                    "shouHuoNameValue":vm.shouHuoNameValue,
+                                    "provinceValue":vm.formValue.province2,
+                                    "cityValue":vm.formValue.city2,
+                                    "blockValue":vm.formValue.region2,
+                                    "addressValue":vm.addressValue,
+                                    "mobile":vm.phoneValue,
+                                    "dxyzm":vm.yzmValue,
+                                    "renZhengValue":vm.renZhengValue,
+                                    'img1':vm.localFile[0].content,
+                                    'img2':vm.localFile2[0].content,
+                                    'img3':vm.localFile3[0].content,
+                                    'img4':vm.localFile4[0].content
+                                },
+                                success : function(data){
+                                    if(data.code==1){
+                                        alertSuccess(data.msg);
+                                        setTimeout(function(){
+                                            return location.href=data.url;
+                                        },3000)
+
+                                    }else{
+                                        return alertError(data.msg);
+                                    }
+                                },
+                                error : function(XMLHttpRequest, textStatus, errorThrown) {
+                                    alert(XMLHttpRequest.status + "," + textStatus);
+                                }
+                            });
+                            // alert(123);
+                        },
+                },
+                mounted: function () {
+                    publicFunction();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="tfkz-container">
+
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <div class="arrow-left" onclick="javascript:history.back(-1);">
+            <van-icon class="arrow-left-item" name="arrow-left" />
+        </div>
+        <div class="page-title">买号添加</div>
+        <div class="menu-box" onclick="slideBarClick()">
+            <van-icon class="menu-box-item" name="bars" />
+        </div>
+    </div>
+
+    <!-- 下拉菜单 -->
+    {include file="public/left" /}
+
+    <!-- 滚动容器 -->
+    <div class="scroll-wrapper" style="padding-bottom: 1.6rem">
+
+        <!-- 公用tab标签 -->
+        <div class="public-tab-title">
+            <span :class="{active:showType===0}" data-type="0" @click="setTabColor">买号信息</span>
+            <span :class="{active:showType===1}" data-type="1" @click="setTabColor">添加账号</span>
+        </div>
+
+        <!-- 买号信息内容 -->
+        <div class="maihao-info" v-show="isShow">
+
+            <!-- 卡片 -->
+            <div class="TaskManagement">
+                <div class="Task-management" v-for="(item,index) in tableData" :key="index">
+                    <div class="TaskTop">
+                        <div class="managementHeng">
+                            <p>旺旺ID：</p>
+                            <p>{{item.wwid}}</p>
+                        </div>
+                        <div class="managementHeng">
+                            <p>收货人：</p>
+                            <p>{{item.name}}</p>
+                        </div>
+                        <div class="managementHeng">
+                            <p>收货地址：</p>
+                            <p>{{item.address}}</p>
+                        </div>
+                        <div class="managementHeng">
+                            <p>收货人手机号码：</p>
+                            <p>{{item.addressphone}}</p>
+                        </div>
+                        <div class="managementHeng">
+                            <p>买号状态：</p>
+                            <p>{{item.maiHaoZhuangTai}}</p>
+                        </div>
+                        <div class="managementHeng">
+                            <p>备注：</p>
+                            <p>{{item.beizhu}}</p>
+                        </div>
+                    </div>
+                    <div class="TaskBottom">
+                        <img src="/static/mobile/img/bolang.png" alt="" />
+                        <div class="TaskBottomPosition">
+                            <p>
+                                操作：
+                                <b>
+                                    <van-button
+                                      round
+                                      :disabled="item.type==0"
+                                      @click="deleteTable(index)"
+                                      icon="edit"
+                                      class="task-bottom-btn"
+                                      type="primary">信息修改</van-button>
+                                </b>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="Task-management" v-if="tableData.length===0">
+                    <div class="TaskTop" style="text-align: center">暂无内容</div>
+                    <div class="TaskBottom">
+                        <img src="/static/mobile/img/bolang.png" alt="" />
+                        <div class="TaskBottomPosition"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提示 -->
+            <div class="maihao-info-alert">
+                提示：买号提交审核后，平台预计在24小时内完成审核操作，只有审核通过的买号才能接手任务 (最多允许绑定3个买号，一个买号每天只能接4单任务)
+            </div>
+        </div>
+
+        <!-- 买号添加内容 -->
+        <div class="maihao-add" v-show="!isShow">
+            <!-- 旺旺信息 -->
+            <div class="public-card">
+                <div class="public-card-title">旺旺信息</div>
+                <div class="pulic-card-content">
+                    <div class="wangwang-login">
+                        <div class="public-area">
+                            <div class="public-area-item" @click="setAreaShow">
+                                <span class="wangwang-login-title">*旺旺常用登陆地：</span>
+                                <span>{{formValue.province}} {{formValue.city}}</span>
+                            </div>
+                            <div class="wangwang-login-alert">
+                                请选择该旺旺经常登录的城市或地区,一经选择后,所有买号对应的收货地址必须和旺旺登录的常用的登录地保持一直,绑定后无法自行修改,请谨慎选择
+                            </div>
+                            <div class="public-area-select">
+                                <van-area
+                                        v-show="areaShow"
+                                        :columns-num="2"
+                                        :area-list="areaList"
+                                        @confirm="areaConfirm"
+                                        @cancel="areaCancel"
+                                        value="110101"></van-area>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wangwang-id">
+                        <div class="wangwang-id-item">
+                            <span>*旺旺ID:</span>
+                            <div class="public-input">
+                                <input type="text" placeholder="请填写旺旺ID" v-model="IDNameValue">
+                            </div>
+                        </div>
+                        <div class="wangwang-id-alert">请填写该买号使用的旺旺ID，绑定后无法修改，严禁绑定相似的买号。</div>
+                    </div>
+                    <div class="wangwang-dangan">
+                        <div class="wangwang-dangan-item">
+                            <span class="wangwang-dangan-title">*旺旺档案截图:</span>
+                            <div class="wangwang-dangan-row">
+                                <div class="upload-pic-box">
+                                    <van-uploader
+                                            v-model="localFile"
+                                            multiple
+                                            :max-count="1"></van-uploader>
+                                </div>
+                                <div class="wangwang-dangan-perview">
+                                    <img @click="showImage1 = true" :src="urlwwimg" alt="">
+                                    <p>示例图</p>
+                                </div>
+                            </div>
+                            <p class="wangwang-dangan-alert">
+                                请登录淘宝APP，点击“我的淘宝-必备工具、互动参与-客服小蜜-发送“评价管理”点“评价管理（电脑版）”截图即可，所绑定买号必须和截图上一致。绑定成功后无法自行修改,请谨慎选择。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="wangwang-dangan" style="border-bottom: 0">
+                        <div class="wangwang-dangan-item">
+                            <span class="wangwang-dangan-title">*IP地址截图:</span>
+                            <div class="wangwang-dangan-row">
+                                <div class="upload-pic-box">
+                                    <van-uploader
+                                            v-model="localFile2"
+                                            multiple
+                                            :max-count="1"></van-uploader>
+                                </div>
+                                <div class="wangwang-dangan-perview">
+                                    <img @click="showImage2 = true" :src="urlip" alt="">
+                                    <p>示例图</p>
+                                </div>
+                            </div>
+                            <p class="wangwang-dangan-alert" style="color: #333333">
+                                进入 <a :href="baiduUrl">www.baidu.com</a> ,搜索"IP"截图本机IP
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 基本信息 -->
+            <div class="public-card">
+                <div class="public-card-title">基本信息</div>
+                <div class="pulic-card-content">
+                    <div class="wangwang-id">
+                        <div class="wangwang-id-item">
+                            <span>*收货人姓名:</span>
+                            <div class="public-input">
+                                <input type="text" placeholder="请输入收货人姓名" v-model="shouHuoNameValue">
+                            </div>
+                        </div>
+                        <div class="wangwang-id-alert">
+                            绑定多个买号必须使用不同身份认证的支付宝账号,支付宝认证姓名只允许输入6个字以内的中文
+                        </div>
+                    </div>
+                    <div class="wangwang-login">
+                        <div class="public-area">
+                            <div class="public-area-item" @click="setAreaShow2">
+                                <span class="wangwang-login-title">*收货人地址：</span>
+                                <span>{{formValue.province2}} {{formValue.city2}} {{formValue.region2}}</span>
+                            </div>
+                            <div class="public-input">
+                                <input type="text" placeholder="请输入收货人地址" v-model="addressValue">
+                            </div>
+                            <div class="wangwang-login-alert">
+                                填写的街道地址必须详细到"门牌号",否则不予通过;第二个买号的收货地址与第一个买号的地址,必须是不同县的或者不同区的
+                            </div>
+                            <div class="public-area-select">
+                                <van-area
+                                        v-show="areaShow2"
+                                        :columns-num="3"
+                                        :area-list="areaList"
+                                        @confirm="areaConfirm2"
+                                        @cancel="areaCancel2"
+                                        value="110101"></van-area>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wangwang-id">
+                        <div class="wangwang-id-item">
+                            <span>*收货人手机号:</span>
+                            <div class="public-input">
+                                <input type="text" placeholder="请输入手机号" v-model="phoneValue">
+                            </div>
+                        </div>
+                        <div class="wangwang-id-alert">
+                            该手机号必须与您支付宝上认证的手机号码一致；否则不予审核通过
+                        </div>
+                    </div>
+                    <!-- 手机验证码 -->
+                    <div class="phone-yzm">
+                        <p>*手机验证码:</p>
+                        <div class="public-input">
+                            <input type="text" placeholder="请输入验证码"  v-model="yzmValue">
+                        </div>
+                        <div class="yzm-btn" @click="sendYzm">
+                            <van-button :disabled="btnDisabled" class="yzm-btn-item" type="info">{{yzmMsg}}</van-button>
+                        </div>
+                    </div>
+                    <div class="wangwang-id" style="border-bottom: 0">
+                        <div class="wangwang-id-item">
+                            <span>*支付宝认证姓名:</span>
+                            <div class="public-input">
+                                <input type="text" placeholder="请输入支付宝认证姓名" v-model="renZhengValue">
+                            </div>
+                        </div>
+                        <div class="wangwang-id-alert">
+                            绑定多个买号必须使用不同身份认证的支付宝账号，支付宝认证姓名只允许输入6个字以内的中文
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 支付宝信息 -->
+            <div class="public-card">
+                <div class="public-card-title">支付宝信息</div>
+                <div class="pulic-card-content">
+                    <div class="wangwang-dangan">
+                        <div class="wangwang-dangan-item">
+                            <span class="wangwang-dangan-title">*身份证正面截图:</span>
+                            <div class="wangwang-dangan-row">
+                                <div class="upload-pic-box">
+                                    <van-uploader
+                                            v-model="localFile3"
+                                            multiple
+                                            :max-count="1"></van-uploader>
+                                </div>
+                                <div class="wangwang-dangan-perview">
+                                    <img @click="showImage3 = true" :src="urlidcard" alt="">
+                                    <p>示例图</p>
+                                </div>
+                            </div>
+                            <p class="wangwang-dangan-alert" style="color: #333333">
+                                身份证正面拍照,身份证信息必须清晰可见,身份证姓名必须和您填写的支付宝实名制姓名一致。此照片仅用于同福客栈审核买号使用。
+                            </p>
+                        </div>
+                    </div>
+                    <div class="wangwang-dangan">
+                        <div class="wangwang-dangan-item">
+                            <span class="wangwang-dangan-title">*支付宝实名认证:</span>
+                            <div class="wangwang-dangan-row">
+                                <div class="upload-pic-box">
+                                    <van-uploader
+                                            v-model="localFile4"
+                                            multiple
+                                            :max-count="1"></van-uploader>
+                                </div>
+                                <div class="wangwang-dangan-perview">
+                                    <img @click="showImage4 = true" :src="urlzfb" alt="">
+                                    <p>示例图</p>
+                                </div>
+                            </div>
+                            <p class="wangwang-dangan-alert" style="color: #333333">
+                                请登录您的"支付宝",点击"我的-支付宝昵称",截取您的支付宝"个人信息"作为审核凭证,截图中的姓名必须和您填写的支付宝姓名保持一致、实名制淘宝会员名必须和您上传的旺旺档案截图一致。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 保存和取消 -->
+            <div class="save-box">
+                <van-button class="save-box-item" type="info" @click="click">保存</van-button>
+                <van-button class="save-box-item" type="info">取消</van-button>
+            </div>
+
+            <!-- 温馨提示 -->
+            <div class="public-alert">
+                <div class="public-alert-title">
+                    <van-icon class="public-alert-title-icon" name="info-o"></van-icon>
+                    <span class="public-alert-title-tip">温馨提示</span>
+                </div>
+                <div class="pulic-alert-item">
+                    <p>1.您绑定的账号需满足<span style="color: red">注册时间超过3个月、实名认证、信誉等级3心以上、信誉大于2钻的买号注册时间要超过3年，好评率大于99%的安全号;</span></p>
+                    <p>2.淘宝|天猫可绑定3个买号，每个买号要求绑定不同的收货信息(收货人姓名 .地址，联系电话均要求不同并且真实有效，能联系上买手本人，同事或者亲戚);</p>
+                    <p>3.平台填写的收货信息，务必和淘宝网下单时收货信息保持一致，否则将封闭您的同福客栈账号，并没收所有佣金:</p>
+                    <p>4.所有绑定的收货地址必须真实有效，因买手原因造成商家真实发货且由于地址原因包裹丢失，损失由买手承担:</p>
+                    <p>5.必须确保绑定的所有买号收货地址与登录IP地址保持一致， 建议还可以写公司地址，亲属地址，朋友地址;</p>
+                    <p>6.买号提交审核后，平台预计在24小时内完成审核操作。</p>
+                    <p>7.提供1个月前的购物记录截图上显示的地址必须和平台绑定的收货地址一致。</p>
+                </div>
+            </div>
+
+            <!-- 预览大图 -->
+            <van-image-preview
+                    v-model="showImage1"
+                    :images="imageList1"
+            ></van-image-preview>
+            <van-image-preview
+                    v-model="showImage2"
+                    :images="imageList2"
+            ></van-image-preview>
+            <van-image-preview
+                    v-model="showImage3"
+                    :images="imageList3"
+            ></van-image-preview>
+            <van-image-preview
+                    v-model="showImage4"
+                    :images="imageList4"
+            ></van-image-preview>
+
+        </div>
+
+    </div>
+
+    {include file="public/footer" /}
